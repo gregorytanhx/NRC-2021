@@ -12,7 +12,6 @@ import math, time
 from pid import *
 
 ev3 = EV3Brick()
-
 Houses = [[], [], []]
 
 try: 
@@ -30,25 +29,27 @@ except:
   pass
 
 stopwatch = StopWatch()
-LineTrack = PID_LineTrack(leftMotor, rightMotor, 0.3, 0, 5)
-Straight = PID_Straight(leftMotor, rightMotor, 0.5, 0, 10)
-# Write your program here.
-ev3.speaker.beep()
-watchtime = stopwatch.time()
+base = Base(leftMotor, rightMotor, colLeft, colRight)
 
-resetMotor(leftMotor, rightMotor)
+LineTrack = PID_LineTrack(base, 0.3, 0, 5, 40)
+Straight = PID_Straight(base, 0.5, 0, 10)
+
+
+ev3.speaker.beep()
+
+base.reset()
 while rightMotor.angle() < 100:
-  Straight.move(80)=
-stop(leftMotor, rightMotor)
+  Straight.move(80)
+base.stop()
 
 while colRight.reflection() > 10:
-  LineTrack.track(80, 40)
-stop(leftMotor, rightMotor)
+  LineTrack.move(80)
+base.stop()
 
-resetMotor(leftMotor, rightMotor)
+base.reset()
 while rightMotor.angle() < 200:
   Straight.move(80)
-stop(leftMotor, rightMotor)
+base.stop()
 
 
 
