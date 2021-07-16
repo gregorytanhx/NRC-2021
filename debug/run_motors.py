@@ -17,19 +17,23 @@ try: motorC = Motor(Port.C)
 except: pass
 try: motorD = Motor(Port.D)
 except: pass
-
+speed = 600
 motor1 = motorA
 motor2 = motorD
 while True:
   buttons = ev3.buttons.pressed()
   if Button.LEFT in buttons:
-    motor1.run(1000)
+    motor1.run(speed)
   elif Button.RIGHT in buttons:
-    motor1.run(-1000)
+    motor1.run(-speed)
+  else:
+    motor1.hold()
   if Button.UP in buttons:
-    motor2.run(1000)
+    motor2.run(speed)
   elif Button.DOWN in buttons:
-    motor2.run(-1000)
+    motor2.run(-speed)
+  else:
+    motor2.hold()
   if Button.CENTER in buttons:
     if motor1 == motorA:
       motor1 = motorB
