@@ -20,8 +20,9 @@ backClaw = Motor(Port.D)
 leftMotor = Motor(Port.B, positive_direction = Direction.COUNTERCLOCKWISE)
 rightMotor =  Motor(Port.C)
 
+ev3Col = Ev3devSensor(Port.S1)
 #nxtCol = nxtColorSensor(Port.S1) 
-HTCol = Ev3devSensor(Port.S1) 
+#HTCol = Ev3devSensor(Port.S1) 
 gyro = GyroSensor(Port.S2)
 colLeft = ColorSensor(Port.S3)
 colRight = ColorSensor(Port.S4)
@@ -35,8 +36,12 @@ GyroTurn = PID_GyroTurn(base, 1.1, 0.0002, 2, gyro)
 gyro.reset_angle(0)
 
 start = stopwatch.time()
-PID_LineSquare(base, 50, 0.2, 0.0001, 0.4)
-# scanHouse(Houses[0], HTCol, LineTrack, 40, ev3)
+# while True:
+#   print(ev3Col.read('RGB-RAW'))
+#PID_LineSquare(base, 50, 0.2, 0.0001, 0.4)
+scanHouseEV3(Houses[0], ev3Col, GyroStraight, 50, ev3)
+
+#scanHouseNXT()
 # wait(5000)
 #PID_LineSquare(base, 60, 0.3, 0.0001, 0.5)
 

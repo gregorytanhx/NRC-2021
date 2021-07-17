@@ -24,6 +24,10 @@ class Base:
     self.clock = StopWatch()
     
   def stop(self):
+    self.leftMotor.brake()
+    self.rightMotor.brake()
+  
+  def hold(self):
     self.leftMotor.hold()
     self.rightMotor.hold()
     
