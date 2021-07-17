@@ -27,7 +27,6 @@ class PID(object):
     if kd is None:
       kd = self.kd
     self.integral += error * 0.5
-    print(self.integral * ki)
     self.correction = kp * error + ki * self.integral + kd * (error - self.lastError)
     self.lastError = error
     
@@ -190,7 +189,8 @@ def PID_LineSquare(base, threshold, kp, ki, kd, direction = 1): # direction = 1 
     rightPID.update(rightError, kp, ki, kd)
     outLeft = direction * leftPID.correction
     outRight = direction * rightPID.correction
-    print(leftVal, rightVal)
+    print('Sensors: ', leftVal, rightVal)
+    print('Speed: ', outLeft, outRight)
     base.run(outLeft, outRight)
     
   

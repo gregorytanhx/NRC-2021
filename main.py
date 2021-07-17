@@ -9,7 +9,7 @@ from pybricks.media.ev3dev import SoundFile, ImageFile
 from pybricks.iodevices import Ev3devSensor
 
 import math, time
-import scan
+from scan import *
 from pid import *
 
 ev3 = EV3Brick()
@@ -20,7 +20,8 @@ backClaw = Motor(Port.D)
 leftMotor = Motor(Port.B, positive_direction = Direction.COUNTERCLOCKWISE)
 rightMotor =  Motor(Port.C)
 
-nxtCol = nxtColorSensor(Port.S1) 
+#nxtCol = nxtColorSensor(Port.S1) 
+HTCol = Ev3devSensor(Port.S1) 
 gyro = GyroSensor(Port.S2)
 colLeft = ColorSensor(Port.S3)
 colRight = ColorSensor(Port.S4)
@@ -33,13 +34,16 @@ GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
 GyroTurn = PID_GyroTurn(base, 1.1, 0.0002, 2, gyro)
 gyro.reset_angle(0)
 start = stopwatch.time()
-
-PID_LineSquare(base, 50, 0.3, 0, 0.2)
+while True:
+   LineTrack.move(LineTrack.base.colLeft, 50, 50)
+scanHouse(Houses[0], HTCol, LineTrack, 50, ev3)
+wait(5000)
+#PID_LineSquare(base, 60, 0.3, 0.0001, 0.5)
 
 # base.run_target(100, 200)
 
 # while colLeft.reflection() > 15:
-#   LineTrack.move(100, 40)
+#   LineTrack.move(colRight, 100, 40)
 # base.stop()
 
 # while colLeft.reflection() < 80:
