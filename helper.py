@@ -44,11 +44,11 @@ class Base:
     start = self.clock.time()
     while self.clock.time() - start < time * 1000:
       self.run(speed, speed)
-      print(self.leftMotor.angle(), self.rightMotor.angle()) 
     self.stop()
     
-  def run_target(self, speed, angle):
+  def run_target(self, speed, angle, stop = Stop.HOLD):
     self.reset()
-    self.leftMotor.run_target(CorrectSpeed(speed), angle, wait=False)
-    self.rightMotor.run_target(CorrectSpeed(speed), angle, wait=True)
-    print(self.leftMotor.angle())
+
+    self.leftMotor.run_target(CorrectSpeed(speed), angle, wait=False, then = stop)
+    self.rightMotor.run_target(CorrectSpeed(speed), angle, wait=True, then = stop)
+  

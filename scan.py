@@ -12,27 +12,27 @@ from pybricks.iodevices import Ev3devSensor
 stopwatch = StopWatch()
 
 def scanHouseEV3(house, sensor, gyrostraight, speed, ev3):
-  while gyrostraight.base.colRight.reflection() < 80:
+  gyrostraight.base.reset()
+  while gyrostraight.base.leftMotor.angle() < 500:
     start = stopwatch.time()
     detected = False
     gyrostraight.move(speed)
     r, g, b = sensor.read('RGB-RAW')
-    print(r,g,b)
-    if r + g + b > 10:
+    if r + g + b > 15:
       detected = True
      
-      if r >= 8:
+      if r - b >= 3 and r - g >= 3:
         house.append(Color.YELLOW)
-      elif b >= 8:
+      elif b - r >= 3 and b - g >= 3:
         house.append(Color.BLUE)
-      elif g >= 5 and b >= 5:
+      elif g - r >= 3 and g - b >= 3:
         house.append(Color.GREEN) 
       else:
-        detect = False
+        detected = False
     if detected:
-      while r + g + b > 10:
+      while r + g + b > 12:
         r, g, b = sensor.read('RGB-RAW')
         gyrostraight.move(speed)
       detected = False
-  gyrostraight.base.stop()
+
   print(house)

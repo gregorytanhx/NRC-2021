@@ -129,37 +129,27 @@ class PID_GyroTurn(PID_GyroStraight):
       self.move(0, kp, ki, kd, error = self.gyro.angle()-angle)
     self.base.stop()
       
+def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.8, ki = 0, kd = 2, minSpeed = 15, direction = 1):
+  pid = PID(kp, ki, kd)
+  while gyro.angle() != angle:
+    error = (gyro.angle() - angle) * direction
+    pid.update(error, kp, ki, kd)
+    if abs(pid.correction) < minSpeed:
+      motor.run(CorrectSpeed(minSpeed * (pid.correction / abs(pid.correction))))
+    else:
+      motor.run(CorrectSpeed(pid.correction))
+  motor.hold()
 
-class PID_AngleOffSet(PID):
-  def __init__(self, 
-              base: Base, 
-              kp: float, 
-              ki: float, 
-              kd: float, 
-              gyro: GyroSensor):
-    super().__init__(self, kp, ki, kd)
-    self.gyro = gyro
-    self.base = base
-    
-  def turn(self, angle, kp=None, ki=None, kd=None):
-    while self.gyro.angle() != angle:
-      error = angle - self.gyro.angle()
-      self.update(error, kp, ki, kd)
-      if angle > 0:
-        self.base.leftMotor.run(self.correction)
-      else:
-        self.base.rightMotor.run(self.correction)
-        
-    self.resetIntegral()
-    
-    while self.gyro.angle != 0:
-      error = self.gyro.angle()
-      self.update(error, kp, ki, kd)
-      if angle > 0:
-        self.base.rightMotor.run(self.correction)
-      else:
-        self.base.leftMotor.run(self.correction)
-    
+def PID_AngleOffSet(base, gyro, angle):
+  if angle > 0:
+    PID_SingleMotorTurn(base.leftMotor, gyro, angle, direction = -1)
+    PID_SingleMotorTurn(base.rightMotor, gyro, 0)
+  else:
+    PID_SingleMotorTurn(base.rightMotor, gyro, angle)
+    PID_SingleMotorTurn(base.leftMotor, gyro, 0, direction = -1)
+  
+
+
 def PID_Distance(degrees: int,
                  speed: float, moveObj: PID_LineTrack, 
                  leeway: int = 5, 
@@ -176,23 +166,26 @@ def PID_Distance(degrees: int,
       pid.update(degrees - moveObj.leftMotor.angle(), kp, ki, kd)
     moveObj.move(speed)
     
-def PID_LineSquare(base, threshold, kp, ki, kd, direction = 1): # direction = 1 for forward, direction = -1 for backwar
+def PID_LineSquare(base, threshold = 50, kp = 0.2, ki = 0.0005, kd = 0.6, direction = 1, leeway = 3): # direction = 1 for forward, direction = -1 for backwar
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
-  
+  stopwatch = StopWatch()
+  start = stopwatch.time()
   while True:
     leftVal = base.colLeft.reflection()
     rightVal = base.colRight.reflection()
     leftError = base.colLeft.reflection() - threshold
     rightError = base.colRight.reflection() - threshold
-    if abs(leftError) <= 2 and abs(rightError) <= 2:
+    if abs(leftError) <= leeway and abs(rightError) <= leeway:
       break
     leftPID.update(leftError, kp, ki, kd)
     rightPID.update(rightError, kp, ki, kd)
     outLeft = direction * leftPID.correction
     outRight = direction * rightPID.correction
-    print('Sensors: ', leftVal, rightVal)
-    print('Speed: ', outLeft, outRight)
+    # print('Sensors: ', leftVal, rightVal)
+    # print('Speed: ', outLeft, outRight)
     base.run(outLeft, outRight)
-    
+    if stopwatch.time() - start > 2000:
+      break
+  base.stop()
   
