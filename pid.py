@@ -185,7 +185,7 @@ def PID_LineSquare(base, threshold = 50, kp = 0.2, ki = 0.0005, kd = 0.6, direct
     # print('Sensors: ', leftVal, rightVal)
     # print('Speed: ', outLeft, outRight)
     base.run(outLeft, outRight)
-    if stopwatch.time() - start > 2000:
+    if stopwatch.time() - start >= 1500:
       break
   base.stop()
   

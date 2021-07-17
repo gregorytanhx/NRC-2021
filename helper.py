@@ -51,4 +51,3 @@ class Base:
 
     self.leftMotor.run_target(CorrectSpeed(speed), angle, wait=False, then = stop)
     self.rightMotor.run_target(CorrectSpeed(speed), angle, wait=True, then = stop)
-  

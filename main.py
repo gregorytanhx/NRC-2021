@@ -42,7 +42,7 @@ gyro.reset_angle(0)
 start = stopwatch.time()
 base.reset()
 
-def main():
+def checkHouse1():
   while leftMotor.angle() < 200:
     GyroStraight.move(100)
   base.reset()
@@ -101,76 +101,85 @@ def main():
   while colRight.reflection() < 80:
     base.run(-40, -40)
 
-while colRight.reflection() > 15:
-  LineTrack.move(colLeft, 50, side = -1)
-base.hold()
 
-while colRight.reflection() > 10:
-  base.run(-40, -40)
-base.hold()
 
-while colRight.reflection() < 80:
-  base.run(-40, -40)
-base.hold()
-#main()
-#
-# grab first two
-GyroTurn.turn(-90)
-base.run_target(50, 100)
-backClaw.run_target(CorrectSpeed(-80), -210)
-while colRight.reflection() < 80:
-  base.run(-50, -50)
-base.hold()
 
-backClaw.run_time(CorrectSpeed(80), 1000, wait = False)
-while colRight.reflection() < 80:
-  base.run(50, 50)
-base.hold()
-while colRight.reflection() > 40:
-  base.run(50, 50)
-base.hold()
 
-# turn to grab second 2
-GyroTurn.turn(0)
-base.reset()
-while leftMotor.angle() < 200:
-  LineTrack.move(colLeft, 50, side = -1)
-base.stop()
-GyroTurn.turn(-90)
-base.run_target(50, 100)
-backClaw.run_target(CorrectSpeed(-80), -210)
-while colRight.reflection() < 80:
-  base.run(-50, -50)
-base.hold()
+def collectGreen():
+  while colRight.reflection() > 15:
+    LineTrack.move(colLeft, 30, side = -1)
+  base.hold()
+  base.run_target(-30, -50)
+  #main()
+  #
+  # grab first two
+  GyroTurn.turn(-90)
+  while colRight.reflection() < 80:
+    base.run(-40, -40)
+  base.hold()
+  PID_LineSquare(base, direction = -1)
+  gyro.reset_angle(0)
+  base.reset()
+  base.run_target(50, 200)
+  backClaw.run_target(CorrectSpeed(-50), -227)
+  while colRight.reflection() < 70:
+    base.run(-30, -30)
+  base.hold()
 
-backClaw.run_time(CorrectSpeed(80), 1000, wait = False)
-# if ev3ColSensor.reflection() > 20:
-#   base.run_target(30, -50)
-#   gyro.reset_angle(0)
-#   surplus = Color.YELLOW
-#   while ev3ColSensor.reflection() > 1:   
-#     GyroStraight.move(-40)
-#   while ev3ColSensor.reflection() < 20:   
-#     GyroStraight.move(-40)
-#   base.stop()
-#   # while ev3ColSensor.reflection() > 1:   
-#   #   GyroStraight.move(-30)
-#   # base.stop()
-#   GyroTurn.turn(90)
-#   gyro.reset_angle(0)
 
-#   while colRight.reflection() > 15:
-#     GyroStraight.move(-40)
-#   base.hold()
+  backClaw.run_time(CorrectSpeed(100), 1200)
+  while colRight.reflection() < 70:
+    base.run(40, 40)
+  base.hold()
+  while colRight.reflection() > 40:
+    base.run(40, 40)
+  base.hold()
+
+  # turn to grab second 2
+  GyroTurn.turn(90)
+  gyro.reset_angle(0)
+  base.reset()
+  while leftMotor.angle() < 240:
+    LineTrack.move(colLeft, 30, side = -1)
+  base.stop()
+
+
+
+  GyroTurn.turn(-90)
+  while colRight.reflection() < 70:
+    base.run(-40, -40)
+  base.hold()
+  PID_LineSquare(base, direction = -1)
+  gyro.reset_angle(0)
+  base.reset()
+  base.reset()
+  base.run_target(50, 200)
+
+  backClaw.run_target(CorrectSpeed(-50), -230)
+  while colRight.reflection() < 80:
+    base.run(-30, -30)
+  base.hold()
+
+
+  backClaw.run_target(CorrectSpeed(50), 100)
+  GyroTurn.turn(-90)
   
-#   while colRight.reflection() < 80:
-#     GyroStraight.move(40)
-#   base.hold()
-#   PID_LineSquare(base, direction = -1)
-#   frontClaw.run_time(CorrectSpeed(100), 1200)
-#   base.reset()
-#   base.run_target(50, 400)
-#   frontClaw.run_target(CorrectSpeed(-30), -100)
+
+checkHouse1()
+if checkSurplus():
+  surplus = Color.YELLOW
+collectSurplus()
+collectGreen()
+if surplus is None:
+  if checkSurplus():
+    surplus = Color.GREEN
+    collectSurplus()
+  else:
+    surplus = Color.BLUE
+
+
+
+
 
 
 # # 
