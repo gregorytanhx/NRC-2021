@@ -29,15 +29,15 @@ colRight = ColorSensor(Port.S4)
 stopwatch = StopWatch()
 base = Base(leftMotor, rightMotor, colLeft, colRight)
 
-LineTrack = PID_LineTrack(base, 0.18, 0, 5, 40)
+LineTrack = PID_LineTrack(base, 0.16, 0, 6, 40)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
 GyroTurn = PID_GyroTurn(base, 1.1, 0.0002, 2, gyro)
 gyro.reset_angle(0)
+
 start = stopwatch.time()
-while True:
-   LineTrack.move(LineTrack.base.colLeft, 50, 50)
-scanHouse(Houses[0], HTCol, LineTrack, 50, ev3)
-wait(5000)
+PID_LineSquare(base, 50, 0.2, 0.0001, 0.4)
+# scanHouse(Houses[0], HTCol, LineTrack, 40, ev3)
+# wait(5000)
 #PID_LineSquare(base, 60, 0.3, 0.0001, 0.5)
 
 # base.run_target(100, 200)

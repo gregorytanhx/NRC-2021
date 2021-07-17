@@ -48,13 +48,13 @@ class PID_LineTrack(PID):
            threshold: int = None, 
            kp: float = None, 
            ki: float = None, 
-           kd: float = None):
+           kd: float = None, side = 1):
     # update control constants if given
     if threshold is None:
       threshold = self.threshold
 
     self.update(threshold - sensor.reflection(), kp, ki, kd) 
-    self.base.run(speed + self.correction, speed - self.correction)
+    self.base.run(speed + side * self.correction, speed - side * self.correction)
 
 class PID_EncoderStraight(PID):
   def __init__(self, 
@@ -185,6 +185,8 @@ def PID_LineSquare(base, threshold, kp, ki, kd, direction = 1): # direction = 1 
     rightVal = base.colRight.reflection()
     leftError = base.colLeft.reflection() - threshold
     rightError = base.colRight.reflection() - threshold
+    if abs(leftError) <= 2 and abs(rightError) <= 2:
+      break
     leftPID.update(leftError, kp, ki, kd)
     rightPID.update(rightError, kp, ki, kd)
     outLeft = direction * leftPID.correction

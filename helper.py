@@ -14,8 +14,8 @@ class Base:
   def __init__(self, 
                leftMotor: Motor, 
                rightMotor: Motor, 
-               colRight: ColorSensor, 
-               colLeft: ColorSensor):
+               colLeft: ColorSensor, 
+               colRight: ColorSensor):
     
     self.leftMotor = leftMotor
     self.rightMotor = rightMotor
