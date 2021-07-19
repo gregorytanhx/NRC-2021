@@ -10,6 +10,7 @@ from pybricks.iodevices import Ev3devSensor
 
 import math, time
 from scan import *
+from surplus import *
 from pid import *
 
 ev3 = EV3Brick()
@@ -31,7 +32,7 @@ colLeft = ColorSensor(Port.S3)
 colRight = ColorSensor(Port.S4)
 
 stopwatch = StopWatch()
-base = Base(leftMotor, rightMotor, colLeft, colRight)
+base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 LineTrack = PID_LineTrack(base, 0.16, 0, 5, 50)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
@@ -41,6 +42,9 @@ gyro.reset_angle(0)
 
 start = stopwatch.time()
 base.reset()
+if ev3.battery.voltage() <= 7.4:
+  print('LOW BATTERY6')
+  ev3.speaker.beep()
 
 def checkHouse1():
   while leftMotor.angle() < 200:
@@ -101,10 +105,6 @@ def checkHouse1():
   while colRight.reflection() < 80:
     base.run(-40, -40)
 
-
-
-
-
 def collectGreen():
   while colRight.reflection() > 15:
     LineTrack.move(colLeft, 30, side = -1)
@@ -164,19 +164,114 @@ def collectGreen():
   backClaw.run_target(CorrectSpeed(50), 100)
   GyroTurn.turn(-90)
   
+def goHouse2():
+  GyroTurn.turn(-180, kp = 1.13)
+  gyro.reset_angle(0)
+  base.reset()
+  while leftMotor.angle() < 1200:
+    LineTrack.move(colRight, 50)
+  base.stop()
 
-checkHouse1()
-if checkSurplus():
-  surplus = Color.YELLOW
-collectSurplus()
-collectGreen()
-if surplus is None:
-  if checkSurplus():
-    surplus = Color.GREEN
-    collectSurplus()
-  else:
-    surplus = Color.BLUE
+  while colRight.reflection() > 15:
+    LineTrack.move(colLeft, 70, kp = 0.4, kd = 5.5, side = -1)
+  base.stop()
 
+  while col.reflection() < 80:
+    GyroStraight.move(40)
+  base.stop() 
+  while colLeft.reflection() > 15:
+    GyroStraight.move(-40)
+  base.stop()
+
+def main():
+  checkHouse1()
+  if checkSurplus(ev3ColSensor, GyroStraight, -50):
+    surplus = Color.YELLOW
+    collectSurplus(base, ev3ColSensor, GyroStraight, GyroTurn, 385)
+    while colRight.reflection() > 15:
+      GyroStraight.move(-40)
+    base.stop()
+    base.reset()
+    while leftMotor.angle() <= 100:
+      GyroStraight.move(40)
+    base.hold()
+
+    GyroTurn.turn(90, kp = 0.7, kd = 1)
+  collectGreen()
+  # collect surplus 
+  if surplus is None:
+    if checkSurplus():
+      surplus = Color.GREEN
+      collectSurplus()
+    else:
+      surplus = Color.BLUE
+      goHouse2()
+  #go back to first house to deposit energy
+  while colLeft.reflection() > 15:
+    base.run(40, 0)
+  while colLeft.reflection() < 80:
+    base.run(-40, 0)
+  base.stop()
+  base.reset()
+  while colLeft.reflection() > 15:
+    Linetrack.move(colRight, 40)
+  base.stop()
+  while colLeft.reflection() < 80:
+    Linetrack.move(colRight, 40)
+  base.stop()
+  while colRight.reflection() > 15:
+    Linetrack.move(colLeft, 40)
+  base.stop()
+  while colRight.reflection() < 80:
+    Linetrack.move(colLeft, 40)
+  base.hold()
+  GyroTurn.turn(90)
+  gyro.reset_angle()
+  base.reset() 
+  while leftMotor.angle() < 500:
+    LineTrack.move(colLeft, 50)
+  base.stop()
+  base.reset()
+  while leftMotor.angle() < 150:
+    GyroStraight.move(40)
+  base.stop()
+  # do solar panel
+  
+ while colLeft.reflection() > 15:
+    base.run(40, 0)
+  while colLeft.reflection() < 80:
+    base.run(-40, 0)
+  base.stop()
+  base.reset()
+  while colLeft.reflection() > 15:
+    Linetrack.move(colRight, 40)
+  base.stop()
+  while colLeft.reflection() < 80:
+    Linetrack.move(colRight, 40)
+  base.stop()
+  while colRight.reflection() > 15:
+    Linetrack.move(colLeft, 40)
+  base.stop()
+  while colRight.reflection() < 80:
+    Linetrack.move(colLeft, 40)
+  base.hold()
+  GyroTurn.turn(90)
+  gyro.reset_angle()
+  base.reset() 
+  while leftMotor.angle() < 500:
+    LineTrack.move(colLeft, 50)
+  base.stop()
+  base.reset()
+  while leftMotor.angle() < 150:
+    GyroStraight.move(40)
+  base.stop()
+# if checkSurplus(ev3ColSensor, GyroStraight, -50):
+
+
+
+# base.frontClaw.run_time(CorrectSpeed(80), 1000)
+
+#main()
 
 
 

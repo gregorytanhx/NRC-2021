@@ -15,13 +15,17 @@ class Base:
                leftMotor: Motor, 
                rightMotor: Motor, 
                colLeft: ColorSensor, 
-               colRight: ColorSensor):
+               colRight: ColorSensor, 
+               frontClaw: Motor, 
+               backClaw: Motor):
     
     self.leftMotor = leftMotor
     self.rightMotor = rightMotor
     self.colLeft = colLeft
     self.colRight = colRight
     self.clock = StopWatch()
+    self.frontClaw = frontClaw
+    self.backClaw = backClaw
     
   def stop(self):
     self.leftMotor.brake()
@@ -34,7 +38,7 @@ class Base:
   def reset(self):
     self.leftMotor.reset_angle(0)
     self.rightMotor.reset_angle(0)
-    
+  
   def run(self, leftSpeed: float, rightSpeed: float):
     self.leftMotor.run(CorrectSpeed(leftSpeed))
     self.rightMotor.run(CorrectSpeed(rightSpeed))

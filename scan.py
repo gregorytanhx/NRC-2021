@@ -11,9 +11,9 @@ from pybricks.iodevices import Ev3devSensor
 
 stopwatch = StopWatch()
 
-def scanHouseEV3(house, sensor, gyrostraight, speed, ev3):
+def scanHouseEV3(house, sensor, gyrostraight, speed, ev3, degrees = 500):
   gyrostraight.base.reset()
-  while gyrostraight.base.leftMotor.angle() < 500:
+  while gyrostraight.base.leftMotor.angle() <= degrees:
     start = stopwatch.time()
     detected = False
     gyrostraight.move(speed)
