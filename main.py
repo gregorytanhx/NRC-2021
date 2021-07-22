@@ -31,12 +31,12 @@ except:
 leftMotor = Motor(Port.B, positive_direction = Direction.COUNTERCLOCKWISE)
 rightMotor =  Motor(Port.C)
 
-# ev3Col = Ev3devSensor(Port.S1)
-# ev3ColSensor = ColorSensor(Port.S1)
+ev3Col = Ev3devSensor(Port.S1)
+ev3ColSensor = ColorSensor(Port.S1)
 
 #nxtCol = nxtColorSensor(Port.S1) 
 #HTCol = Ev3devSensor(Port.S1) 
-# gyro = GyroSensor(Port.S2)
+gyro = GyroSensor(Port.S2)
 try:
   colLeft = ColorSensor(Port.S3)
 except: 
@@ -47,13 +47,10 @@ stopwatch = StopWatch()
 base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 LineTrack = PID_LineTrack(base, 0.16, 0, 5, 50)
-# GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
-# GyroTurn = PID_GyroTurn(base, 1.09, 0.0002, 2, gyro)
+GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
+GyroTurn = PID_GyroTurn(base, 1.09, 0.0002, 2, gyro)
 
-#gyro.reset_angle(0)
-#base.reset()
 start = stopwatch.time()
-
 
 # battery alert
 print(ev3.battery.voltage())
@@ -109,15 +106,10 @@ def checkSurplus(degrees):
 
 def collectSurplus(degrees):
   gyro.reset_angle(0)
-  
-  while ev3ColSensor.reflection() > 1:   
-    GyroStraight.move(-40)
-  #GyroStraight.base.stop()
-  while ev3ColSensor.reflection() < 20:   
-    GyroStraight.move(-40)
+  GyroStraight.move(-40, condition = lambda: ev3ColSensor.reflection() > 1)
+  GyroStraight.move(-40, condition = lambda: ev3ColSensor.reflection() < 20)
   base.stop()
-  while ev3ColSensor.reflection() > 1:   
-    GyroStraight.move(-40)
+  GyroStraight.move(-40, condition = lambda: ev3ColSensor.reflection() > 1)
   base.hold()
   # while ev3ColSensor.reflection() > 1:   
   #   GyroStraight.move(-30)
@@ -125,18 +117,13 @@ def collectSurplus(degrees):
   GyroTurn.turn(90)
   gyro.reset_angle(0)
 
- 
-  while colRight.reflection() > 15:
-    GyroStraight.move(-30)
+  GyroStraight.move(-30, condition = lambda: colRight.reflection() > 15)
   base.stop()
-  while colRight.reflection() < 80:
-    GyroStraight.move(-30)
+  GyroStraight.move(-30, condition = lambda: colRight.reflection() < 80)
   base.stop()
-  while colRight.reflection() > 15:
-    GyroStraight.move(30)
+  GyroStraight.move(30, condition = lambda: colRight.reflection() > 15)
   base.stop()
-  while colRight.reflection() < 80:
-    GyroStraight.move(30)
+  GyroStraight.move(-30, condition = lambda: colRight.reflection() < 80)
   base.stop()
   
   PID_LineSquare(base, direction = -1)
@@ -145,8 +132,7 @@ def collectSurplus(degrees):
   frontClaw.run_time(CorrectSpeed(100), 1100)
   frontClaw.reset_angle(0)
   base.reset()
-  while leftMotor.angle() < degrees:
-    GyroStraight.move(30)
+  GyroStraight.move(-30, condition = lambda: leftMotor.angle() < degrees)
   base.hold()
   wait(1000)
 
@@ -154,24 +140,20 @@ def collectSurplus(degrees):
   frontClaw.hold()   
 
 def checkHouse1():
-  while leftMotor.angle() < 200:
-    GyroStraight.move(100)
+  gyro.reset_angle(0)
   base.reset()
-  while leftMotor.angle() < 500:
-    LineTrack.move(colRight, 50)
-  # base.stop()
-  while colLeft.reflection() > 15:
-    LineTrack.move(colRight, 50)
+  GyroStraight.move(100, condition = lambda: leftMotor.angle() <= 200)
+  base.reset()
+  LineTrack.move(colRight, 50, condition = lambda: leftMotor.angle() <= 500)
+  LineTrack.move(colRight, 50, condition = lambda: colLeft.reflection() > 15)
   base.stop()
-  while colLeft.reflection() < 80:
-    GyroStraight.move(40)
+  GyroStraight.move(40, condition = lambda: colLeft.reflection() < 80)
   base.stop() 
-  while colLeft.reflection() > 15:
-    GyroStraight.move(-40)
+  GyroStraight.move(-40, condition = lambda: colLeft.reflection() > 15)
   base.stop()  
   base.reset()
-  while leftMotor.angle() < 295:
-    GyroStraight.move(50)
+  GyroStraight.move(50, condition = lambda:  leftMotor.angle() <= 295)
+  base.stop()
   GyroTurn.turn(-90)
   gyro.reset_angle(0)
   # wall align
@@ -192,11 +174,10 @@ def checkHouse1():
   
 
 def collectGreen(degrees):
-  while colRight.reflection() > 15:
-    LineTrack.move(colLeft, 30, side = -1)
+  LineTrack.move(colLeft, 30, side = -1, condition = lambda:  colRight.reflection() > 15)
   base.hold()
-  while colRight.reflection() > 15:
-    GyroStraight.move(-30)
+
+  GyroStraight.move(-30, condition = colRight.reflection() > 15)
   base.hold()
   #main()
   #
@@ -227,11 +208,9 @@ def collectGreen(degrees):
   GyroTurn.turn(90)
   gyro.reset_angle(0)
   base.reset()
-  while leftMotor.angle() < degrees:
-    LineTrack.move(colLeft, 30, side = -1)
+
+  LineTrack.move(colLeft, 30, side = -1, condition = lambda: leftMotor.angle() <= degrees)
   base.stop()
-
-
 
   GyroTurn.turn(-90)
   while colRight.reflection() < 70:
@@ -248,7 +227,6 @@ def collectGreen(degrees):
     base.run(-30, -30)
   base.hold()
 
-
   backClaw.run_target(CorrectSpeed(50), 100)
   GyroTurn.turn(-90)
   
@@ -256,19 +234,16 @@ def goHouse2():
   GyroTurn.turn(-180, kp = 1.13)
   gyro.reset_angle(0)
   base.reset()
-  while leftMotor.angle() < 1200:
-    LineTrack.move(colRight, 50)
+
+  LineTrack.move(colRight, 50, condition = leftMotor.angle() <= 1200)
   base.stop()
 
-  while colRight.reflection() > 15:
-    LineTrack.move(colLeft, 70, kp = 0.4, kd = 5.5, side = -1)
+  LineTrack.move(colLeft, 70, kp = 0.4, kd = 5.5, side = -1, condition = lambda: colRight.reflection() > 15)
   base.stop()
 
-  while col.reflection() < 80:
-    GyroStraight.move(40)
+  GyroStraight.move(40, condition = lambda: col.reflection() < 80)
   base.stop() 
-  while colLeft.reflection() > 15:
-    GyroStraight.move(-40)
+  GyroStraight.move(-40, condition = colLeft.reflection() > 15)
   base.stop()
 
 def returnHouse1():
@@ -303,19 +278,16 @@ def solarPanels():
   base.stop()
   wait(100)
   base.reset()
-  while colLeft.reflection() > 15:
-    LineTrack.move(colRight, 40)
-  base.stop()
-  while colLeft.reflection() < 80:
-    LineTrack.move(colRight, 40)
-  base.stop()
-  wait(100)
-  while colRight.reflection() > 15:
-    LineTrack.move(colLeft, 40, side = -1)
+  LineTrack.move(colRight, 40, condition = lambda: colLeft.reflection() > 15)
   base.stop()
 
-  while colRight.reflection() < 80:
-    LineTrack.move(colLeft, 40, side = -1)
+  LineTrack.move(colRight, 40, condition = lambda: colLeft.reflection() < 80)
+  base.stop()
+  wait(100)
+  LineTrack.move(colLeft, 40, side = -1, condition = lambda: colRight.reflection() > 15)
+  base.stop()
+
+  LineTrack.move(colLeft, 40, side = -1, condition = lambda: colRight.reflection() < 80)
   base.stop()
 
   
@@ -323,17 +295,14 @@ def solarPanels():
   gyro.reset_angle(0)
   base.reset() 
   # push solar panels
-  while leftMotor.angle() < 500:
-    LineTrack.move(colLeft, 50)
+  LineTrack.move(colLeft, 50, condition = lambda: leftMotor.angle() <= 500)
   base.stop()
   base.reset()
-  while leftMotor.angle() < 150:
-    GyroStraight.move(40)
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() <= 150)
   base.stop()
   
   base.reset()
-  while leftMotor.angle() > - 300:
-    GyroStraight.move(-80)
+  GyroStraight.move(-80, condition = lambda: leftMotor.angle() >= - 300)
   base.stop()
   GyroTurn.turn(180)
   
@@ -346,12 +315,10 @@ def main():
   if checkSurplus(-140):
     surplus = Color.YELLOW
     collectSurplus(385)
-    while colRight.reflection() > 15:
-      GyroStraight.move(-40)
+    GyroStraight.move(-40, condition = lambda: colRight.reflection() > 15)
     base.stop()
     base.reset()
-    while leftMotor.angle() <= 100:
-      GyroStraight.move(40)
+    GyroStraight.move(40, condition = lambda: leftMotor.angle() <= 100)
     base.hold()
 
     GyroTurn.turn(90, kp = 0.7, kd = 1)
@@ -365,17 +332,12 @@ def main():
     PID_AngleOffSet(base, gyro, 45)
     base.reset()
   
-  while leftMotor.angle() < 300:
-    LineTrack.move(colRight, 50)
-    
-  while colLeft.reflection() > 15:
-    LineTrack.move(colRight, 50)
-
-  while colLeft.reflection() < 80:
-    LineTrack.move(colRight, 50)
+  
+  LineTrack.move(colRight, 50, condition = lambda: leftMotor.angle() <= 300)  
+  LineTrack.move(colRight, 50, condition = lambda: colLeft.reflection() > 15)
+  LineTrack.move(colRight, 50, condition = lambda: colLeft.reflection() < 80)
   base.stop()
-  while colRight.reflection() > 15:
-    LineTrack.move(colLeft, 50, side = -1)
+  LineTrack.move(colLeft, 50, side = -1, collection = lambda: colRight.reflection() > 15)
   base.hold()
 
   while colRight.reflection() < 80:
