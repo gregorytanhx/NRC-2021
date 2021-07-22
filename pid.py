@@ -48,13 +48,18 @@ class PID_LineTrack(PID):
            threshold: int = None, 
            kp: float = None, 
            ki: float = None, 
-           kd: float = None, side = 1):
+           kd: float = None, side = 1, condition = lambda: True):
     # update control constants if given
     if threshold is None:
       threshold = self.threshold
-
-    self.update(threshold - sensor.reflection(), kp, ki, kd) 
-    self.base.run(speed + side * self.correction, speed - side * self.correction)
+    while condition():
+      error = threshold - sensor.reflection()
+      self.update(error, kp, ki, kd)
+      # self.integral += error * 0.5
+      # self.correction = self.kp * error + self.ki * self.integral + self.kd * (error - self.lastError)
+      # self.lastError = error
+      self.base.run(speed + side * self.correction, speed - side * self.correction)
+    
 
 class PID_EncoderStraight(PID):
   def __init__(self, 
@@ -105,11 +110,13 @@ class PID_GyroStraight(PID):
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
-           error = None):
+           error = None, 
+           condition = lambda: True):
     if error is None:
       error = self.gyro.angle()
-    self.update(error, kp, ki, kd)
-    self.base.run(speed - self.correction, speed + self.correction)
+    while condition():
+      self.update(error, kp, ki, kd)
+      self.base.run(speed - self.correction, speed + self.correction)
   
 class PID_GyroTurn(PID_GyroStraight):  
   def __init__(self,
@@ -129,7 +136,7 @@ class PID_GyroTurn(PID_GyroStraight):
       self.move(0, kp, ki, kd, error = self.gyro.angle()-angle)
     self.base.stop()
       
-def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.8, ki = 0, kd = 2, minSpeed = 15, direction = 1):
+def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.5, ki = 0, kd = 2, minSpeed = 15, direction = 1):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle) * direction
@@ -166,7 +173,7 @@ def PID_Distance(degrees: int,
       pid.update(degrees - moveObj.leftMotor.angle(), kp, ki, kd)
     moveObj.move(speed)
     
-def PID_LineSquare(base, threshold = 50, kp = 0.2, ki = 0.0005, kd = 0.6, direction = 1, leeway = 3): # direction = 1 for forward, direction = -1 for backwar
+def PID_LineSquare(base, threshold = 50, kp = 0.16, ki = 0.0005, kd = 0.6, direction = 1, leeway = 3): # direction = 1 for forward, direction = -1 for backwar
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   stopwatch = StopWatch()
@@ -186,6 +193,7 @@ def PID_LineSquare(base, threshold = 50, kp = 0.2, ki = 0.0005, kd = 0.6, direct
     # print('Speed: ', outLeft, outRight)
     base.run(outLeft, outRight)
     if stopwatch.time() - start >= 1500:
+      base.stop()
       break
   base.stop()
   

@@ -17,7 +17,7 @@ try: motorC = Motor(Port.C)
 except: pass
 try: motorD = Motor(Port.D)
 except: pass
-speed = 600
+speed = 60
 motor1 = motorA
 motor2 = motorD
 while True:
