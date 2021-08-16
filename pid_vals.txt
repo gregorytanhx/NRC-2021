@@ -1,1 +1,4 @@
-speed 80: kp 0.7, kd 6
+Gyro Turn
+
+90: default
+180: kp 1.2 ki 0.00005

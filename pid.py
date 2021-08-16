@@ -1,4 +1,12 @@
 from helper import *
+from pybricks.hubs import EV3Brick
+from pybricks.ev3devices import (Motor, ColorSensor, GyroSensor)
+from pybricks.nxtdevices import ColorSensor as nxtColorSensor
+from pybricks.parameters import Port, Stop, Direction, Button, Color
+from pybricks.tools import wait, StopWatch, DataLog
+from pybricks.robotics import DriveBase
+from pybricks.media.ev3dev import SoundFile, ImageFile
+from pybricks.iodevices import Ev3devSensor
 
 class PID(object):
   def __init__(self, 
@@ -11,6 +19,7 @@ class PID(object):
     self.integral = 0
     self.lastError = 0
     self.correction = 0
+    self.stopwatch = StopWatch()
     
   def resetIntegral(self):
     self.integral = 0
@@ -110,11 +119,11 @@ class PID_GyroStraight(PID):
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
-           error = None, 
-           condition = lambda: True):
-    if error is None:
-      error = self.gyro.angle()
+           condition = lambda: True,
+           target = 0):
+    
     while condition():
+      error = self.gyro.angle() - target
       self.update(error, kp, ki, kd)
       self.base.run(speed - self.correction, speed + self.correction)
   
@@ -131,12 +140,11 @@ class PID_GyroTurn(PID_GyroStraight):
     self.base.reset()
     self.gyro.reset_angle(0)
     self.resetIntegral()
-
-    while self.gyro.angle() != angle:
-      self.move(0, kp, ki, kd, error = self.gyro.angle()-angle)
+    
+    self.move(0, kp, ki, kd, target = angle, condition= lambda: self.gyro.angle() != angle)
     self.base.stop()
       
-def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.5, ki = 0, kd = 2, minSpeed = 15, direction = 1):
+def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.3, ki = 0.00005, kd = 3, minSpeed = 0, direction = 1):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle) * direction
@@ -145,7 +153,7 @@ def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.5, ki = 0, kd = 2, minSpeed =
       motor.run(CorrectSpeed(minSpeed * (pid.correction / abs(pid.correction))))
     else:
       motor.run(CorrectSpeed(pid.correction))
-  motor.hold()
+  motor.brake()
 
 def PID_AngleOffSet(base, gyro, angle):
   if angle > 0:
@@ -173,7 +181,7 @@ def PID_Distance(degrees: int,
       pid.update(degrees - moveObj.leftMotor.angle(), kp, ki, kd)
     moveObj.move(speed)
     
-def PID_LineSquare(base, threshold = 50, kp = 0.16, ki = 0.0005, kd = 0.6, direction = 1, leeway = 3): # direction = 1 for forward, direction = -1 for backwar
+def PID_LineSquare(base, threshold = 50, kp = 0.16, ki = 0.0005, kd = 0.6, direction = 1, leeway = 5): # direction = 1 for forward, direction = -1 for backwar
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   stopwatch = StopWatch()
@@ -192,8 +200,6 @@ def PID_LineSquare(base, threshold = 50, kp = 0.16, ki = 0.0005, kd = 0.6, direc
     # print('Sensors: ', leftVal, rightVal)
     # print('Speed: ', outLeft, outRight)
     base.run(outLeft, outRight)
-    if stopwatch.time() - start >= 1500:
-      base.stop()
-      break
+    
   base.stop()
   
