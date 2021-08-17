@@ -144,7 +144,7 @@ class PID_GyroTurn(PID_GyroStraight):
     self.move(0, kp, ki, kd, target = angle, condition= lambda: self.gyro.angle() != angle)
     self.base.stop()
       
-def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.3, ki = 0.00005, kd = 3, minSpeed = 0, direction = 1):
+def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.1, ki = 0.00001, kd = 2.5, minSpeed = 25, direction = 1):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle) * direction
@@ -181,7 +181,15 @@ def PID_Distance(degrees: int,
       pid.update(degrees - moveObj.leftMotor.angle(), kp, ki, kd)
     moveObj.move(speed)
     
-def PID_LineSquare(base, threshold = 50, kp = 0.16, ki = 0.0005, kd = 0.6, direction = 1, leeway = 5): # direction = 1 for forward, direction = -1 for backwar
+def PID_LineSquare(base, threshold = 50, direction = 1, leeway = 4): # direction = 1 for forward, direction = -1 for backwar
+  if direction == 1:
+    kp = 0.15
+    ki = 0.0005
+    kd = 0.6
+  else:
+    kp = 0.15
+    ki = 0.0002
+    kd = 0.7
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   stopwatch = StopWatch()
