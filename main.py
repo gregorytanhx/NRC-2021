@@ -30,8 +30,6 @@ rightMotor =  Motor(Port.C)
 ev3Col = Ev3devSensor(Port.S1)
 ev3ColSensor = ColorSensor(Port.S1)
 
-#nxtCol = nxtColorSensor(Port.S1) 
-#HTCol = Ev3devSensor(Port.S1) 
 gyro = GyroSensor(Port.S2)
 colLeft = ColorSensor(Port.S3)
 colRight = ColorSensor(Port.S4)
@@ -188,12 +186,13 @@ def collectGreen(degrees):
   gyro.reset_angle(0)
   base.reset()
   base.run_target(40, 200)
-  backClaw.run_target(CorrectSpeed(-40), -220)
+  backClaw.run_target(CorrectSpeed(-40), -210)
   GyroStraight.move(-30, condition = lambda: colRight.reflection() < 70)
   GyroStraight.move(-30, condition = lambda: colRight.reflection() > 15)
   base.hold()
 
   backClaw.run_time(CorrectSpeed(100), 1200)
+  backClaw.reset_angle(0)
   GyroStraight.move(40, condition = lambda: colRight.reflection() < 70)
   GyroStraight.move(40, condition = lambda: colRight.reflection() > 40)
   base.hold()
@@ -218,11 +217,11 @@ def collectGreen(degrees):
  
   GyroStraight.move(50, condition = lambda: leftMotor.angle() <= 200)
   base.hold()
-  backClaw.run_target(CorrectSpeed(-50), -220)
+  backClaw.run_target(CorrectSpeed(-50), -210)
+  backClaw.reset_angle(0)
   GyroStraight.move(-30, condition = lambda: colRight.reflection() < 60)
   base.hold()
-
-  backClaw.run_target(CorrectSpeed(50), 100)
+  backClaw.run_target(CorrectSpeed(50), 50)
   GyroTurn.turn(-90)
   
 def goHouse2():
@@ -239,33 +238,65 @@ def goHouse2():
 def returnHouse1():
   pass
 
-def depositHouse(house, time):
-  gyro.reset_angle(0)
-  base.reset() 
-  LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 250)
-  base.hold()
+def depositHouse(house, time, houseNum):
+  global numGreen, numBlue, numYellow, numSurplus
+  
   if time == 1:
     # first visit to house
     # deposit surplus and green
     if len(house) == 1: # surplus to be deposited
-      frontClaw.run_target(CorrectSpeed(-100), -300)
-      GyroStraight.move(40, condition = lambda: colLeft.color == Color.RED)
-      GyroStraight.move(-40, condition = lambda: leftMotor.angle() > 0)
-      base.hold()
-    if Color.GREEN in house: # green to be deposited
-      GyroTurn.turn(-180, kp = 1.5)
-      if len(house) == 1:
-        frontClaw.run_target(CorrectSpeed(50), 400)
-      gyro.reset_angle(0)
+      if houseNum == 1:
+        GyroTurn.turn(-90)
+        gyro.reset_angle(0)
+      else:
+        GyroTurn.turn(90)
+        gyro.reset_angle(0)
       base.reset()
-      GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -100)
+      LineTrack.move(colRight, 35, condition = lambda: leftMotor.angle() < 300)
       base.hold()
-      backClaw.reset_angle(0)
-      backClaw.run_target(CorrectSpeed(-50), -160)
-      GyroStraight.move(40, condition = lambda: leftMotor.angle() < 50)
+      frontClaw.reset_angle(0)
+      frontClaw.run_target(CorrectSpeed(-70), -300)
+      frontClaw.reset_angle(0)
+      GyroStraight.move(40, condition = lambda: colLeft.color() != Color.RED)
+      base.reset()
+      GyroStraight.move(40, condition = lambda: leftMotor.angle() < 100)
+      base.reset()
+      GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -300)
       base.hold()
-      backClaw.run_target(CorrectSpeed(50), 160)
+      
+    if Color.GREEN in house: # green to be deposited
+      green = 1
+      if len(house) == 2:
+        if houseNum == 1:
+          GyroTurn.turn(90)
+          gyro.reset_angle(0)
+        else:
+          GyroTurn.turn(-90)
+          gyro.reset_angle(0)
+        if house[0] == Color.GREEN and house[1] == Color.GREEN:
+          green = 2
+          
+      if len(house) == 1:
+        GyroTurn.turn(-180, kp = 1.5)
+        base.reset()
+        gyro.reset_angle(0)
+        frontClaw.run_target(CorrectSpeed(50), 300)
+        
+      GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -50)
+      base.hold()
 
+      backClaw.reset_angle(0)
+      backClaw.run_target(CorrectSpeed(-20), -140)
+      base.reset()
+      wait(2000)
+      if numGreen == 4 and green == 1:
+        GyroStraight.move(30, condition = lambda: leftMotor.angle() < 60)        
+      else:
+        GyroStraight.move(30, condition = lambda: leftMotor.angle() < 100)
+      base.hold()
+      numGreen -= 2
+      backClaw.run_target(CorrectSpeed(40), 100)
+        
 
 def goHouse3():
   pass
@@ -375,14 +406,20 @@ def main():
   if Color.BLUE or Color.YELLOW in Houses[0]:
     depositHouse(Houses[0])
   returnBase()
+# while gyro.angle() < 175:
+#   base.run(40, -40)
+# base.hold()
+# wait(1000)
 
-depositHouse([Color.GREEN], 1)
-# #frontClaw.reset_angle(0)
-# # main()
-# backClaw.run_time(CorrectSpeed(100), 1000)
+GyroTurn.turn(90, kp = 0.6)
+# depositHouse([Color.GREEN, Color.BLUE], 1, 1)
+# wait(1000)
+# backClaw.run_time(CorrectSpeed(100), 1200)
 # backClaw.reset_angle(0)
-# backClaw.run_target(CorrectSpeed(-50), -220)
+# backClaw.run_target(CorrectSpeed(-50), -210)
 # backClaw.reset_angle(0)
 # backClaw.run_target(CorrectSpeed(50), 80)
 # backClaw.reset_angle(0)
-# backClaw.run_target(CorrectSpeed(-50), -180)
+# backClaw.run_target(CorrectSpeed(-50), -140)
+# backClaw.reset_angle(0)
+# # backClaw.run_target(CorrectSpeed(-50), -30)
