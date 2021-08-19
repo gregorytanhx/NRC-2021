@@ -57,10 +57,14 @@ class PID_LineTrack(PID):
            threshold: int = None, 
            kp: float = None, 
            ki: float = None, 
-           kd: float = None, side = 1, condition = lambda: True):
+           kd: float = None, side = 1, 
+           condition = lambda: True
+           reset = True):
     # update control constants if given
     if threshold is None:
       threshold = self.threshold
+    if reset:
+      self.base.reset()
     while condition():
       error = threshold - sensor.reflection()
       self.update(error, kp, ki, kd)
@@ -69,40 +73,6 @@ class PID_LineTrack(PID):
       # self.lastError = error
       self.base.run(speed + side * self.correction, speed - side * self.correction)
     
-
-class PID_EncoderStraight(PID):
-  def __init__(self, 
-               base: Base, 
-               kp: float,
-               ki: float,
-               kd: float):
-    super().__init__(kp, ki, kd)
-    self.base = base
-    
-  def move(self, 
-           speed: float, 
-           kp: float = None, 
-           ki: float = None, 
-           kd: float = None):
-
-    error = self.base.rightMotor.angle() - self.base.leftMotor.angle() 
-    self.update(error, kp, ki, kd)
-    self.base.run(speed + self.correction, speed - self.correction)
-    
-def PID_EncoderTurn(base: Base, degrees: int, kp: float, ki: float, kd: float):
-  base.reset()
-  left = PID(kp, ki, kd)
-  right = PID(kp, ki, kd)
-  while degrees - abs(base.leftMotor.angle()) > 10 or degrees - abs(base.rightMotor.angle()) > 10:
-    print('reading:',base.leftMotor.angle(), base.rightMotor.angle())
-    left.update(degrees - base.leftMotor.angle(), kp, ki, kd)
-    right.update(degrees - base.rightMotor.angle(), kp, ki, kd)
-    leftOut = max(30, abs(left.correction))
-    rightOut = max(30, abs(right.correction))
-    base.run(leftOut, -rightOut)
-    print(leftOut, -rightOut)
-
-
 class PID_GyroStraight(PID):
   def __init__(self, 
                base: Base, 
@@ -120,11 +90,17 @@ class PID_GyroStraight(PID):
            ki: float = None, 
            kd: float = None,
            condition = lambda: True,
-           target = 0):
-    
+           target = 0, 
+           maxSpeed = 100,
+           reset = True):
+    if reset:
+      self.base.reset()
     while condition():
       error = self.gyro.angle() - target
       self.update(error, kp, ki, kd)
+      if abs(self.correction) > maxSpeed:
+        self.correction = maxSpeed * self.correction/abs(self.correction)
+      
       self.base.run(speed - self.correction, speed + self.correction)
   
 class PID_GyroTurn(PID_GyroStraight):  
@@ -133,16 +109,20 @@ class PID_GyroTurn(PID_GyroStraight):
                 kp: float, 
                 ki: float, 
                 kd: float, 
-                gyro: GyroSensor):
+                gyro: GyroSensor,
+                maxSpeed = 100):
       super().__init__(base, kp, ki, kd, gyro)
-  
+      self.maxSpeed = maxSpeed
+      
   def turn(self, angle, kp = None, ki = None, kd = None):
     self.base.reset()
     self.gyro.reset_angle(0)
     self.resetIntegral()
     
-    self.move(0, kp, ki, kd, target = angle, condition= lambda: self.gyro.angle() != angle)
+    self.move(0, kp, ki, kd, target = angle, condition= lambda: self.gyro.angle() != angle, maxSpeed = self.maxSpeed)
     self.base.stop()
+    self.gyro.reset_angle(0)
+    
       
 def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.1, ki = 0.00001, kd = 2.5, minSpeed = 25, direction = 1):
   pid = PID(kp, ki, kd)
