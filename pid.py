@@ -72,6 +72,24 @@ class PID_LineTrack(PID):
       # self.correction = self.kp * error + self.ki * self.integral + self.kd * (error - self.lastError)
       # self.lastError = error
       self.base.run(speed + side * self.correction, speed - side * self.correction)
+  
+  def settle(self, 
+            sensor: ColorSensor,
+            speed: float, 
+            threshold: int = None, 
+            kp: float = None, 
+            ki: float = None, 
+            kd: float = None, side = 1):
+    while True:
+      error = threshold - sensor.reflection()
+      self.update(error, kp, ki, kd)
+      # self.integral += error * 0.5
+      # self.correction = self.kp * error + self.ki * self.integral + self.kd * (error - self.lastError)
+      # self.lastError = error
+      self.base.run(speed + side * self.correction, speed - side * self.correction)
+      if self.correction <= 1:
+        break
+  
     
 class PID_GyroStraight(PID):
   def __init__(self, 
@@ -120,7 +138,7 @@ class PID_GyroTurn(PID_GyroStraight):
     self.resetIntegral()
     
     self.move(0, kp, ki, kd, target = angle, condition= lambda: self.gyro.angle() != angle, maxSpeed = self.maxSpeed)
-    self.base.stop()
+    self.base.hold()
     self.gyro.reset_angle(0)
     
       
@@ -133,7 +151,8 @@ def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.1, ki = 0.00001, kd = 2.5, mi
       motor.run(CorrectSpeed(minSpeed * (pid.correction / abs(pid.correction))))
     else:
       motor.run(CorrectSpeed(pid.correction))
-  motor.brake()
+  motor.hold()
+  gyro.reset_angle(0)
 
 def PID_AngleOffSet(base, gyro, angle):
   if angle > 0:
@@ -142,7 +161,7 @@ def PID_AngleOffSet(base, gyro, angle):
   else:
     PID_SingleMotorTurn(base.rightMotor, gyro, angle)
     PID_SingleMotorTurn(base.leftMotor, gyro, 0, direction = -1)
-  
+    
 
 def PID_Distance(degrees: int,
                  speed: float, moveObj: PID_LineTrack, 
@@ -188,5 +207,5 @@ def PID_LineSquare(base, threshold = 50, direction = 1, leeway = 4): # direction
     # print('Speed: ', outLeft, outRight)
     base.run(outLeft, outRight)
     
-  base.stop()
+  base.hold()
   
