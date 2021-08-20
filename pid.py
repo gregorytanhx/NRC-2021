@@ -58,7 +58,7 @@ class PID_LineTrack(PID):
            kp: float = None, 
            ki: float = None, 
            kd: float = None, side = 1, 
-           condition = lambda: True
+           condition = lambda: True,
            reset = True):
     # update control constants if given
     if threshold is None:

@@ -24,14 +24,9 @@ pressed = False
 clock = StopWatch()
 lastPressedTime = 0
 while True:
+
   buttons = ev3.buttons.pressed()
-  if len(buttons) != 0: 
-    pressed = True
-    lastPressedTime = StopWatch.time()
-    
-  if pressed and StopWatch.time() - lastPressedTime > 5000:
-    break
-  
+
   if Button.LEFT in buttons:
     motor1.run(speed)
   elif Button.RIGHT in buttons:
