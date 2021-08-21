@@ -68,9 +68,6 @@ class PID_LineTrack(PID):
     while condition():
       error = threshold - sensor.reflection()
       self.update(error, kp, ki, kd)
-      # self.integral += error * 0.5
-      # self.correction = self.kp * error + self.ki * self.integral + self.kd * (error - self.lastError)
-      # self.lastError = error
       self.base.run(speed + side * self.correction, speed - side * self.correction)
   
   def settle(self, 
@@ -83,9 +80,6 @@ class PID_LineTrack(PID):
     while True:
       error = threshold - sensor.reflection()
       self.update(error, kp, ki, kd)
-      # self.integral += error * 0.5
-      # self.correction = self.kp * error + self.ki * self.integral + self.kd * (error - self.lastError)
-      # self.lastError = error
       self.base.run(speed + side * self.correction, speed - side * self.correction)
       if self.correction <= 1:
         break
@@ -190,8 +184,6 @@ def PID_LineSquare(base, threshold = 50, direction = 1, leeway = 4): # direction
     kd = 0.7
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
-  stopwatch = StopWatch()
-  start = stopwatch.time()
   while True:
     leftVal = base.colLeft.reflection()
     rightVal = base.colRight.reflection()
@@ -203,8 +195,6 @@ def PID_LineSquare(base, threshold = 50, direction = 1, leeway = 4): # direction
     rightPID.update(rightError, kp, ki, kd)
     outLeft = direction * leftPID.correction
     outRight = direction * rightPID.correction
-    # print('Sensors: ', leftVal, rightVal)
-    # print('Speed: ', outLeft, outRight)
     base.run(outLeft, outRight)
     
   base.hold()
