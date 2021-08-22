@@ -29,6 +29,7 @@ leftMotor = Motor(Port.B, positive_direction = Direction.COUNTERCLOCKWISE)
 rightMotor =  Motor(Port.C)
 
 # initialise sensors
+
 ev3Col = Ev3devSensor(Port.S1)
 gyro = GyroSensor(Port.S2)
 colLeft = ColorSensor(Port.S3)
