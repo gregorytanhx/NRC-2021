@@ -478,12 +478,16 @@ def main():
     depositHouse(Houses[0], 2, 1)
   returnBase()
 
-if checkSurplus(-200):
-  collectSurplus(215, Color.GREEN)
+# if checkSurplus(-200):
+#   collectSurplus(215, Color.GREEN)
 
-#frontClaw.run_time(-90, 1100)
-# frontClaw.reset_angle(0)
-#wait(1000)
-# frontClaw.run_target(-70, - 400)
-
- 
+base.reset()
+LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK, reset=False)
+base.stop()
+wait(1000)
+LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.WHITE, reset=False)
+base.stop()
+wait(1000)
+LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
+base.hold()
+wait(1000)

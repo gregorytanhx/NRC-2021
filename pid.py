@@ -77,12 +77,21 @@ class PID_LineTrack(PID):
             kp: float = None, 
             ki: float = None, 
             kd: float = None, side = 1):
+    if threshold is None:
+      threshold = self.threshold
+    stable = 0
     while True:
       error = threshold - sensor.reflection()
       self.update(error, kp, ki, kd)
       self.base.run(speed + side * self.correction, speed - side * self.correction)
-      if self.correction <= 1:
+      if self.correction < 1:
+        stable += 1
+      else:
+        stable = 0
+      if stable >= 10:
         break
+        
+  
   
     
 class PID_GyroStraight(PID):
