@@ -91,8 +91,6 @@ class PID_LineTrack(PID):
       if stable >= 10:
         break
         
-  
-  
     
 class PID_GyroStraight(PID):
   def __init__(self, 
@@ -145,7 +143,7 @@ class PID_GyroTurn(PID_GyroStraight):
     self.gyro.reset_angle(0)
     
       
-def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.1, ki = 0.00001, kd = 2.5, minSpeed = 25, direction = 1):
+def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.1, ki = 0.00001, kd = 2.5, minSpeed = 25, direction = 1, reset = True):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle) * direction
@@ -155,14 +153,15 @@ def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.1, ki = 0.00001, kd = 2.5, mi
     else:
       motor.run(CorrectSpeed(pid.correction))
   motor.hold()
-  gyro.reset_angle(0)
+  if reset:
+    gyro.reset_angle(0)
 
 def PID_AngleOffSet(base, gyro, angle):
   if angle > 0:
-    PID_SingleMotorTurn(base.leftMotor, gyro, angle, direction = -1)
+    PID_SingleMotorTurn(base.leftMotor, gyro, angle, direction = -1, reset = False)
     PID_SingleMotorTurn(base.rightMotor, gyro, 0)
   else:
-    PID_SingleMotorTurn(base.rightMotor, gyro, angle)
+    PID_SingleMotorTurn(base.rightMotor, gyro, angle, reset = False)
     PID_SingleMotorTurn(base.leftMotor, gyro, 0, direction = -1)
     
 

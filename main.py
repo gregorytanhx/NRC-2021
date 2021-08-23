@@ -342,17 +342,11 @@ def depositBattery(side = 1):
 def solarPanels():
   # re-align robot onto line
   gyro.reset_angle(0)
-  while colLeft.reflection() > 15:
-    base.run(40, 0)
-  base.hold()
-  while gyro.angle() > 0:
-    base.run(0, 40)
-  base.hold()
+  PID_AngleOffSet(base, gyro, 50)
   
   # linetrack to intersection
-  LineTrack.move(colRight, 30, condition = lambda: leftMotor.angle() < 200)
   LineTrack.move(colLeft, 40, side = -1, condition = lambda: colRight.reflection() > 15)
-  LineTrack.move(colLeft, 40, side = -1, condition = lambda: leftMotor.angle() < 90)
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 90)
   base.hold()
   
   GyroTurn.turn(90)
@@ -482,12 +476,12 @@ def main():
 #   collectSurplus(215, Color.GREEN)
 
 base.reset()
-LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK, reset=False)
+LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.reflection() > 15, reset=False)
 base.stop()
 wait(1000)
-LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.WHITE, reset=False)
+LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.reflection() < 80, reset=False)
 base.stop()
 wait(1000)
-LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
+LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() > 15)
 base.hold()
 wait(1000)
