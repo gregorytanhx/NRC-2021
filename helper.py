@@ -21,6 +21,10 @@ class Claw:
   def run_time(self, speed, time, wait = True):
     self.motor.run_time(CorrectSpeed(speed), time, wait=wait)    
   
+  def reset(self, time, dir = 1):
+    self.motor.dc(40 * dir)
+    wait(time)
+    self.motor.hold()
   def hold(self):
     self.motor.hold()
   
