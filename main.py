@@ -101,7 +101,7 @@ def checkSurplus(degrees):
 def collectSurplus(degrees, col):
   # align robot using surplus
   base.reset()
-  frontClaw.run_time(100, 1200)
+  frontClaw.reset(1500)
   if col != Color.BLUE:
     GyroStraight.move(-30, condition = lambda: leftMotor.angle() > -250)
     GyroTurn.turn(90)
@@ -116,11 +116,8 @@ def collectSurplus(degrees, col):
   # move forward to collect surplus
   GyroStraight.move(30, condition = lambda: leftMotor.angle() <= degrees)
   base.hold()
-  wait(2000)
   # grab front surplus using claw
   frontClaw.run_target(-40, -380)
-  
-  wait(2000)
   
 def collectGreen(degrees):  
   # reset claw to maintain consistency
@@ -468,7 +465,7 @@ def main():
   if Color.BLUE or Color.YELLOW in Houses[0]:
     depositHouse(Houses[0], 2, 1)
   returnBase()
-frontClaw.reset(2000)
+
 # GyroTurn.maxSpeed = 50
 # # GyroTurn.turn(180)
 # # gyro.reset_angle(0)

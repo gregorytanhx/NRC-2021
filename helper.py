@@ -25,6 +25,7 @@ class Claw:
     self.motor.dc(40 * dir)
     wait(time)
     self.motor.hold()
+    
   def hold(self):
     self.motor.hold()
   
