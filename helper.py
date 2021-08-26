@@ -21,8 +21,8 @@ class Claw:
   def run_time(self, speed, time, wait = True):
     self.motor.run_time(CorrectSpeed(speed), time, wait = wait)    
   
-  def reset(self, time, dir = 1):
-    self.motor.dc(40 * dir)
+  def reset(self, time, dir = 1, speed = 40):
+    self.motor.dc(speed * dir)
     wait(time)
     self.motor.hold()
     
@@ -41,12 +41,14 @@ class FrontClaw(Claw):
 class BackClaw(Claw):
   def __init__(self, port: Port):
     super().__init__(port)
-    self.lowerDist = -205
+    
+  def mid(self):
+    self.run_target(-50, -200)
     
   def defaultPos(self):
     self.run_time(50, 1000)
-    self.run_target(-50, -170)
-    self.run_target(50, 50)
+    self.run_target(-50, -200)
+    self.run_target(50, 80)
  
 class Base:
   def __init__(self, 

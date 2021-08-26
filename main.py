@@ -141,7 +141,7 @@ def collectGreen(degrees):
    
   # move forward, lower claw then reverse to collect green
   base.run_target(40, 200)
-  backClaw.run_target(-40, -205)
+  backClaw.mid()
   GyroStraight.move(-30, condition = lambda: colRight.reflection() < 70)
   GyroStraight.move(-30, condition = lambda: colRight.reflection() > 15)
   base.hold()
@@ -169,10 +169,10 @@ def collectGreen(degrees):
   base.reset()
   GyroStraight.move(50, condition = lambda: leftMotor.angle() < 200)
   base.hold()
-  backClaw.run_target(-50, -205)
+  backClaw.mid()
   GyroStraight.move(-30, condition = lambda: colRight.reflection() < 60)
   base.hold()
-  backClaw.run_target(50, 50)
+  backClaw.run_target(50, 80)
   
   # cap speed of turns after grabbing green to stop them from jerking
   GyroTurn.maxSpeed = 50
@@ -323,10 +323,12 @@ def collectYellow():
   pass
 
 def collectBlue():
-  backClaw.run_time(100, 500)
-  backClaw.run_target(-50, -200)
+  backClaw.reset(1000, speed = 50)
+  backClaw.run_target(-50, -170)
   base.reset()
-  GyroStraight.move(-40, leftMotor.angle()
+  GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -100)
+  base.hold()
+  wait(1000)
 
 def depositBattery(side = 1):
   pass
@@ -496,7 +498,15 @@ def main():
   returnBase()
 
 
-collectBlue()
+backClaw.defaultPos()
+# wait(4000)
+# backClaw.run_target(-20, -140)
+# base.reset()
+# wait(3000)
+# GyroStraight.move(20, condition = lambda: leftMotor.angle() < 200)
+# base.hold()
+# backClaw.run_target(20, 140)
+
 # LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
 # LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.WHITE)
 # LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
