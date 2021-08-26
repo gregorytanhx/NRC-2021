@@ -63,34 +63,10 @@ class PID_LineTrack(PID):
     # update control constants if given
     if threshold is None:
       threshold = self.threshold
-    if reset:
-      self.base.reset()
     while condition():
       error = threshold - sensor.reflection()
       self.update(error, kp, ki, kd)
-      self.base.run(speed + side * self.correction, speed - side * self.correction)
-  
-  def settle(self, 
-            sensor: ColorSensor,
-            speed: float, 
-            threshold: int = None, 
-            kp: float = None, 
-            ki: float = None, 
-            kd: float = None, side = 1):
-    if threshold is None:
-      threshold = self.threshold
-    stable = 0
-    while True:
-      error = threshold - sensor.reflection()
-      self.update(error, kp, ki, kd)
-      self.base.run(speed + side * self.correction, speed - side * self.correction)
-      if self.correction < 1:
-        stable += 1
-      else:
-        stable = 0
-      if stable >= 10:
-        break
-        
+      self.base.run(speed + side * self.correction, speed - side * self.correction)        
     
 class PID_GyroStraight(PID):
   def __init__(self, 
@@ -112,8 +88,6 @@ class PID_GyroStraight(PID):
            target = 0, 
            maxSpeed = 100,
            reset = True):
-    if reset:
-      self.base.reset()
     while condition():
       error = self.gyro.angle() - target
       self.update(error, kp, ki, kd)

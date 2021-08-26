@@ -14,12 +14,12 @@ class Claw:
   def __init__(self, port: Port):
     self.motor = Motor(port)
 
-  def run_target(self, speed, angle):
+  def run_target(self, speed, angle, wait = True):
     self.motor.reset_angle(0)
-    self.motor.run_target(CorrectSpeed(speed), angle)
+    self.motor.run_target(CorrectSpeed(speed), angle, wait = wait)
   
   def run_time(self, speed, time, wait = True):
-    self.motor.run_time(CorrectSpeed(speed), time, wait=wait)    
+    self.motor.run_time(CorrectSpeed(speed), time, wait = wait)    
   
   def reset(self, time, dir = 1):
     self.motor.dc(40 * dir)
@@ -29,6 +29,25 @@ class Claw:
   def hold(self):
     self.motor.hold()
   
+class FrontClaw(Claw):
+  def __init__(self, port: Port):
+    super().__init__(port)
+    self.closeDist = -460
+    
+  def defaultPos(self):
+    self.reset(40, 1000)
+    self.run_target(self.closeDist)
+
+class BackClaw(Claw):
+  def __init__(self, port: Port):
+    super().__init__(port)
+    self.closeDist = -460
+    
+  def defaultPos(self):
+    self.reset(100, 1000)
+    self.run_target(-50, -205)
+    self.run_target(50, 50)
+ 
 class Base:
   def __init__(self, 
                leftMotor: Motor, 
@@ -65,7 +84,7 @@ class Base:
   def run_time(self, speed: float, time: int):
     # time in seconds
     start = self.clock.time()
-    while self.clock.time() - start < time * 1000:
+    while self.clock.time() - start < time:
       self.run(speed, speed)
     self.stop()
     
