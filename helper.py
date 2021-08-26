@@ -35,17 +35,17 @@ class FrontClaw(Claw):
     self.closeDist = -460
     
   def defaultPos(self):
-    self.reset(40, 1000)
-    self.run_target(self.closeDist)
+    self.reset(2000)
+    self.run_target(-50, self.closeDist, wait=False)
 
 class BackClaw(Claw):
   def __init__(self, port: Port):
     super().__init__(port)
-    self.closeDist = -460
+    self.lowerDist = -205
     
   def defaultPos(self):
-    self.reset(100, 1000)
-    self.run_target(-50, -205)
+    self.run_time(50, 1000)
+    self.run_target(-50, -170)
     self.run_target(50, 50)
  
 class Base:

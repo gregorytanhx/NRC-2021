@@ -219,7 +219,7 @@ def depositHouse(house, time, houseNum):
         elif house == 2: 
           GyroTurn.turn(90)
         
-      frontClaw.run_target(50, 300)
+      frontClaw.run_target(30, 300, wait=False)
       
   else:
     # second visit to house deposits yellow and blue
@@ -288,28 +288,27 @@ def depositHouse(house, time, houseNum):
       elif tmp == 2:
         GyroTurn.turn(-90)
     base.reset()
-    base.run_time(-40, 500) 
     base.hold()
     base.reset()
-    GyroStraight.move(40, condition = lambda: leftMotor.angle() < 150)
+    GyroStraight.move(-40, condition = lambda: leftMotor.angle() < -150)
     base.hold()
     backClaw.run_target(-20, -140)
     base.reset()
     # reverse more if 2 ring blocks have to be deposited
     if numCol == 4 and tmp == 1:
-      GyroStraight.move(30, condition = lambda: leftMotor.angle() < 100) 
+      GyroStraight.move(30, condition = lambda: leftMotor.angle() < 50) 
       numCol -= 2       
     else:
-      GyroStraight.move(30, condition = lambda: leftMotor.angle() < 200)
+      GyroStraight.move(30, condition = lambda: leftMotor.angle() < 100)
       numCol -= 4
     base.hold()
-    backClaw.run_target(40, 100)
+    backClaw.run_target(40, 140)
 
     if houseNum == 1 or houseNum == 2:
       GyroStraight.move(40, condition = lambda: colLeft.reflection() > 15 or colRight.reflection() > 15)
       base.hold()
       base.reset()
-      GyroStraight.move(40, condition = lambda: leftMotor.angle() < 100)
+      GyroStraight.move(40, condition = lambda: leftMotor.angle() < 150)
       base.hold()
       if house == 1:
         GyroTurn.turn(90)
@@ -324,7 +323,10 @@ def collectYellow():
   pass
 
 def collectBlue():
-  pass
+  backClaw.run_time(100, 500)
+  backClaw.run_target(-50, -200)
+  base.reset()
+  GyroStraight.move(-40, leftMotor.angle()
 
 def depositBattery(side = 1):
   pass
@@ -494,7 +496,7 @@ def main():
   returnBase()
 
 
-GyroTurn.maxSpeed = 40
+collectBlue()
 # LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
 # LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.WHITE)
 # LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
@@ -503,16 +505,16 @@ GyroTurn.maxSpeed = 40
 # base.hold()
 # PID_AngleOffSet(base, gyro, 80)
 # base.hold()
-
-PID_LineSquare(base, direction = -1)
-gyro.reset_angle(0)
-base.reset()
-GyroStraight.move(-50, condition = lambda: leftMotor.angle() > -300)
-base.hold()
-scanHouseEV3(Houses[1], ev3Col, 50, lambda: colRight.reflection() > 15)  
-base.hold()
-GyroStraight.move(40, condition = lambda: colRight.reflection() < 80)
-GyroStraight.move(40, condition = lambda: colRight.reflection() > 40)
-base.hold()
-depositHouse(Houses[1], 1, 2)
+# GyroTurn.maxSpeed = 40
+# PID_LineSquare(base, direction = -1)
+# gyro.reset_angle(0)
+# base.reset()
+# GyroStraight.move(-50, condition = lambda: leftMotor.angle() > -300)
+# base.hold()
+# scanHouseEV3(Houses[1], ev3Col, 50, lambda: colRight.reflection() > 15)  
+# base.hold()
+# GyroStraight.move(40, condition = lambda: colRight.reflection() < 80)
+# GyroStraight.move(40, condition = lambda: colRight.reflection() > 40)
+# base.hold()
+# depositHouse(Houses[1], 1, 2)
 # # SHOULD SHIFT SOLAR PANELS TO PART FOR COLLECTING YELLOW FOR BETTER ROUTING
