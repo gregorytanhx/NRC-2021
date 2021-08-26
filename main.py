@@ -117,7 +117,7 @@ def collectSurplus(degrees, col):
   GyroStraight.move(30, condition = lambda: leftMotor.angle() <= degrees)
   base.hold()
   # grab front surplus using claw
-  frontClaw.run_target(-40, -380)
+  frontClaw.run_target(-40, -470)
   
 def collectGreen(degrees):  
   # reset claw to maintain consistency
@@ -319,9 +319,6 @@ def depositHouse(house, time, houseNum):
     if numCol == 0:
       GyroTurn.maxspeed = 100
 
-def goHouse3():
-  pass
-
 def collectYellow():
   pass
 
@@ -376,15 +373,16 @@ def main():
   base.hold()
   GyroTurn.turn(-90)
   
-  # wall align
+  # wall align and scan indicators 
   base.run_time(-100, 1.3)
-  gyro.reset_angle(0)
-  
+  gyro.reset_angle(0)  
   scanHouseEV3(Houses[0], ev3Col, 50, lambda: colRight.reflection() > 15)
   PID_LineSquare(base, direction = -1)
   PID_SingleMotorTurn(rightMotor, gyro, -179)
   gyro.reset_angle(0)
   
+  # if yellow surplus is present, collect it 
+  # move toward green energy
   if checkSurplus(-140):
     surplus = Color.YELLOW
     collectSurplus(360, Color.YELLOW)
@@ -399,8 +397,10 @@ def main():
     GyroTurn.turn(180)
     PID_AngleOffSet(base, gyro, 42)
     
+  # collect green energy
   collectGreen(360)
-  # collect surplus 
+  
+  # collect green surplus if present, else go collect blue surplus
   if surplus is None:
     if checkSurplus(-200, Color.GREEN):
       surplus = Color.GREEN
@@ -411,20 +411,37 @@ def main():
       GyroTurn.turn(180)
       gyro.reset_angle(0)
       base.reset()
-      LineTrack.move(colLeft, 60, condition = lambda: colRight.reflection() > 15)
+      LineTrack.move(colLeft, 60, condition = lambda: colRight.color() != Color.BLACK)
       base.hold()
       base.reset()
-      GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -90)
+      GyroStraight.move(-30, condition = lambda: leftMotor.angle() > -150)
       base.hold()
       GyroTurn.turn(-90)
-      collectSurplus(1000, blue = True)
+      collectSurplus(610, Color.BLUE)
+
+      GyroStraight.move(-60, condition = lambda: colLeft.color() != Color.BLACK)
+      base.hold()
+      GyroStraight.move(40, condition = lambda: colLeft.color() != Color.WHITE)
+      GyroStraight.move(40, condition = lambda: colLeft.color() != Color.BLACK)
+      base.reset()
+      GyroStraight.move(40, condition = lambda: leftMotor.angle() < 110)
+
+      GyroTurn.turn(-90)
+      LineTrack.move(colLeft, 60, condition = lambda: colRight.reflection() > 15)
+      base.reset()
+      GyroStraight.move(60, condition = lambda: colRight.reflection() < 80)
+      base.hold()
+      
   else:
     gyro.reset_angle(0)
     PID_AngleOffSet(base, gyro, 40)
   
+  # push solars panels on the way to the first house
   solarPanels()
   
+  # start first round of deposition (green + surplus)
   depositHouse(Houses[0], 1, 1)
+  
   LineTrack.move(colRight, 60, side = -1, condition = lambda: colRight.reflection() > 15)
   GyroStraight.move(60, condition = lambda: colRight.reflection() > 80)
   LineTrack.move(colLeft, 60, side = -1, condition = lambda: colRight.reflection() > 15)
@@ -432,13 +449,17 @@ def main():
   base.hold()
   # do some cool swerve
   scanHouseEV3(Houses[1], ev3Col, 50)  
+  
   depositHouse(Houses[1], 1, 2)
+  
   LineTrack.move(colLeft, 50, condition = lambda: colRight.reflection() > 15)
-  goHouse3()
+  
   scanHouse3(Houses[2], ev3Col, 50)
   depositHouse(Houses[2], 1, 3)
-  # always deposit two surplus into battery storage from claw
+  # always deposit two surplus into battery storage from claw, deposit any remaining green
   depositBattery()
+  
+  # collect yellow and blue energy
   if Color.YELLOW and Color.BLUE in Houses[2]:
     collectYellow()
     collectBlue()
@@ -457,35 +478,27 @@ def main():
   else:
     collectYellow()
     collectBlue()
-    
+  
+  # based on houses, determine which energy is extra and deposit it
   depositBattery()
+  
+  # clear remaining houses 
   if Color.BLUE or Color.YELLOW in Houses[1]:
     depositHouse(Houses[1], 2, 2)
     
   if Color.BLUE or Color.YELLOW in Houses[0]:
     depositHouse(Houses[0], 2, 1)
+    
+  # go back to base
   returnBase()
 
-# GyroTurn.maxSpeed = 50
-# # GyroTurn.turn(180)
-# # gyro.reset_angle(0)
-# # base.reset()
-# LineTrack.move(colLeft, 60, condition = lambda: colRight.color() != Color.BLACK)
-# base.hold()
-# base.reset()
-# GyroStraight.move(-30, condition = lambda: leftMotor.angle() > -150)
-# base.hold()
-# GyroTurn.turn(-90)
-# collectSurplus(610, Color.BLUE)
 
-# GyroStraight.move(-50, condition = lambda: colLeft.color() != Color.BLACK)
-# base.hold()
-# GyroStraight.move(40, condition = lambda: colLeft.color() != Color.WHITE)
-# base.hold()
-# wait(1000)
-# # GyroTurn.turn(-90)
-# # LineTrack.move(colLeft, 60, condition = lambda: colRight.reflection() > 15)
-# # base.reset()
-# # GyroStraight.move(60, condition = lambda: colRight.reflection() < 80)
-# # base.hold()
+
+wait(2000)
+
+ LineTrack.move(colRight, 60, side = -1, condition = lambda: colRight.reflection() > 15)
+  GyroStraight.move(60, condition = lambda: colRight.reflection() > 80)
+  LineTrack.move(colLeft, 60, side = -1, condition = lambda: colRight.reflection() > 15)
+  GyroStraight.move(60, condition = lambda: colRight.reflection() > 80)
+  base.hold()
 # # SHOULD SHIFT SOLAR PANELS TO PART FOR COLLECTING YELLOW FOR BETTER ROUTING
