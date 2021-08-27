@@ -139,29 +139,13 @@ def PID_AngleOffSet(base, gyro, angle):
     PID_SingleMotorTurn(base.leftMotor, gyro, 0, direction = -1)
     
 
-def PID_Distance(degrees: int,
-                 speed: float, moveObj: PID_LineTrack, 
-                 leeway: int = 5, 
-                 kp: int = 1.5, 
-                 ki: int = 0.01, 
-                 kd: int = 1, 
-                 minSpeed: int = 40):
-  
-  resetMotor(moveObj.leftMotor, moveObj.rightMotor)
-  pid = PID(kp, ki, kd)
-  while abs(moveObj.leftMotor.angle() - degrees) > leeway:
-    # only activate PID slowdown when close to destination
-    if (degrees - moveObj.leftMotor.angle()) < 50:    
-      pid.update(degrees - moveObj.leftMotor.angle(), kp, ki, kd)
-    moveObj.move(speed)
-    
 def PID_LineSquare(base, threshold = 50, direction = 1, leeway = 4): # direction = 1 for forward, direction = -1 for backwar
   if direction == 1:
-    kp = 0.15
+    kp = 0.12
     ki = 0.0005
     kd = 0.6
   else:
-    kp = 0.15
+    kp = 0.12
     ki = 0.0002
     kd = 0.7
   leftPID = PID(kp, ki, kd)

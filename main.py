@@ -320,12 +320,35 @@ def depositHouse(house, time, houseNum):
       GyroTurn.maxspeed = 100
 
 def collectBlue():
-  backClaw.reset(1000, speed = 50)
-  backClaw.run_target(-50, -170)
+  backClaw.reset(500, speed = 80)
+  PID_LineSquare(base)
+  gyro.reset_angle(0)
   base.reset()
-  GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -100)
+  GyroStraight.move(-40, condition =  lambda: colRight.color() != Color.WHITE)
   base.hold()
-  wait(1000)
+  GyroTurn.turn(-90)
+  backClaw.run_target(-50, -210)
+  base.reset()
+  GyroStraight.move(-20, condition = lambda: leftMotor.angle() > -80)
+  base.hold()
+  backClaw.run_target(-50, -30)
+  base.reset()
+  GyroStraight.move(-10, condition = lambda: leftMotor.angle() > -15)
+  base.hold()
+  backClaw.reset(500, speed = 80)
+  base.reset()
+  GyroStraight.move(50, condition = lambda: leftMotor.angle() < 95)
+  base.hold()
+  GyroTurn.turn(90)
+  base.reset()
+  GyroStraight.move(40, condition =  lambda: leftMotor.angle() < 100)
+  base.hold()
+  GyroTurn.turn(90)
+
+  
+  
+  
+  
 
 def depositBattery(side = 1):
   pass
@@ -360,7 +383,7 @@ def collectYellow():
   base.reset()
   GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -60)
   base.hold()
-  wait(1000)
+  
   
   # collect next 2 in catchment area
   GyroTurn.turn(90)
@@ -377,6 +400,7 @@ def collectYellow():
   frontClaw.run_target(30, 250)
   GyroTurn.turn(90)
   GyroStraight.move(60, condition=lambda: colRight.color() != Color.BLACK)
+  base.hold()
   
 def main():
   surplus = None
@@ -507,8 +531,7 @@ def main():
 
 # gyro.reset_angle(0)
 # collectYellow()
-frontClaw.run_target(-40, -250)
-frontClaw.run_target(30, 250)
+collectBlue()
 # wait(1000)
 
 # base.reset()
