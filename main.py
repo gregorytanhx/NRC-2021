@@ -327,7 +327,7 @@ def collectBlue():
   GyroStraight.move(-40, condition =  lambda: colRight.color() != Color.WHITE)
   base.hold()
   GyroTurn.turn(-90)
-  backClaw.run_target(-50, -210)
+  backClaw.run_target(-50, -230)
   base.reset()
   GyroStraight.move(-20, condition = lambda: leftMotor.angle() > -80)
   base.hold()
@@ -340,10 +340,17 @@ def collectBlue():
   GyroStraight.move(50, condition = lambda: leftMotor.angle() < 95)
   base.hold()
   GyroTurn.turn(90)
+  GyroStraight.move(40, condition =  lambda: colRight.color() != Color.BLACK)
   base.reset()
-  GyroStraight.move(40, condition =  lambda: leftMotor.angle() < 100)
+  GyroStraight.move(40, condition =  lambda: leftMotor.angle() < 250)
   base.hold()
-  GyroTurn.turn(90)
+  GyroTurn.turn(-90)
+  backClaw.run_target(-50, -230)
+  base.reset()
+  GyroStraight.move(-10, condition = lambda: leftMotor.angle() > -50)
+  base.hold()
+  backClaw.run_target(50, 90)
+  
 
   
   
