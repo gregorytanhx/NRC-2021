@@ -410,7 +410,8 @@ def main():
     if checkSurplus(-200, Color.GREEN):
       surplus = Color.GREEN
       collectSurplus(200)
-      GyroTurn.turn(-90)
+      PID_SingleMotorTurn(leftMotor, gyro, -90)
+      
     else:
       surplus = Color.BLUE
       GyroTurn.turn(180)
@@ -429,30 +430,39 @@ def main():
       GyroStraight.move(40, condition = lambda: colLeft.color() != Color.WHITE)
       GyroStraight.move(40, condition = lambda: colLeft.color() != Color.BLACK)
       base.reset()
-      GyroStraight.move(40, condition = lambda: leftMotor.angle() < 110)
-
-      GyroTurn.turn(-90)
-      LineTrack.move(colLeft, 60, condition = lambda: colRight.reflection() > 15)
-      base.reset()
-      GyroStraight.move(60, condition = lambda: colRight.reflection() < 80)
+      GyroStraight.move(40, condition = lambda: leftMotor.angle() < 50)
       base.hold()
+      GyroTurn.turn(-90)
+      
+    LineTrack.move(colRight, 70, side = -1,  condition = lambda: colLeft.color() != Color.BLACK)
+    LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.WHITE)
       
   else:
     gyro.reset_angle(0)
-    PID_AngleOffSet(base, gyro, 40)
-  
-  # push solars panels on the way to the first house
-  solarPanels()
+    LineTrack.move(colRight, 70, side = -1,  condition = lambda: leftMotor.angle() < 500)
+
+  LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
+  base.reset() 
+  LineTrack.move(colRight, 40, side = -1,  condition = lambda: leftMotor.angle() < 90)
+  base.hold()
   
   # start first round of deposition (green + surplus)
   depositHouse(Houses[0], 1, 1)
   
-  LineTrack.move(colRight, 60, side = -1, condition = lambda: colRight.reflection() > 15)
-  GyroStraight.move(60, condition = lambda: colRight.reflection() > 80)
-  LineTrack.move(colLeft, 60, side = -1, condition = lambda: colRight.reflection() > 15)
-  GyroStraight.move(60, condition = lambda: colRight.reflection() > 80)
+  LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
+  LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.WHITE)
+  LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
+  base.reset()
+  LineTrack.move(colRight, 60, side = -1, condition = lambda: leftMotor.angle() < 650)
   base.hold()
-  # do some cool swerve
+  PID_AngleOffSet(base, gyro, 80)
+  base.hold()
+  GyroTurn.maxSpeed = 40
+  PID_LineSquare(base, direction = -1)
+  gyro.reset_angle(0)
+  base.reset()
+  GyroStraight.move(-50, condition = lambda: leftMotor.angle() > -300)
+  base.hold()
   scanHouseEV3(Houses[1], ev3Col, 50)  
   
   depositHouse(Houses[1], 1, 2)
@@ -497,8 +507,12 @@ def main():
   # go back to base
   returnBase()
 
-
-backClaw.defaultPos()
+frontClaw.defaultPos()
+# base.reset()
+# LineTrack.move(colRight, 70, side = -1,  condition = lambda: leftMotor.angle() < 500)
+# LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
+# base.hold()
+# wait(1000)
 # wait(4000)
 # backClaw.run_target(-20, -140)
 # base.reset()
@@ -507,20 +521,7 @@ backClaw.defaultPos()
 # base.hold()
 # backClaw.run_target(20, 140)
 
-# LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
-# LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.WHITE)
-# LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
-# base.reset()
-# LineTrack.move(colRight, 60, side = -1, condition = lambda: leftMotor.angle() < 650)
-# base.hold()
-# PID_AngleOffSet(base, gyro, 80)
-# base.hold()
-# GyroTurn.maxSpeed = 40
-# PID_LineSquare(base, direction = -1)
-# gyro.reset_angle(0)
-# base.reset()
-# GyroStraight.move(-50, condition = lambda: leftMotor.angle() > -300)
-# base.hold()
+
 # scanHouseEV3(Houses[1], ev3Col, 50, lambda: colRight.reflection() > 15)  
 # base.hold()
 # GyroStraight.move(40, condition = lambda: colRight.reflection() < 80)
