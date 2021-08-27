@@ -319,9 +319,6 @@ def depositHouse(house, time, houseNum):
     if numCol == 0:
       GyroTurn.maxspeed = 100
 
-def collectYellow():
-  pass
-
 def collectBlue():
   backClaw.reset(1000, speed = 50)
   backClaw.run_target(-50, -170)
@@ -337,20 +334,49 @@ def collectYellow():
   # push solar panels
   base.reset()
   frontClaw.reset(1500)
-  frontClaw.run_target(-50, -400)
+  frontClaw.run_target(-50, -390)
   frontClaw.hold()
   LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 200)
-  GyroStraight.move(40, condition = lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
+  while colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK:
+    base.run(20, 20)
   base.reset()
-  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 100)
+  while leftMotor.angle() < 100:
+    base.run(20, 20)
   base.hold()
   frontClaw.reset(1500, dir = -1, speed = 40)
+  
+  # track to first 2 yellow and grab with claw
   GyroTurn.turn(-90)
   base.reset()
   LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 500)
   GyroStraight.move(40, condition = lambda: leftMotor.angle() < 600)
+  base.hold()
+  frontClaw.reset(1500)
   GyroTurn.turn(90)
-  GyroStraight
+  base.reset()
+  GyroStraight.move(20, condition = lambda: leftMotor.angle() < 30)
+  base.hold()
+  frontClaw.run_target(-50, -470)
+  base.reset()
+  GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -60)
+  base.hold()
+  wait(1000)
+  
+  # collect next 2 in catchment area
+  GyroTurn.turn(90)
+  LineTrack.move(colLeft, 50, condition = lambda: colRight.color() != Color.BLACK)
+  base.reset()  
+  LineTrack.move(colLeft, 40, condition = lambda: leftMotor.angle() < 550)
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 750)
+  base.hold()
+  frontClaw.run_target(-40, -250)
+  GyroTurn.turn(-90)
+  base.reset()
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 200)
+  base.hold()
+  frontClaw.run_target(30, 250)
+  GyroTurn.turn(90)
+  GyroStraight.move(60, condition=lambda: colRight.color() != Color.BLACK)
   
 def main():
   surplus = None
@@ -460,24 +486,11 @@ def main():
   depositBattery()
   
   # collect yellow and blue energy
-  if Color.YELLOW and Color.BLUE in Houses[2]:
-    collectYellow()
-    collectBlue()
-    depositeHouse(Houses[2], 2, 3)
-    
-  elif Color.YELLOW in Houses[2]:
-    collectYellow()
-    depositeHouse(Houses[2], 2, 3)
-    collectBlue()
-    
-  elif Color.BLUE in Houses[2]:
-    collectBlue()
+
+  collectBlue()  
+  collectYellow()
+  if Color.YELLOW or Color.BLUE in Houses[2]:
     depositHouse(Houses[2], 2, 3)
-    collectYellow()
-    
-  else:
-    collectYellow()
-    collectBlue()
   
   # based on houses, determine which energy is extra and deposit it
   depositBattery()
@@ -492,8 +505,12 @@ def main():
   # go back to base
   returnBase()
 
-collectYellow()
-wait(1000)
+# gyro.reset_angle(0)
+# collectYellow()
+frontClaw.run_target(-40, -250)
+frontClaw.run_target(30, 250)
+# wait(1000)
+
 # base.reset()
 # LineTrack.move(colRight, 70, side = -1,  condition = lambda: leftMotor.angle() < 500)
 # LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
