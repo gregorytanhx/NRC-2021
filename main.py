@@ -333,39 +333,24 @@ def collectBlue():
 def depositBattery(side = 1):
   pass
 
-def solarPanels():
-  
-  # linetrack to intersection
-  LineTrack.move(colLeft, 40, condition = lambda: colRight.reflection() > 15)
-  base.reset()
-  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 90)
-  base.hold()
-  
-  GyroTurn.turn(90)
-  gyro.reset_angle(0)
-    
+def collectYellow():
   # push solar panels
   base.reset()
-  LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 600)
-  base.hold()
-   
-  GyroStraight.move(30, condition = lambda: colLeft.reflection() > 15 and colRight.reflection() > 15)
-  GyroStraight.move(30, condition = lambda: colLeft.reflection() < 80 and colRight.reflection() < 80)
-  GyroStraight.move(30, condition = lambda: colLeft.reflection() > 76 and colRight.reflection() > 76)
-  base.hold()
-   
-  # reverse until black line intersection and turn toward house 1
-  GyroStraight.move(-40, condition = lambda: colLeft.reflection() > 15 and colRight.reflection() > 15)
-  base.hold()
+  frontClaw.reset(1500)
+  frontClaw.run_target(-50, -400)
+  frontClaw.hold()
+  LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 200)
+  GyroStraight.move(40, condition = lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
   base.reset()
-  GyroStraight.move(-60, condition = lambda: leftMotor.angle() > -630)
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 100)
   base.hold()
+  frontClaw.reset(1500, dir = -1, speed = 40)
   GyroTurn.turn(-90)
-
-  LineTrack.move(colRight, 50, side = -1, condition = lambda: colLeft.reflection() > 15)
   base.reset()
-  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 90)
-  base.hold()
+  LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 500)
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 600)
+  GyroTurn.turn(90)
+  GyroStraight
   
 def main():
   surplus = None
@@ -507,7 +492,8 @@ def main():
   # go back to base
   returnBase()
 
-frontClaw.defaultPos()
+collectYellow()
+wait(1000)
 # base.reset()
 # LineTrack.move(colRight, 70, side = -1,  condition = lambda: leftMotor.angle() < 500)
 # LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
