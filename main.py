@@ -289,10 +289,18 @@ def depositHouse(house, time, houseNum):
     
     if numCol == 4 and tmp == 1:
       GyroStraight.move(30, condition = lambda: leftMotor.angle() < 50) 
-      numCol -= 2       
+      if RingCol == Color.GREEN:
+        numGreen -= 2
+      else:
+        numBlue -= 2
     else:
       GyroStraight.move(30, condition = lambda: leftMotor.angle() < 100)
-      numCol -= 4
+      if RingCol == Color.GREEN:
+        numGreen -= 4
+      else:
+        numBlue -= 4
+        
+
     base.hold()
     backClaw.run_target(40, 140)
 
@@ -343,8 +351,12 @@ def collectBlue():
   base.hold()
   backClaw.run_target(50, 90)
     
-def depositBattery(side = 1):
+def depositBatteryFront():
   pass
+
+def depositBatteryBack():
+  pass
+  
 
 def collectYellow():
   # push solar panels
@@ -394,6 +406,16 @@ def collectYellow():
   GyroTurn.turn(90)
   GyroStraight.move(60, condition=lambda: colRight.color() != Color.BLACK)
   base.hold()
+  
+def getExtra():
+  cols = {Color.YELLOW: 0, Color.GREEN: 0, Color.BLUE: 0}
+  for house in Houses:
+    for col in house:
+      cols[col] += 1
+  
+  for key in cols:
+    if cols[key] == 1:
+      return key
   
 def main():
   surplus = None
@@ -515,8 +537,12 @@ def main():
   GyroStraight.move(40, condition = lambda: colLeft.reflection() > 76)
   base.hold()
   depositHouse(Houses[2], 1, 3)
+
   # always deposit two surplus into battery storage from claw, deposit any remaining green
-  depositBattery()
+  extraCol = getExtra()
+  depositBatteryFront()
+  if extraCol == Color.GREEN:
+    depositBatteryBack()
   
   # collect yellow and blue energy
   collectBlue()  
@@ -525,7 +551,10 @@ def main():
     depositHouse(Houses[2], 2, 3)
   
   # based on houses, determine which energy is extra and deposit it
-  depositBattery()
+  if extraCol == Color.YELLOW:
+    depositBatteryFront()
+  elif extraCol == Color.BLUE:
+    depositBatteryBack()
   
   # clear remaining houses 
   if Color.BLUE or Color.YELLOW in Houses[1]:
@@ -536,8 +565,15 @@ def main():
     
   # go back to base
   returnBase()
+  
+# base.reset()
+# LineTrack.move(colRight, 50, condition=lambda: leftMotor.angle() < 400)
+# base.hold()
+# GyroStraight.move(40, condition = lambda: colRight.color() != Color.BLACK or colLeft.color() != Color.BLACK)
+print(min([Color.BLUE, Color.YELLOW, Color.BLUE, Color.GREEN, Color.YELLOW]))
 
-depositHouse([Color.GREEN, Color.BLUE], 1, 1)
+
+
 # base.reset()
 # LineTrack.move(colRight, 70, side = -1,  condition = lambda: leftMotor.angle() < 500)
 # LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
