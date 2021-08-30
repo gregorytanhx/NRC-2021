@@ -43,7 +43,7 @@ class BackClaw(Claw):
     super().__init__(port)
     
   def mid(self):
-    self.run_target(-50, -200)
+    self.run_target(-50, -190)
     
   def defaultPos(self):
     self.run_time(50, 1000)

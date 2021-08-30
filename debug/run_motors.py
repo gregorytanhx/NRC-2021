@@ -24,7 +24,6 @@ pressed = False
 clock = StopWatch()
 lastPressedTime = 0
 while True:
-
   buttons = ev3.buttons.pressed()
 
   if Button.LEFT in buttons:
