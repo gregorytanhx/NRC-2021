@@ -140,14 +140,10 @@ def PID_AngleOffSet(base, gyro, angle):
     
 
 def PID_LineSquare(base, threshold = 50, direction = 1, leeway = 4): # direction = 1 for forward, direction = -1 for backwar
-  if direction == 1:
-    kp = 0.12
-    ki = 0.0005
-    kd = 0.6
-  else:
-    kp = 0.12
-    ki = 0.0002
-    kd = 0.7
+  kp = 0.12
+  ki = 0.0005
+  kd = 0.5
+
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   while True:

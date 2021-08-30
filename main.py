@@ -99,15 +99,14 @@ def checkSurplus(degrees):
   return False
 
 def collectSurplus(degrees, col):
-  # align robot using surplus
   base.reset()
   frontClaw.reset(1500)
   if col != Color.BLUE:
-    GyroStraight.move(-30, condition = lambda: leftMotor.angle() > -250)
+    GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -250)
     GyroTurn.turn(90)
     gyro.reset_angle(0)
 
-  GyroStraight.move(-30, condition = lambda: colRight.reflection() > 40)
+  GyroStraight.move(-40, condition = lambda: colRight.color() != Color.WHITE)
   base.hold()
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
@@ -337,7 +336,6 @@ def collectBlue():
   base.hold()
   backClaw.run_target(50, 90)
     
-  
 def depositBattery(side = 1):
   pass
 
@@ -491,13 +489,12 @@ def main():
   base.hold()
   GyroTurn.turn(90)
   
-  scanHouse3(Houses[2], ev3Col, 50)
+  scanHouseEV3(Houses[2], ev3Col, 50)
   depositHouse(Houses[2], 1, 3)
   # always deposit two surplus into battery storage from claw, deposit any remaining green
   depositBattery()
   
   # collect yellow and blue energy
-
   collectBlue()  
   collectYellow()
   if Color.YELLOW or Color.BLUE in Houses[2]:
@@ -516,16 +513,24 @@ def main():
   # go back to base
   returnBase()
 
-
-gyro.reset_angle(0)
-GyroStraight.move(-50, condition = lambda: colRight.reflection() < 80)
+LineTrack.move(colLeft, 50, condition = lambda: colRight.color() != Color.BLACK)
 base.reset()
+LineTrack.move(colLeft, 50, condition = lambda: leftMotor.angle() < 100)
+base.hold()
+GyroTurn.turn(90)
+LineTrack.move(colRight, 50, condition = lambda: colLeft.color() != Color.RED)
+base.hold()
+base.reset()
+GyroTurn.move(-40, condition = lambda: leftMotor.angle() > -150)
 base.hold()
 GyroTurn.turn(-90)
-LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
-LineTrack.move(colRight, 70, side = -1, condition = lambda: colLeft.color() != Color.WHITE)
+GyroStraight.move(-40, condition = lambda: colLeft.color() != Color.WHITE)
+PID_LineSquare(base, direction = -1)
+gyro.reset_angle(0)
+base.reset()
+GyroStraight.move(-50, condition = lambda: leftMotor.angle() > -300)
 base.hold()
-wait(1000)
+scanHouseEV3(Houses[2], ev3Col, 50, lambda: colLeft.reflection() > 15)
 
 
 # base.reset()
