@@ -32,6 +32,7 @@ rightMotor =  Motor(Port.C)
 # initialise sensors
 
 ev3Col = Ev3devSensor(Port.S1)
+ev3ColSensor = ColorSensor(Port.S1)
 gyro = GyroSensor(Port.S2)
 colLeft = ColorSensor(Port.S3)
 colRight = ColorSensor(Port.S4)
@@ -89,21 +90,22 @@ def checkSurplus(degrees):
   kp, ki, kd = GyroStraight.kp, GyroStraight.ki, GyroStraight.kd
   gyroPID = PID(kp, ki, kd)
   base.reset()
+  detected = False
   while leftMotor.angle() >= degrees:
-    r, g, b = ev3Col.read('RGB-RAW')
+    # r, g, b = ev3Col.read('RGB-RAW')
     gyroPID.update(gyro.angle(), kp, ki, kd)
     base.run(speed - gyroPID.correction, speed + gyroPID.correction)
-    if (r + g + b) > 20:
-      return True
-
-  return False
+    if ev3ColSensor.reflection() > 0:
+      detected = True
+  base.hold()
+  return detected
 
 def collectSurplus(degrees, col):
   base.reset()
   frontClaw.run_target(60, 200)
   frontClaw.reset(1500)
   if col != Color.BLUE:
-    GyroStraight.move(-30, condition = lambda: leftMotor.angle() > -250)
+    GyroStraight.move(-30, condition = lambda: leftMotor.angle() > -245)
     GyroTurn.turn(90)
     gyro.reset_angle(0)
 
@@ -118,13 +120,11 @@ def collectSurplus(degrees, col):
   GyroStraight.move(30, condition = lambda: leftMotor.angle() < degrees)
   base.hold()
   # grab front surplus using claw
-  frontClaw.run_target(-40, -410)
-  # frontClaw.run_target(-40, -600)
-  # base.reset()
-  # GyroStraight.move(40, condition = lambda: leftMotor.angle() < 200)
-
-  # base.hold()
-  # frontClaw.run_target(40, 190)
+  frontClaw.run_target(-40, -700)
+  base.reset()
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 350)
+  base.hold()
+  frontClaw.run_target(40, 280)
   
 def collectGreen():  
   backClaw.run_time(100, 1200, wait = False)
@@ -445,7 +445,7 @@ def main():
   LineTrack.move(colRight, 60, side = -1, condition = lambda: colLeft.color() != Color.BLACK)   
   base.hold()
   base.reset()
-  GyroStraight.move(50, condition = lambda: leftMotor.angle() < 290)
+  GyroStraight.move(50, condition = lambda: leftMotor.angle() < 305)
   base.hold()
   GyroTurn.turn(-90)
   
@@ -460,9 +460,9 @@ def main():
   
   # if yellow surplus is present, collect it 
   # move toward green energy
-  if checkSurplus(-140):
+  if checkSurplus(-100):
     surplus = Color.YELLOW
-    collectSurplus(380, Color.YELLOW)
+    collectSurplus(200, Color.YELLOW)
     base.reset()
     GyroStraight.move(-40, condition = lambda: colRight.color() != Color.BLACK)
     base.hold()
@@ -596,6 +596,7 @@ def main():
 frontClaw.reset(1500, dir = -1)
 backClaw.reset(1000)
 main()
+
 #PID_SingleMotorTurn(leftMotor, gyro, -90, direction = -1)
 
 #
