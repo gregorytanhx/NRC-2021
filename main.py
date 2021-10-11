@@ -481,9 +481,9 @@ def main():
   
   # collect green surplus if present, else go collect blue surplus
   if surplus is None:
-    if checkSurplus(-200):
+    if checkSurplus(-100):
       surplus = Color.GREEN
-      collectSurplus(210, Color.GREEN)
+      collectSurplus(30, Color.GREEN)
       PID_SingleMotorTurn(leftMotor, gyro, -90, direction = -1)
       base.hold()  
       wait(1000)
@@ -498,7 +498,7 @@ def main():
       GyroStraight.move(-30, condition = lambda: leftMotor.angle() > -150)
       base.hold()
       GyroTurn.turn(-90)
-      collectSurplus(610, Color.BLUE)
+      collectSurplus(430, Color.BLUE)
 
       GyroStraight.move(-60, condition = lambda: colLeft.color() != Color.WHITE)
       base.hold()
