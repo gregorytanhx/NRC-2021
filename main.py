@@ -42,7 +42,7 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 # set up defaults for PID functions
 LineTrack = PID_LineTrack(base, 0.16, 0, 5, 50)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
-GyroTurn = PID_GyroTurn(base, 0.9, 0.0002, 2.4, gyro)
+GyroTurn = PID_GyroTurn(base, 1.0, 0.0002, 2.3, gyro)
 
 # battery alert
 print(ev3.battery.voltage())
@@ -105,7 +105,7 @@ def collectSurplus(degrees, col):
   frontClaw.run_target(60, 200)
   frontClaw.reset(1500)
   if col != Color.BLUE:
-    GyroStraight.move(-30, condition = lambda: leftMotor.angle() > -245)
+    GyroStraight.move(-30, condition = lambda: leftMotor.angle() > -160)
     GyroTurn.turn(90)
     gyro.reset_angle(0)
 
@@ -124,7 +124,7 @@ def collectSurplus(degrees, col):
   base.reset()
   GyroStraight.move(40, condition = lambda: leftMotor.angle() < 350)
   base.hold()
-  frontClaw.run_target(40, 280)
+  frontClaw.run_target(30, 220)
   
 def collectGreen():  
   backClaw.run_time(100, 1200, wait = False)
@@ -473,7 +473,7 @@ def main():
 
   else:
     gyro.reset_angle(0)
-    GyroTurn.turn(180)
+    GyroTurn.turn(179)
     PID_AngleOffSet(base, gyro, 30)
     
   # collect green energy
