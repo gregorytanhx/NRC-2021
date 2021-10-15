@@ -558,14 +558,13 @@ def main():
     
   else:
     # TO DO add movement from blue surplus to house 2
-    PID_SingleMotorTurn()
+    PID_SingleMotorTurn(rightMotor, gyro, 89)
     
-  scanHouseEV3(Houses[1], ev3Col, 50)  
-  GyroStraight.move(40, condition = lambda: colLeft.reflection() > 76)
+  scanHouseEV3(Houses[1], ev3Col, 50, colRight.color() != Color.BLACK)  
+  base.reset()
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 150)
   base.hold()
   
-    
-    
   if Color.GREEN in Houses[0] or len(Houses[0]) == 1:
     depositHouse(Houses[1], 1, 2)
   else:
@@ -592,7 +591,8 @@ def main():
   GyroStraight.move(-50, condition = lambda: leftMotor.angle() > -300)
   base.hold()
   scanHouseEV3(Houses[2], ev3Col, 50, lambda: colLeft.Color() != Color.BLACK)
-  GyroStraight.move(40, condition = lambda: colLeft.reflection() > 76)
+  base.reset()
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 150)
   base.hold()
   
   if Color.GREEN in Houses[0] or len(Houses[0]) == 1:
