@@ -117,16 +117,16 @@ class PID_GyroTurn(PID_GyroStraight):
     self.gyro.reset_angle(0)
     
       
-def PID_SingleMotorTurn(motor, gyro, angle, kp = 1.1, ki = 0.00001, kd = 2.5, minSpeed = 25, direction = 1, reset = True):
+def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 1.1, ki = 0.00001, kd = 2, minSpeed = 20, direction = 1, reset = True):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle) * direction
     pid.update(error, kp, ki, kd)
     if abs(pid.correction) < minSpeed:
-      motor.run(CorrectSpeed(minSpeed * (pid.correction / abs(pid.correction))))
+      base.run(-minSpeed * (pid.correction / abs(pid.correction)) * leftM, minSpeed * (pid.correction / abs(pid.correction)) * rightM)
     else:
-      motor.run(CorrectSpeed(pid.correction))
-  motor.hold()
+      base.run(-pid.correction * leftM, pid.correction * rightM)
+  base.hold()
   if reset:
     gyro.reset_angle(0)
 
