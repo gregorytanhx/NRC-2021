@@ -40,7 +40,7 @@ colRight = ColorSensor(Port.S4)
 base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
-LineTrack = PID_LineTrack(base, 0.2, 0, 5, 50)
+LineTrack = PID_LineTrack(base, 0.16, 0, 5, 50)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
 GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.5, gyro)
 
@@ -393,10 +393,11 @@ def collectBlue():
 def depositBatteryFront():
   frontClaw.run_target(-50, -300)
   base.reset()
-  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 230)
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 165)
   base.hold()
   frontClaw.run_target(50, 300)
-  GyroStraight.move(-40, condition = lambda: colRight.color() != Color.BLACK or colLeft.color() != Color.BLACK)
+  
+  GyroStraight.move(-10, condition = lambda: colRight.color() != Color.BLACK or colLeft.color() != Color.BLACK)
   base.hold()
 
 def depositBatteryBack():
@@ -415,7 +416,7 @@ def collectYellow():
   # push solar panels
   base.reset()
   frontClaw.reset(1500)
-  frontClaw.run_target(-40, -425)
+  frontClaw.run_target(-40, -430)
   frontClaw.hold()
   LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 200)
   base.hold()
@@ -590,7 +591,6 @@ def main():
     base.hold()
     
   else:
-    # TO DO add movement from blue surplus to house 2
     PID_SingleMotorTurn(rightMotor, gyro, 89)
     
   scanHouseEV3(Houses[1], ev3Col, 50, colRight.color() != Color.BLACK)  
@@ -598,7 +598,8 @@ def main():
   GyroStraight.move(40, condition = lambda: leftMotor.angle() < 150)
   base.hold()
   
-  if Color.GREEN in Houses[0] or len(Houses[0]) == 1:
+  # deposit at house 2 
+  if Color.GREEN in Houses[1] or len(Houses[1]) == 1:
     depositHouse(Houses[1], 1, 2)
   else:
     GyroTurn.turn(-89)
@@ -628,7 +629,9 @@ def main():
   GyroStraight.move(40, condition = lambda: leftMotor.angle() < 150)
   base.hold()
   
-  if Color.GREEN in Houses[0] or len(Houses[0]) == 1:
+  # deposit at house 3
+  if Color.GREEN in Houses[2] or len(Houses[2]) == 1:
+    GyroTurn.turn(-89)
     depositHouse(Houses[2], 1, 3)
   else:
     GyroTurn.turn(-89)
@@ -637,26 +640,66 @@ def main():
   base.hold()
   
   # always deposit two surplus into battery storage from claw, deposit any remaining green
+  # based on houses, determine which energy is extra  
   extraCol = getExtra()
   depositBatteryFront()
   if extraCol == Color.GREEN:
     depositBatteryBack()
+    GyroTurn.turn(-89)
+  else:
+    # single motor turn to avoid hitting wall of battery area
+    base.reset()
+    GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -80)
+    base.hold()
+    PID_SingleMotorTurn(base, gyro, 89, 1, 0)
+    
+  LineTrack.move(colLeft, 60, condition = lambda: colRight.color() != Color.BLACK)
+  base.hold()
+  base.reset()
+  LineTrack.move(colLeft, 40, condition = lambda: leftMotor.angle() < 90)
+  base.hold()
+  GyroTurn.turn(89)
   
   # collect yellow and blue energy
-  collectBlue()  
   collectYellow()
-  if Color.YELLOW or Color.BLUE in Houses[2]:
-    depositHouse(Houses[2], 2, 3)
+  collectBlue()  
+ 
+  # deposit at house 3 again
   
-  # based on houses, determine which energy is extra and deposit it
+  GyroStraight.move(60, condition = lambda: colRight.color() != Color.BLACK or colLeft.color() != Color.BLACK)
+  base.reset()
+  GyroStraight.move(40, condition = lambda: leftMotor.angle() < 150)
+  base.hold()
+  
+ 
+  if Color.YELLOW or Color.BLUE in Houses[2]:
+    GyroTurn.turn(89)
+    # add condition to turn based on whether blue is in the house
+    depositHouse(Houses[2], 2, 3)
+  else:
+    GyroTurn.turn(-89)
+    
+  LineTrack.move(colRight, 40, side = -1, condition =  lambda: colLeft.color() != Color.BLACK)
+  base.hold()
+  turnMult = 1
   if extraCol == Color.YELLOW:
     depositBatteryFront()
   elif extraCol == Color.BLUE:
     depositBatteryBack()
+    turnMult = -1
+
+  if Color.BLUE or Color.YELLOW in Houses[1]:
+    GyroTurn.turn(-89 * turnMult)
+    
+    depositHouse(Houses[1], 2, 2)
+  elif Color.BLUE or Color.YELLOW in Houses[0]:
+    GyroTurn.turn(89 * turnMult)
+    
+  
+
   
   # clear remaining houses 
-  if Color.BLUE or Color.YELLOW in Houses[1]:
-    depositHouse(Houses[1], 2, 2)
+  
     
   if Color.BLUE or Color.YELLOW in Houses[0]:
     depositHouse(Houses[0], 2, 1)
@@ -674,4 +717,5 @@ def main():
 # base.hold()
 # GyroTurn.turn(89)
 # wait(1000)
-collectYellow()
+
+wait(1000)
