@@ -681,28 +681,50 @@ def main():
     
   LineTrack.move(colRight, 40, side = -1, condition =  lambda: colLeft.color() != Color.BLACK)
   base.hold()
-  turnMult = 1
+ 
   if extraCol == Color.YELLOW:
     depositBatteryFront()
   elif extraCol == Color.BLUE:
     depositBatteryBack()
-    turnMult = -1
 
   if Color.BLUE or Color.YELLOW in Houses[1]:
-    GyroTurn.turn(-89 * turnMult)
-    
+    if extraCol == Color.YELLOW:
+      GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -80)
+      base.hold()
+      PID_SingleMotorTurn(base, gyro, 89, 1, 0)
+    elif extraCol == Color.BLUE:
+      GyroTurn.turn(89)
+    base.reset()      
+    LineTrack.move(colRight, 45, side = -1, condition = lambda: leftMotor.angle() < 700)
+    base.hold()
+    GyroTurn.turn(89)
+ 
     depositHouse(Houses[1], 2, 2)
+    
+    LineTrack.move(colRight, 60, side = -1, condition = lambda: colRight.color() != Color.BLACK)
+    LineTrack.move(colRight, 60, side = -1, condition = lambda: colRight.color() != Color.WHITE)
+    
+    
   elif Color.BLUE or Color.YELLOW in Houses[0]:
-    GyroTurn.turn(89 * turnMult)
-    
-  
-
-  
-  # clear remaining houses 
-  
-    
+    if extraCol == Color.YELLOW:
+      GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -80)
+      base.hold()
+      PID_SingleMotorTurn(base, gyro, -89, 1, 0)
+    elif extraCol == Color.BLUE:
+      GyroTurn.turn(-89)
+      
+  LineTrack.move(colRight, 60, side = -1, condition = lambda: colRight.color() != Color.BLACK)
   if Color.BLUE or Color.YELLOW in Houses[0]:
+    base.reset()
+    LineTrack.move(colRight, 50, side = -1, condition = lambda: leftMotor.angle() < 700)
+    base.hold()
+    GyroTurn.turn(-89)
     depositHouse(Houses[0], 2, 1)
+  else:
+    LineTrack.move(colRight, 60, side = -1, condition = lambda: colRight.color() != Color.WHITE)
+    LineTrack.move(colRight, 60, side = -1, condition = lambda: colRight.color() != Color.BLACK)
+
+
     
   # go back to base
   returnBase()
