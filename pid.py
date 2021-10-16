@@ -87,14 +87,18 @@ class PID_GyroStraight(PID):
            condition = lambda: True,
            target = 0, 
            maxSpeed = 100,
+           minSpeed = 0,
            reset = True):
     while condition():
       error = self.gyro.angle() - target
       self.update(error, kp, ki, kd)
       if abs(self.correction) > maxSpeed:
         self.correction = maxSpeed * self.correction/abs(self.correction)
+      if abs(self.correction) < minSpeed:
+        self.correction = minSpeed * self.correction/abs(self.correction)
       
       self.base.run(speed - self.correction, speed + self.correction)
+
   
 class PID_GyroTurn(PID_GyroStraight):  
   def __init__(self,
@@ -112,7 +116,7 @@ class PID_GyroTurn(PID_GyroStraight):
     self.gyro.reset_angle(0)
     self.resetIntegral()
     
-    self.move(0, kp, ki, kd, target = angle, condition= lambda: self.gyro.angle() != angle, maxSpeed = self.maxSpeed)
+    self.move(0, kp, ki, kd, target = angle, condition= lambda: self.gyro.angle() != angle, maxSpeed = self.maxSpeed, minSpeed = 5)
     self.base.hold()
     self.gyro.reset_angle(0)
     

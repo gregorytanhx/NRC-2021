@@ -42,7 +42,7 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 # set up defaults for PID functions
 LineTrack = PID_LineTrack(base, 0.2, 0, 5, 50)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
-GyroTurn = PID_GyroTurn(base, 1.1, 0.0001, 2, gyro)
+GyroTurn = PID_GyroTurn(base, 1.1, 0.0003, 1.5, gyro)
 
 # battery alert
 print(ev3.battery.voltage())
@@ -660,7 +660,5 @@ def main():
   # go back to base
   returnBase()
   
-
-
 
 collectBlue()
