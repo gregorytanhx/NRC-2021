@@ -18,13 +18,15 @@ class Claw:
     self.motor.reset_angle(0)
     self.motor.run_target(CorrectSpeed(speed), angle, wait = wait)
   
+  def run_angle(self, speed, angle, wait = True):
+    self.motor.reset_angle(0)
+    self.motor.run_angle(CorrectSpeed(speed), angle, wait = wait)
+    
   def run_time(self, speed, time, wait = True):
     self.motor.run_time(CorrectSpeed(speed), time, wait = wait)    
   
-  def reset(self, time, dir = 1, speed = 50):
+  def dc(self, dir = 1, speed = 50):
     self.motor.dc(speed * dir)
-    wait(time)
-    self.motor.hold()
     
   def hold(self):
     self.motor.hold()
