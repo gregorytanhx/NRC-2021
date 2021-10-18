@@ -37,8 +37,13 @@ class FrontClaw(Claw):
     self.closeDist = -460
     
   def defaultPos(self):
-    self.reset(2000)
+    self.reset()
     self.run_target(-50, self.closeDist, wait=False)
+  
+  def reset(self, dir = 1, deg = 700):
+    self.run_angle(100 * dir, deg)
+    self.dc(dir = dir)
+
 
 class BackClaw(Claw):
   def __init__(self, port: Port):

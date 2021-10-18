@@ -229,7 +229,8 @@ def depositHouse(house, time, houseNum):
       
       if tmp == 2:
         # deposit both yellow
-        frontClaw.reset(1000)
+        frontClaw.dc()
+        wait(1000)
         LineTrack.move(colRight, 50, condition = lambda: colLeft.color() != Color.RED)
         base.hold()
       
@@ -363,9 +364,10 @@ def collectBlue():
   base.reset()
   GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -40)
   base.hold()
-  backClaw.reset(500, speed = 80)
+  backClaw.dc(speed = 80)
   PID_LineSquare(base)
   gyro.reset_angle(0)
+  
   
   # collect blue energy
   GyroStraight.move(-40, condition =  lambda: colRight.color() != Color.WHITE)
@@ -420,7 +422,7 @@ def depositBatteryBack():
 def collectYellow():
   # push solar panels
   base.reset()
-  frontClaw.reset(1500)
+  frontClaw.reset()
   frontClaw.run_target(-40, -430)
   frontClaw.hold()
   LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 200)
@@ -432,7 +434,7 @@ def collectYellow():
   GyroStraight.move(20, condition = lambda: leftMotor.angle() < 80)
   base.hold()
   frontClaw.run_target(40, 100)
-  frontClaw.reset(1500, dir = -1, speed = 60)
+  frontClaw.reset(dir = -1, deg = 500)
   
   # track to first 2 yellow and grab with claw
   GyroTurn.turn(-89)
@@ -440,7 +442,7 @@ def collectYellow():
   LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 500)
   GyroStraight.move(40, condition = lambda: leftMotor.angle() < 600)
   base.hold()
-  frontClaw.reset(1500)
+  frontClaw.reset()
   GyroTurn.turn(89)
   base.reset()
   GyroStraight.move(20, condition = lambda: leftMotor.angle() < 40)
@@ -735,10 +737,10 @@ def main():
   returnBase()
   
 
-# frontClaw.dc(dir=-1)
-# backClaw.dc()
-# wait(1000)
-# main()
+frontClaw.dc(dir=-1)
+backClaw.dc()
+wait(1000)
+main()
 # GyroStraight.move(50, condition = lambda: colRight.color() != Color.BLACK)
 # base.hold()
 # base.reset()
@@ -751,9 +753,7 @@ def main():
 # base.reset()
 # LineTrack.move(colRight, 40, side = -1, condition = lambda: leftMotor.angle() < 200)
 # base.hold()
+frontClaw.reset(dir = -1, deg = 500)
 
-# frontClaw.dc(dir=-1)
-# wait(1300)
-frontClaw.run_angle(100, 700)
-# frontClaw.dc()
-# wait(500)
+wait(1000)
+
