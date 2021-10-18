@@ -144,9 +144,9 @@ def PID_AngleOffSet(base, gyro, angle):
     
 
 def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 3): # direction = 1 for forward, direction = -1 for backwar
-  kp = 0.16
-  ki = 0.0002
-  kd = 0.5
+  kp = 0.15
+  ki = 0.0005
+  kd = 0.45
 
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
