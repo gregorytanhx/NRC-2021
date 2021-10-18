@@ -183,6 +183,8 @@ def collectGreen():
   GyroTurn.maxSpeed = 40
   
 def depositHouse(house, time, houseNum):
+  # TO DO 
+  # add variable degree for cases when bot starts closer to house
   global numGreen, numBlue, numYellow, numSurplus
   
   if time == 1:
@@ -419,7 +421,7 @@ def collectYellow():
 
   frontClaw.dc()
   wait(1500)
-  frontClaw.run_target(-40, -430)
+  frontClaw.run_target(-40, -440)
   frontClaw.hold()
   base.reset()
   LineTrack.move(colRight, 40, condition = lambda: leftMotor.angle() < 300)
@@ -427,6 +429,8 @@ def collectYellow():
   GyroStraight.move(15, condition = lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
   GyroStraight.move(15, condition = lambda: colLeft.color() != Color.WHITE or colRight.color() != Color.WHITE)
   base.reset()
+  
+  frontClaw.run_target(40, 10)
   GyroStraight.move(15, condition = lambda: leftMotor.angle() < 50)
   base.hold()
   wait(100)
