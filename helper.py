@@ -37,7 +37,8 @@ class FrontClaw(Claw):
     self.closeDist = -460
     
   def defaultPos(self):
-    self.reset()
+    self.dc()
+    wait(1500)
     self.run_target(-50, self.closeDist, wait=False)
   
   def reset(self, dir = 1, deg = 700):
