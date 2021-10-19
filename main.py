@@ -599,18 +599,18 @@ def main():
   if surplus != Color.BLUE:
     LineTrack.move(colRight, 50, side = -1, condition = lambda: colLeft.color() != Color.BLACK)
     base.reset()
-    LineTrack.move(colRight, 50, side = -1, condition = lambda: leftMotor.angle() < 650)
+    LineTrack.move(colRight, 50, side = -1, condition = lambda: leftMotor.angle() < 700)
     base.hold()
     PID_AngleOffSet(base, gyro, 80)
     base.hold()
     GyroStraight.move(-40, condition = lambda: colLeft.color() != Color.WHITE)
-    
     base.hold()
     PID_LineSquare(base, direction = -1)
     gyro.reset_angle(0)
     base.reset()
     GyroStraight.move(-50, condition = lambda: leftMotor.angle() > -300)
     base.hold()
+    wait(10)
     
   else:
     PID_SingleMotorTurn(base, gyro, 89, 0, 1)
@@ -764,5 +764,16 @@ def main():
 # wait(1500)
 # main()
 
+GyroStraight.move(-40, condition = lambda: colLeft.color() != Color.BLACK)
+base.hold()
+base.reset()
+GyroStraight.move(30, condition = lambda: leftMotor.angle() < 50)
+base.hold()
+PID_LineSquare(base, direction = -1)
+gyro.reset_angle(0)
+base.reset()
+GyroStraight.move(30, condition = lambda: leftMotor.angle() < 200)
+base.hold()
+wait(1000)
 
 # ADD 3 HOLE BEAMS TO BUMPER

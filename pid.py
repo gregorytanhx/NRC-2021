@@ -137,9 +137,11 @@ def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 1.1, ki = 0.00001
 def PID_AngleOffSet(base, gyro, angle):
   if angle > 0:
     PID_SingleMotorTurn(base, gyro, angle, 1, 0, reset = False)
+    wait(50)
     PID_SingleMotorTurn(base, gyro, 0, 0, 1)
   else:
     PID_SingleMotorTurn(base, gyro, angle, 0, 1,reset = False)
+    wait(50)
     PID_SingleMotorTurn(base, gyro, 0, 1, 0)
     
 
@@ -147,7 +149,7 @@ def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 3): # direction
   kp = 0.13
   ki = 0.0002
   kd = 0.2
-
+  wait(10)
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   while True:
