@@ -54,11 +54,12 @@ class PID_LineTrack(PID):
   def move(self, 
            sensor: ColorSensor,
            speed: float, 
+           condition, 
            threshold: int = None, 
            kp: float = None, 
            ki: float = None, 
-           kd: float = None, side = 1, 
-           condition = lambda: True,
+           kd: float = None, 
+           side = 1, 
            reset = True):
     # update control constants if given
     if threshold is None:
@@ -81,10 +82,10 @@ class PID_GyroStraight(PID):
     
   def move(self, 
            speed: float, 
+           condition,
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
-           condition = lambda: True,
            target = 0, 
            maxSpeed = 100,
            minSpeed = 0,
@@ -116,7 +117,7 @@ class PID_GyroTurn(PID_GyroStraight):
     self.gyro.reset_angle(0)
     self.resetIntegral()
     
-    self.move(0, kp, ki, kd, target = angle, condition= lambda: self.gyro.angle() != angle, maxSpeed = self.maxSpeed, minSpeed = 5)
+    self.move(0, kp, ki, kd, lambda: self.gyro.angle() != angle, target = angle, maxSpeed = self.maxSpeed, minSpeed = 5)
     self.base.hold()
     self.gyro.reset_angle(0)
     
