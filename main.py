@@ -126,7 +126,7 @@ def collectSurplus(degrees, col):
   base.reset()
   GyroStraight.move(40, condition = lambda: leftMotor.angle() < 350)
   base.hold()
-  frontClaw.run_target(30, 220)
+  frontClaw.run_target(30, 215)
   
 def collectGreen():  
   backClaw.run_time(100, 1200, wait = False)
@@ -319,7 +319,7 @@ def depositHouse(house, time, houseNum):
       GyroStraight.move(40, condition = lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
       base.hold()
       base.reset()
-      GyroStraight.move(40, condition = lambda: leftMotor.angle() < 90)
+      GyroStraight.move(40, condition = lambda: leftMotor.angle() < 110)
       base.hold()
       if houseNum == 1:
         GyroTurn.turn(89)
@@ -629,9 +629,8 @@ def main():
     base.reset()
     LineTrack.move(colLeft, 40, condition = lambda: leftMotor.angle() < 100)
     GyroTurn.turn(-89)
-    
-  
-  # move to house 3 and scan
+     
+  # move to house 3 
   LineTrack.move(colLeft, 50, condition = lambda: colRight.color() != Color.BLACK)
   base.reset()
   LineTrack.move(colLeft, 40, condition = lambda: leftMotor.angle() < 100)
@@ -646,6 +645,8 @@ def main():
   base.reset()
   GyroStraight.move(-40, condition = lambda: leftMotor.angle() > -50)
   base.hold()
+  
+  # scan house 3
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
   base.reset()
@@ -764,16 +765,19 @@ def main():
 # wait(1500)
 # main()
 
-GyroStraight.move(-40, condition = lambda: colLeft.color() != Color.BLACK)
+GyroStraight.move(40, condition = lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
 base.hold()
 base.reset()
-GyroStraight.move(30, condition = lambda: leftMotor.angle() < 50)
+GyroStraight.move(40, condition = lambda: leftMotor.angle() < 110)
 base.hold()
-PID_LineSquare(base, direction = -1)
-gyro.reset_angle(0)
+GyroTurn.turn(-89)
+LineTrack.move(colLeft, 50, condition = lambda: colRight.color() != Color.BLACK)
 base.reset()
-GyroStraight.move(30, condition = lambda: leftMotor.angle() < 200)
+LineTrack.move(colLeft, 40, condition = lambda: leftMotor.angle() < 100)
 base.hold()
+GyroTurn.turn(89)
 wait(1000)
 
+
 # ADD 3 HOLE BEAMS TO BUMPER
+# NEED TO FIX CLAW GRIP ISSUE 
