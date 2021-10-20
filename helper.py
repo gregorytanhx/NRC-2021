@@ -30,6 +30,7 @@ class Claw:
     
   def hold(self):
     self.motor.hold()
+    wait(10)
   
 class FrontClaw(Claw):
   def __init__(self, port: Port):

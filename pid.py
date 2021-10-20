@@ -117,7 +117,7 @@ class PID_GyroTurn(PID_GyroStraight):
     self.gyro.reset_angle(0)
     self.resetIntegral()
     
-    self.move(0, kp, ki, kd, lambda: self.gyro.angle() != angle, target = angle, maxSpeed = self.maxSpeed, minSpeed = 5)
+    self.move(0, lambda: self.gyro.angle() != angle, kp, ki, kd, target = angle, maxSpeed = self.maxSpeed, minSpeed = 5)
     self.base.hold()
     self.gyro.reset_angle(0)
     
@@ -150,7 +150,6 @@ def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 3): # direction
   kp = 0.13
   ki = 0.0002
   kd = 0.2
-  wait(10)
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   while True:

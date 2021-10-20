@@ -528,9 +528,9 @@ def main():
     GyroTurn.turn(-89)
     if checkSurplus(-170):
       surplus = Color.GREEN
-      collectSurplus(30, Color.GREEN)
+      collectSurplus(20, Color.GREEN)
       base.reset()
-      GyroStraight.move(-40, lambda: leftMotor.angle() > -60)
+      GyroStraight.move(-40, lambda: leftMotor.angle() > -80)
       base.hold()
     else:
       surplus = Color.BLUE
@@ -563,7 +563,7 @@ def main():
       LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.WHITE, side = -1)
     else:
       if surplus == Color.GREEN:
-        PID_SingleMotorTurn(base, gyro, -90, 1, 0)
+        PID_SingleMotorTurn(base, gyro, -89, 1, 0)
         base.hold()  
       elif surplus == Color.YELLOW:
         GyroTurn.turn(-89)
@@ -586,8 +586,7 @@ def main():
   else:
     # turn to face house 2 from green surplus area if not blue surplus
     if surplus == Color.GREEN:
-      PID_SingleMotorTurn(base, gyro, 89, 0, 1)
-      base.hold()  
+      PID_SingleMotorTurn(base, gyro, 89, 1, 0.3)
     elif surplus == Color.YELLOW:
       base.reset()
       GyroStraight.move(40, lambda: leftMotor.angle() < 80)
@@ -764,19 +763,16 @@ def main():
 # backClaw.dc()
 # wait(1500)
 # main()
+GyroStraight.move(-40,  lambda: colLeft.color() != Color.BLACK)
+base.hold()
+base.reset()
+GyroStraight.move(40, lambda: leftMotor.angle() < 100)
+base.hold()
 
-GyroStraight.move(40, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
-base.hold()
-base.reset()
-GyroStraight.move(40, lambda: leftMotor.angle() < 110)
-base.hold()
-GyroTurn.turn(-89)
-LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK)
-base.reset()
-LineTrack.move(colLeft, 40, lambda: leftMotor.angle() < 100)
-base.hold()
-GyroTurn.turn(89)
+PID_SingleMotorTurn(base, gyro, 89, 1, 0.3)
 wait(1000)
+
+
 
 
 # ADD 3 HOLE BEAMS TO BUMPER
