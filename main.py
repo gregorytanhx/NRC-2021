@@ -124,7 +124,7 @@ def collectSurplus(degrees, col):
   base.hold()
   
   # grab front surplus using claw
-  frontClaw.run_target(30, -700)
+  frontClaw.run_target(40, -700)
  
   base.reset()
   GyroStraight.move(40, lambda: leftMotor.angle() < 350)
@@ -789,9 +789,9 @@ frontClaw.dc(dir=-1)
 # main()
 
 wait(1500)
-collectSurplus(420, Color.BLUE)
+collectSurplus(422, Color.BLUE)
 
-GyroStraight.move(-50, lambda: colLeft.color() != Color.BLACK)
+GyroStraight.move(-60, lambda: colLeft.color() != Color.BLACK)
 base.hold()
 GyroStraight.move(40, lambda: colLeft.color() != Color.BLACK)
 base.hold()
@@ -802,13 +802,14 @@ base.hold()
 #test claw strength
 frontClaw.run_target(-30, -300)
 wait(1000)
-frontClaw.run_target(20, 300)
+frontClaw.run_target(30, 300)
 wait(1000)
 
 base.reset()
 GyroStraight.move(-50, lambda: leftMotor.angle() > -200)
 base.hold()
 wait(1000)
+frontClaw.run_target(40, 300)
 
 wait(10000)
 # ADD 3 HOLE BEAMS TO BUMPER
