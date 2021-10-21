@@ -175,7 +175,7 @@ def collectGreen():
   base.reset()
   # GyroStraight.move(30, lambda: leftMotor.angle() < 20)
   # base.hold()
-  backClaw.run_target(20, 80)
+  backClaw.run_target(20, 50)
   base.reset()
   GyroStraight.move(-30, lambda: leftMotor.angle() > -30)
   # base.hold(
@@ -186,18 +186,17 @@ def depositHouse(house, time, houseNum):
   # TO DO 
   # add variable degree for cases when bot starts closer to house
   global numGreen, numBlue, numYellow, numSurplus
-  
+  if houseNum == 1:
+    GyroTurn.turn(-89)
+  else:
+    GyroTurn.turn(89)
+    
   if time == 1:
     # first visit to house deposits surplus and green
     numCol = numGreen
     RingCol = Color.GREEN
     if len(house) == 1: # surplus to be deposited
       # only 2 surplus ever need to be deposited
-      
-      if houseNum == 1:
-        GyroTurn.turn(-89)
-      else:
-        GyroTurn.turn(89)
              
       # lift claw, move forward then reverse to deposit surplus from within catchment area
       frontClaw.run_target(-70, -300)
@@ -219,10 +218,6 @@ def depositHouse(house, time, houseNum):
       if len(house) == 2:
         if house[0] == Color.YELLOW and house[1] == Color.YELLOW:
           tmp = 2
-      if houseNum == 1:
-        GyroTurn.turn(-89)
-      if houseNum == 2:
-        GyroTurn.turn(89)
       
       if tmp == 2:
         # deposit both yellow
@@ -294,7 +289,7 @@ def depositHouse(house, time, houseNum):
       GyroStraight.move(-40, lambda: leftMotor.angle() > -50)
     base.hold()
     
-    backClaw.run_target(-20, -130)
+    backClaw.run_target(-20, -100)
 
     base.reset()
     # go more if 2 ring blocks have to be deposited
@@ -313,7 +308,7 @@ def depositHouse(house, time, houseNum):
 
     base.hold()
 
-    backClaw.run_target(20, 130)
+    backClaw.run_target(20, 100)
     GyroStraight.move(-40, lambda: leftMotor.angle() > 0)
     base.hold()
     if houseNum == 1 or houseNum == 2:
@@ -366,13 +361,13 @@ def collectBlue():
   gyro.reset_angle(0)
   
   
-  # collect blue energy
+  # collect first 2 blue energy
   GyroStraight.move(-40,  lambda: colRight.color() != Color.WHITE)
   base.hold()
   GyroTurn.turn(-89)
   backClaw.run_target(-50, -230)
   base.reset()
-  GyroStraight.move(-20, lambda: leftMotor.angle() > -80)
+  GyroStraight.move(-20, lambda: leftMotor.angle() > -90)
   base.hold()
   backClaw.run_target(-50, -30)
   base.reset()
@@ -382,6 +377,8 @@ def collectBlue():
   base.reset()
   GyroStraight.move(50, lambda: leftMotor.angle() < 95)
   base.hold()
+  
+  # collect next 2
   GyroTurn.turn(89)
   GyroStraight.move(40,  lambda: colRight.color() != Color.BLACK)
   base.reset()
@@ -469,6 +466,9 @@ def collectYellow():
   GyroStraight.move(40, lambda: leftMotor.angle() < 200)
   base.hold()
   frontClaw.run_target(30, 260)
+  base.reset()
+  GyroStraight.move(-40, lambda: leftMotor.angle() > -200)
+  base.hold()
   GyroTurn.turn(89)
   
 def getExtra():
@@ -548,7 +548,7 @@ def main():
       GyroStraight.move(-30, lambda: leftMotor.angle() > -120)
       base.hold()
       GyroTurn.turn(-89)
-      collectSurplus(430, Color.BLUE)
+      collectSurplus(435, Color.BLUE)
 
       GyroStraight.move(-60, lambda: colLeft.color() != Color.BLACK)
       base.hold()
@@ -565,8 +565,8 @@ def main():
       
       GyroTurn.turn(-89)
       gyro.reset_angle(0)
-      LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
-      LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.WHITE, side = -1)
+      LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1)
+      LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.WHITE, side = -1)
     else:
       GyroTurn.turn(-89)      
       
@@ -692,10 +692,10 @@ def main():
     base.hold()
     PID_SingleMotorTurn(base, gyro, 89, 1, 0)
     
-  LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK)
+  LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK)
   base.hold()
   base.reset()
-  LineTrack.move(colLeft, 40, lambda: leftMotor.angle() < 100)
+  LineTrack.move(colLeft, 40, lambda: leftMotor.angle() < 110)
   base.hold()
   GyroTurn.turn(89)
   
@@ -706,6 +706,7 @@ def main():
   # deposit at house 3 again
   
   GyroStraight.move(60, lambda: colRight.color() != Color.BLACK or colLeft.color() != Color.BLACK)
+  base.hold()
   base.reset()
   GyroStraight.move(40, lambda: leftMotor.angle() < 150)
   base.hold()
@@ -771,14 +772,17 @@ def main():
   returnBase()
     
     
-frontClaw.dc(dir=-1)
-backClaw.dc()
-wait(1500)
-frontClaw.hold()
-backClaw.hold()
-main()
-
+# frontClaw.dc(dir=-1)
+# backClaw.dc()
+# wait(1500)
+# frontClaw.hold()
+# backClaw.hold()
+# main()
+GyroTurn.maxSpeed = 40
+depositHouse([Color.BLUE], 2, 3)
 # ADD 3 HOLE BEAMS TO BUMPER
 # NEED TO FIX CLAW GRIP ISSUE 
 
-
+# Gyrostraight problem at house 1
+# green energy gets pushed back -> change back claw default position
+# collect yellow line track is off to the right
