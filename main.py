@@ -122,12 +122,16 @@ def collectSurplus(degrees, col):
   #move forward to collect surplus
   GyroStraight.move(30, lambda: leftMotor.angle() < degrees)
   base.hold()
+  
   # grab front surplus using claw
-  frontClaw.run_target(-40, -700)
+  frontClaw.run_target(30, -700)
+ 
   base.reset()
   GyroStraight.move(40, lambda: leftMotor.angle() < 350)
   base.hold()
-  frontClaw.run_target(30, 210)
+  frontClaw.run_target(20, 230)
+  frontClaw.hold()
+  frontClaw.dc(dir = -1, speed = 20)
   
 def collectGreen():  
   backClaw.run_time(100, 1200, wait = False)
@@ -186,17 +190,18 @@ def depositHouse(house, time, houseNum):
   # TO DO 
   # add variable degree for cases when bot starts closer to house
   global numGreen, numBlue, numYellow, numSurplus
-  if houseNum == 1:
-    GyroTurn.turn(-89)
-  else:
-    GyroTurn.turn(89)
-    
+  
   if time == 1:
     # first visit to house deposits surplus and green
     numCol = numGreen
     RingCol = Color.GREEN
     if len(house) == 1: # surplus to be deposited
       # only 2 surplus ever need to be deposited
+      
+      if houseNum == 1:
+        GyroTurn.turn(-89)
+      else:
+        GyroTurn.turn(89)
              
       # lift claw, move forward then reverse to deposit surplus from within catchment area
       frontClaw.run_target(-70, -300)
@@ -218,6 +223,10 @@ def depositHouse(house, time, houseNum):
       if len(house) == 2:
         if house[0] == Color.YELLOW and house[1] == Color.YELLOW:
           tmp = 2
+      if houseNum == 1:
+        GyroTurn.turn(-89)
+      else:
+        GyroTurn.turn(89)
       
       if tmp == 2:
         # deposit both yellow
@@ -276,7 +285,7 @@ def depositHouse(house, time, houseNum):
       if houseNum == 1:
         GyroTurn.turn(89)
         
-      elif houseNum == 2 or (houseNum == 3 and time == 1):
+      else:
         GyroTurn.turn(-89)
         
     else:
@@ -289,7 +298,7 @@ def depositHouse(house, time, houseNum):
       GyroStraight.move(-40, lambda: leftMotor.angle() > -50)
     base.hold()
     
-    backClaw.run_target(-20, -100)
+    backClaw.run_target(-20, -105)
 
     base.reset()
     # go more if 2 ring blocks have to be deposited
@@ -307,9 +316,10 @@ def depositHouse(house, time, houseNum):
         numBlue = 0
 
     base.hold()
+    wait(2000)
 
-    backClaw.run_target(20, 100)
-    GyroStraight.move(-40, lambda: leftMotor.angle() > 0)
+    backClaw.run_target(20, 105)
+    GyroStraight.move(-40, lambda: leftMotor.angle() > 50)
     base.hold()
     if houseNum == 1 or houseNum == 2:
       GyroStraight.move(40, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
@@ -373,7 +383,7 @@ def collectBlue():
   base.reset()
   GyroStraight.move(-10, lambda: leftMotor.angle() > -30)
   base.hold()
-  backClaw.run_target(50, 200)
+  backClaw.run_time(100, 1000, wait = False)
   base.reset()
   GyroStraight.move(50, lambda: leftMotor.angle() < 95)
   base.hold()
@@ -385,11 +395,11 @@ def collectBlue():
   GyroStraight.move(40,  lambda: leftMotor.angle() < 250)
   base.hold()
   GyroTurn.turn(-89)
-  backClaw.run_target(-30, -175)
+  backClaw.run_target(-30, -230)
   base.reset()
   GyroStraight.move(-5, lambda: leftMotor.angle() > -60)
   base.hold()
-  backClaw.run_target(30, 90)
+  backClaw.run_target(30, 80)
     
 def depositBatteryFront():
   frontClaw.run_target(-50, -300)
@@ -431,7 +441,7 @@ def collectYellow():
   base.hold()
   wait(100)
 
-  frontClaw.run_target(40,150)
+  frontClaw.run_target(40, 150)
   base.reset()
   
 
@@ -581,7 +591,6 @@ def main():
     base.hold()
 
     depositHouse(Houses[0], 1, 1)
-    wait(1000)
     
     # return to house 2 intersection
     LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
@@ -618,8 +627,7 @@ def main():
     base.reset()
     GyroStraight.move(-50, lambda: leftMotor.angle() > -300)
     base.hold()
-    wait(10)
-    
+    wait(10)    
     
   scanHouseEV3(Houses[1], ev3Col, 50, lambda: colRight.color() != Color.BLACK)  
   base.reset()
@@ -695,6 +703,7 @@ def main():
   LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK)
   base.hold()
   base.reset()
+  wait(100)
   LineTrack.move(colLeft, 40, lambda: leftMotor.angle() < 110)
   base.hold()
   GyroTurn.turn(89)
@@ -772,17 +781,37 @@ def main():
   returnBase()
     
     
-# frontClaw.dc(dir=-1)
+frontClaw.dc(dir=-1)
 # backClaw.dc()
 # wait(1500)
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-GyroTurn.maxSpeed = 40
-depositHouse([Color.BLUE], 2, 3)
+
+wait(1500)
+collectSurplus(420, Color.BLUE)
+
+GyroStraight.move(-50, lambda: colLeft.color() != Color.BLACK)
+base.hold()
+GyroStraight.move(40, lambda: colLeft.color() != Color.BLACK)
+base.hold()
+base.reset()
+GyroStraight.move(40, lambda: leftMotor.angle() < 150)
+base.hold()
+
+#test claw strength
+frontClaw.run_target(-30, -300)
+wait(1000)
+frontClaw.run_target(20, 300)
+wait(1000)
+
+base.reset()
+GyroStraight.move(-50, lambda: leftMotor.angle() > -200)
+base.hold()
+wait(1000)
+
+wait(10000)
 # ADD 3 HOLE BEAMS TO BUMPER
 # NEED TO FIX CLAW GRIP ISSUE 
 
 # Gyrostraight problem at house 1
-# green energy gets pushed back -> change back claw default position
-# collect yellow line track is off to the right
