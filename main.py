@@ -110,10 +110,11 @@ def collectSurplus(degrees, col):
 
   GyroStraight.move(-40, lambda: colLeft.color() != Color.BLACK)
   base.hold()
+  wait(100)
   base.reset()
   GyroStraight.move(30, lambda: leftMotor.angle() < 60)
   base.hold()
-  wait(100)
+  
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
   base.reset()
@@ -544,7 +545,7 @@ def main():
       LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK)
       base.hold()
       base.reset()
-      GyroStraight.move(-30, lambda: leftMotor.angle() > -150)
+      GyroStraight.move(-30, lambda: leftMotor.angle() > -120)
       base.hold()
       GyroTurn.turn(-89)
       collectSurplus(430, Color.BLUE)
@@ -563,6 +564,7 @@ def main():
     if surplus == Color.BLUE:
       
       GyroTurn.turn(-89)
+      gyro.reset_angle(0)
       LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
       LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.WHITE, side = -1)
     else:
@@ -574,10 +576,12 @@ def main():
     
     LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
     base.reset() 
+    
     GyroStraight.move(40, lambda: leftMotor.angle() < 120)
     base.hold()
 
     depositHouse(Houses[0], 1, 1)
+    wait(1000)
     
     # return to house 2 intersection
     LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
@@ -596,7 +600,11 @@ def main():
        
         
   # scan house 2
-  if surplus != Color.BLUE:
+  if surplus == Color.BLUE and Color.GREEN not in Houses[0] and len(Houses[0]) != 1:
+    # if house 1 has nothing to be deposited, go to house 2 directly from blue surplus area
+    PID_SingleMotorTurn(base, gyro, 89, 0, 1)    
+  
+  else:
     LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
     base.reset()
     LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 700, side = -1)
@@ -612,8 +620,6 @@ def main():
     base.hold()
     wait(10)
     
-  else:
-    PID_SingleMotorTurn(base, gyro, 89, 0, 1)
     
   scanHouseEV3(Houses[1], ev3Col, 50, lambda: colRight.color() != Color.BLACK)  
   base.reset()
@@ -765,13 +771,14 @@ def main():
   returnBase()
     
     
-# frontClaw.dc(dir=-1)
-# backClaw.dc()
-# wait(1500)
-# frontClaw.hold()
-# backClaw.hold()
-# main()
-GyroTurn.maxSpeed = 40
-depositHouse([Color.GREEN, Color.BLUE], 1, 2)
+frontClaw.dc(dir=-1)
+backClaw.dc()
+wait(1500)
+frontClaw.hold()
+backClaw.hold()
+main()
+
 # ADD 3 HOLE BEAMS TO BUMPER
 # NEED TO FIX CLAW GRIP ISSUE 
+
+
