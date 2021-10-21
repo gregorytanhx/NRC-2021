@@ -585,10 +585,10 @@ def main():
       LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 500, side = -1)
     
     LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
-    base.hold()
+  
     base.reset() 
-    wait(100)
-    GyroStraight.move(40, lambda: leftMotor.angle() < 120)
+
+    GyroStraight.move(30, lambda: leftMotor.angle() < 150)
     base.hold()
 
     depositHouse(Houses[0], 1, 1)
@@ -767,19 +767,32 @@ def main():
       GyroTurn.turn(-89)
       
   LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK)
+  # deposit last energy and return to base
   if Color.BLUE or Color.YELLOW in Houses[0]:
     base.reset()
     LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 700)
     base.hold()
     GyroTurn.turn(-89)
     depositHouse(Houses[0], 2, 1)
+    frontClaw.dc(dir = -1)
+    backClaw.run_time(100, 500)
+    base.run_time(-100, 1000)
+    GyroTurn.turn(87)
   else:
+    frontClaw.dc(dir = -1)
+    backClaw.run_time(100, 500, wait = False)
     LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.WHITE)
     LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK)
     base.hold()
+    base.reset()
+    GyroStraight.move(40, lambda: leftMotor.angle() < 100)
+    base.hold()
+    GyroTurn.turn(-92)
+    
+  base.run_time(-100, 1500)
+  
+  
 
-  # go back to base
-  returnBase()
     
     
 # frontClaw.dc(dir=-1)
@@ -788,16 +801,13 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-print(gyro.angle())
-LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
-base.hold()
-base.reset() 
+frontClaw.dc(dir = -1)
+backClaw.run_time(100, 500)
+base.run_time(-100, 1500)
+GyroTurn.turn(87)
 
+base.run_time(-100, 2000)
 
-
-GyroStraight.move(40, lambda: leftMotor.angle() < 150)
-base.hold()
-wait(1000)
 # GyroTurn.maxSpeed = 40
 # depositHouse([Color.BLUE],1, 1)
 
