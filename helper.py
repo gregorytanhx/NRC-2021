@@ -85,6 +85,10 @@ class Base:
     self.leftMotor.hold()
     self.rightMotor.hold()
     
+  def move(self, speed, condition):
+    while condition():
+      self.run(speed, speed)
+    
   def reset(self):
     self.leftMotor.reset_angle(0)
     self.rightMotor.reset_angle(0)
