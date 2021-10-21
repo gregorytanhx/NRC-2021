@@ -41,7 +41,7 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
 LineTrack = PID_LineTrack(base, 0.18, 0, 5, 40)
-GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
+GyroStraight = PID_GyroStraight(base, 1.5, 0, 5, gyro)
 GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.5, gyro)
 
 # battery alert
@@ -788,11 +788,12 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
+print(gyro.angle())
 LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
 base.hold()
 base.reset() 
 
-wait(100)
+
 
 GyroStraight.move(40, lambda: leftMotor.angle() < 150)
 base.hold()

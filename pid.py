@@ -59,8 +59,7 @@ class PID_LineTrack(PID):
            kp: float = None, 
            ki: float = None, 
            kd: float = None, 
-           side = 1, 
-           reset = True):
+           side = 1):
     # update control constants if given
     if threshold is None:
       threshold = self.threshold
@@ -88,8 +87,8 @@ class PID_GyroStraight(PID):
            kd: float = None,
            target = 0, 
            maxSpeed = 100,
-           minSpeed = 0,
-           reset = True):
+           minSpeed = 0):
+    
     while condition():
       error = self.gyro.angle() - target
       self.update(error, kp, ki, kd)
