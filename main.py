@@ -40,7 +40,7 @@ colRight = ColorSensor(Port.S4)
 base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
-LineTrack = PID_LineTrack(base, 0.18, 0, 5, 40)
+LineTrack = PID_LineTrack(base, 0.2, 0, 6, 40)
 GyroStraight = PID_GyroStraight(base, 1.5, 0, 5, gyro)
 GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.5, gyro)
 
@@ -141,7 +141,7 @@ def collectGreen():
   base.hold()
 
   GyroTurn.turn(-89)
-  GyroStraight.move(-50, lambda: colRight.color() != Color.WHITE)
+  GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
   base.hold()
   
   PID_LineSquare(base, direction = -1)
@@ -181,7 +181,7 @@ def collectGreen():
   # base.hold()
   backClaw.run_target(20, 50)
   base.reset()
-  GyroStraight.move(-50, lambda: leftMotor.angle() > -30)
+  GyroStraight.move(-30, lambda: leftMotor.angle() > -30)
   # base.hold(
   # cap speed of turns after grabbing green to stop them from jerking
   GyroTurn.maxSpeed = 40
@@ -491,7 +491,6 @@ def getExtra():
     if cols[key] == 1:
       return key
   
-
 def main():
   surplus = None
   gyro.reset_angle(0)
@@ -508,8 +507,7 @@ def main():
   base.run_time(-100, 700)
   gyro.reset_angle(0)  
   scanHouseEV3(Houses[0], ev3Col, 50, lambda: colRight.color() != Color.BLACK)
-  GyroStraight.move(50, lambda: colRight.color() != Color.WHITE)
-  base.hold()
+  wait(100)
   PID_LineSquare(base, direction=-1)
   gyro.reset_angle(0)
   PID_SingleMotorTurn(base, gyro, -179, 0.06, 1)
@@ -577,7 +575,7 @@ def main():
       
       GyroTurn.turn(-89)
       gyro.reset_angle(0)
-      LineTrack.move(colRight, 70, lambda: colLeft.color() != Color.BLACK, side = -1)
+      LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1)
       LineTrack.move(colRight, 70, lambda: colLeft.color() != Color.WHITE, side = -1)
     else:
       GyroTurn.turn(-89)      
@@ -586,7 +584,7 @@ def main():
       base.reset()
       LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 500, side = -1)
     
-    LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
+    LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1)
     base.hold()
     base.reset() 
 
@@ -596,7 +594,7 @@ def main():
     depositHouse(Houses[0], 1, 1)
     
     # return to house 2 intersection
-    LineTrack.move(colRight, 70, lambda: colLeft.color() != Color.BLACK, side = -1)
+    LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1)
     LineTrack.move(colRight, 70, lambda: colLeft.color() != Color.WHITE, side = -1)
     
   
@@ -621,14 +619,14 @@ def main():
     base.reset()
     LineTrack.move(colRight, 60, lambda: leftMotor.angle() < 700, side = -1)
     base.hold()
-    PID_AngleOffSet(base, gyro, 82)
+    PID_AngleOffSet(base, gyro, 81)
     base.hold()
     GyroStraight.move(-40, lambda: colLeft.color() != Color.WHITE)
     base.hold()
     PID_LineSquare(base, direction = -1)
     gyro.reset_angle(0)
     base.reset()
-    GyroStraight.move(-60, lambda: leftMotor.angle() > -300)
+    GyroStraight.move(-100, lambda: leftMotor.angle() > -300)
     base.hold()
     wait(10)    
     
@@ -667,7 +665,7 @@ def main():
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
   base.reset()
-  GyroStraight.move(-50, lambda: leftMotor.angle() > -300)
+  GyroStraight.move(-100, lambda: leftMotor.angle() > -300)
   base.hold()
   scanHouseEV3(Houses[2], ev3Col, 50, lambda: colLeft.color() != Color.BLACK)
   base.reset()
@@ -794,13 +792,20 @@ def main():
   base.run_time(-100, 1500)
   
 
-frontClaw.dc(dir=-1)
-backClaw.dc()
-wait(1500)
-frontClaw.hold()
-backClaw.hold()
-main()
+# frontClaw.dc(dir=-1)
+# backClaw.dc()
+# wait(1500)
+# frontClaw.hold()
+# backClaw.hold()
+# main()
 
+LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1)
+base.hold()
+base.reset() 
+
+GyroStraight.move(40, lambda: leftMotor.angle() < 150)
+base.hold()
+wait(1000)
 # FASTER LINESQUARE
 # FIX SLOW LINESQUARE AT HOUSE 1 (STILL A PROBLEM WTF)
 # FIX HOUSE 1 GYROSTRAIGHT AHHHHHHHHHHHHHHHHHHHHHHHHHH
