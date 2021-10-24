@@ -42,7 +42,7 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 # set up defaults for PID functions
 LineTrack = PID_LineTrack(base, 0.2, 0, 6, 40)
 GyroStraight = PID_GyroStraight(base, 1.5, 0, 5, gyro)
-GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.5, gyro)
+GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.7, gyro)
 
 # battery alert
 print(ev3.battery.voltage())
@@ -139,25 +139,16 @@ def collectGreen():
   base.reset()
   LineTrack.move(colRight, 40, lambda: leftMotor.angle() < 225, side = -1)
   base.hold()
+  gyro.reset_angle(0)
 
   GyroTurn.turn(-89)
-  GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
-  base.hold()
-  
-  PID_LineSquare(base, direction = -1)
-  gyro.reset_angle(0)
-   
-  # move forward, lower claw then reverse to collect green
-  base.reset()
-  GyroStraight.move(50, lambda: leftMotor.angle() < 190)
-  base.hold()
   backClaw.run_target(-50, -180)
-  GyroStraight.move(-50, lambda: colRight.color() != Color.WHITE)
-  GyroStraight.move(-50, lambda: colRight.color() != Color.BLACK)
+  GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
+  GyroStraight.move(-40, lambda: colRight.color() != Color.BLACK)
   base.hold()
-
+  wait(50)
   # reset claw again
-  backClaw.run_time(100, 1200, wait = False)
+  backClaw.run_time(70, 1200, wait = False)
   
   # linetrack and turn to grab other 2 green
   base.reset()
@@ -165,7 +156,7 @@ def collectGreen():
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  GyroStraight.move(40, lambda: leftMotor.angle() < 355)
+  GyroStraight.move(50, lambda: leftMotor.angle() < 355)
   base.hold()
 
   GyroTurn.turn(-89)
@@ -176,9 +167,8 @@ def collectGreen():
   base.reset()
   # GyroStraight.move(30, lambda: leftMotor.angle() < 20)
   # base.hold()
-  backClaw.run_target(20, 50)
+  backClaw.run_target(20, 60)
   base.reset()
-  GyroStraight.move(-30, lambda: leftMotor.angle() > -30)
   base.hold()
   # cap speed of turns after grabbing green to stop them from jerking
   GyroTurn.maxSpeed = 40
@@ -792,7 +782,12 @@ def main():
 # main()
 collectGreen()
 wait(1000)
+# GyroStraight.move(-50, lambda: colRight.color() != Color.WHITE)
+# base.hold()
 
+# PID_LineSquare(base, direction = -1)
+# gyro.reset_angle(0)
+# wait(1000)
 # FASTER LINESQUARE
 # FIX SLOW LINESQUARE AT HOUSE 1 (STILL A PROBLEM WTF)
 # FIX HOUSE 1 GYROSTRAIGHT AHHHHHHHHHHHHHHHHHHHHHHHHHH
