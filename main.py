@@ -22,6 +22,7 @@ numSurplus = 4
 
 # initialise ev3
 ev3 = EV3Brick()
+clock = StopWatch()
 
 # initialise motors
 frontClaw = FrontClaw(Port.A)
@@ -780,14 +781,18 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-collectGreen()
-wait(1000)
-# GyroStraight.move(-50, lambda: colRight.color() != Color.WHITE)
-# base.hold()
 
-# PID_LineSquare(base, direction = -1)
-# gyro.reset_angle(0)
-# wait(1000)
+GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
+base.hold()
+start = clock.time()
+PID_LineSquare(base, direction = -1)
+print(clock.time() - start)
+gyro.reset_angle(0)
+
+base.reset()
+GyroStraight.move(50, lambda: leftMotor.angle() < 300)
+base.hold()
+wait(1000)
 # FASTER LINESQUARE
 # FIX SLOW LINESQUARE AT HOUSE 1 (STILL A PROBLEM WTF)
 # FIX HOUSE 1 GYROSTRAIGHT AHHHHHHHHHHHHHHHHHHHHHHHHHH
