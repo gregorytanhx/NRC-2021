@@ -137,7 +137,7 @@ def collectGreen():
   backClaw.run_time(100, 1200, wait = False)
   LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
   base.reset()
-  LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 225, side = -1)
+  LineTrack.move(colRight, 40, lambda: leftMotor.angle() < 225, side = -1)
   base.hold()
 
   GyroTurn.turn(-89)
@@ -148,8 +148,10 @@ def collectGreen():
   gyro.reset_angle(0)
    
   # move forward, lower claw then reverse to collect green
-  base.run_target(40, 200)
-  backClaw.mid()
+  base.reset()
+  GyroStraight.move(50, lambda: leftMotor.angle() < 190)
+  base.hold()
+  backClaw.run_target(-50, -180)
   GyroStraight.move(-50, lambda: colRight.color() != Color.WHITE)
   GyroStraight.move(-50, lambda: colRight.color() != Color.BLACK)
   base.hold()
@@ -159,7 +161,7 @@ def collectGreen():
   
   # linetrack and turn to grab other 2 green
   base.reset()
-  GyroStraight.move(40, lambda: leftMotor.angle() < 150)
+  GyroStraight.move(50, lambda: leftMotor.angle() < 150)
   base.hold()
   GyroTurn.turn(89)
   base.reset()
@@ -167,14 +169,9 @@ def collectGreen():
   base.hold()
 
   GyroTurn.turn(-89)
-
-  gyro.reset_angle(0)
+  backClaw.run_target(-50, -180)
   base.reset()
-  GyroStraight.move(40, lambda: leftMotor.angle() < 120)
-  base.hold()
-  backClaw.mid()
-  base.reset()
-  GyroStraight.move(-30, lambda: leftMotor.angle() > -145)
+  GyroStraight.move(-30, lambda: colLeft.color() != Color.WHITE)
   base.hold()
   base.reset()
   # GyroStraight.move(30, lambda: leftMotor.angle() < 20)
@@ -182,7 +179,7 @@ def collectGreen():
   backClaw.run_target(20, 50)
   base.reset()
   GyroStraight.move(-30, lambda: leftMotor.angle() > -30)
-  # base.hold(
+  base.hold()
   # cap speed of turns after grabbing green to stop them from jerking
   GyroTurn.maxSpeed = 40
   
@@ -259,7 +256,7 @@ def depositHouse(house, time, houseNum):
       GyroStraight.move(-40, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
       base.hold()
       base.reset()
-      GyroStraight.move(40, lambda: leftMotor.angle() < 170)
+      GyroStraight.move(40, lambda: leftMotor.angle() < 150)
       base.hold()
       if houseNum ==  1:
         GyroTurn.turn(-89)
@@ -510,10 +507,10 @@ def main():
   gyro.reset_angle(0)
   base.reset()
   GyroStraight.move(70, lambda: leftMotor.angle() < 300)   
-  LineTrack.move(colRight, 65, lambda: colLeft.color() != Color.BLACK, side = -1)   
+  LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1)   
   base.hold()
   base.reset()
-  GyroStraight.move(40, lambda: leftMotor.angle() < 310)
+  GyroStraight.move(40, lambda: leftMotor.angle() < 300)
   base.hold()
   GyroTurn.turn(-89)
   
@@ -793,9 +790,9 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-
-collectYellow()
+collectGreen()
 wait(1000)
+
 # FASTER LINESQUARE
 # FIX SLOW LINESQUARE AT HOUSE 1 (STILL A PROBLEM WTF)
 # FIX HOUSE 1 GYROSTRAIGHT AHHHHHHHHHHHHHHHHHHHHHHHHHH
