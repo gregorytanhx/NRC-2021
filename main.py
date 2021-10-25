@@ -102,9 +102,9 @@ def checkSurplus(degrees):
   return detected
 
 def collectSurplus(degrees, col):
-  base.reset()
-  frontClaw.reset()
   if col != Color.BLUE:
+    base.reset()
+    frontClaw.reset()
     GyroStraight.move(-40, lambda: leftMotor.angle() > -160)
     GyroTurn.turn(89)
     gyro.reset_angle(0)
@@ -553,6 +553,7 @@ def main():
       surplus = Color.BLUE
       GyroTurn.turn(180)
       gyro.reset_angle(0)
+      frontClaw.dc()
       base.reset()
       LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK)
       base.hold()
