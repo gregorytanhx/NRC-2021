@@ -117,7 +117,7 @@ class PID_GyroStraightDegrees(PID):
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
-           minSpeed = 30):
+           minSpeed = 40):
     self.base.reset()
     angle = self.base.leftMotor.angle()
     rate = maxSpeed / (target * 0.055)

@@ -416,16 +416,15 @@ def collectBlue():
   GyroStraight.move(90, lambda: colLeft.color() != Color.WHITE)
   base.hold()
   
-  
   # collect first 2 blue energy
   GyroStraight.move(-90, lambda: colRight.color() != Color.WHITE)
   base.hold()
   GyroTurn.turn(-89)
-  backClaw.run_target(-70,-230)
+  backClaw.run_target(-70, -230)
   base.reset()
-  GyroStraight.move(-20, lambda: leftMotor.angle() > -100)
+  GyroStraight.move(-30, lambda: leftMotor.angle() > -100)
   base.hold()
-  backClaw.run_angle(-70,-40)
+  backClaw.run_angle(-70, -40)
   base.reset()
   GyroStraight.move(-10, lambda: leftMotor.angle() > -35)
   base.hold()
@@ -443,7 +442,7 @@ def collectBlue():
   GyroTurn.turn(-89)
   backClaw.run_target(-30, -230, wait = False)
   base.reset()
-  GyroStraight.move(-5, lambda: leftMotor.angle() > -90)
+  GyroStraight.move(-10, lambda: leftMotor.angle() > -90)
   base.hold()
   backClaw.run_target(55, 80)
   GyroTurn.maxSpeed = 50
@@ -499,7 +498,7 @@ def collectYellow():
   base.hold()
   frontClaw.run_target(-95,-460)
   base.reset()
-  frontClaw.dc(speed = 20, dir = -1)
+  frontClaw.dc(speed = 30, dir = -1)
   GyroStraight.move(-55, lambda: leftMotor.angle() > -40)
   base.hold()
     
@@ -517,7 +516,7 @@ def collectYellow():
   GyroStraight.move(55, lambda: leftMotor.angle() < 180)
   base.hold()
   frontClaw.run_target(90,255)
-  frontClaw.dc(speed = 20, dir = -1)
+  frontClaw.dc(speed = 30, dir = -1)
   base.reset()
   GyroStraight.move(-95, lambda: leftMotor.angle() > -350)
   base.hold()
@@ -571,7 +570,7 @@ def depositBatteryBack():
 def depositBattery(time, extraCol):
   base.reset()
   LineTrack.move(colLeft, 90, lambda: leftMotor.angle() < 400)
-  LineTrack.move(colLeft, 20, lambda: colRight.color() != Color.BLACK)
+  LineTrack.move(colLeft, 30, lambda: colRight.color() != Color.BLACK)
   base.hold()
   
   if time == 1:
@@ -844,12 +843,10 @@ def main():
 # backClaw.hold()
 # main()
 # gyro.reset_angle(0)
-# GyroStraight.move(90, lambda: True)
-# base.hold()
+GyroStraightDeg.move(95, 1000)
+base.hold()
+wait(1000)
 
-while True:
-  base.run(90,70)
-  print(leftMotor.speed())
 # wait(1000)
 # while True: 
 #   print(gyro.angle())
