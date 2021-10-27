@@ -848,6 +848,10 @@ LineTrack.move(colLeft, 95, lambda: colRight.color() != Color.BLACK)
 base.hold()
 wait(1000)
 
+# TO DO
+
+# INTEGRATE ACCEL/DECELL INTO MAIN PROGRAM
+
 # wait(1000)
 # while True: 
 #   print(gyro.angle())
