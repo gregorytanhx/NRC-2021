@@ -55,10 +55,11 @@ class BackClaw(Claw):
     self.run_target(-50, -180)
     
   def defaultPos(self):
-    self.run_time(50, 1000)
-    self.run_target(-50, -200)
-    self.run_target(50, 50)
-    #original 80
+    self.run_time(100, 1000)
+    self.run_target(-50, -190)
+    wait(100)
+    self.run_target(50, 40)
+
  
 class Base:
   def __init__(self, 
