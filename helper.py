@@ -8,7 +8,7 @@ from pybricks.iodevices import Ev3devSensor
 
 
 def CorrectSpeed(x):
-  return (x/100) * 1400 
+  return (x/100) * 1000 
 
 class Claw:
   def __init__(self, port: Port):
