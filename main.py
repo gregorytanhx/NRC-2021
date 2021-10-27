@@ -43,7 +43,7 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 # set up defaults for PID functions
 LineTrack = PID_LineTrack(base, 0.2, 0, 6, 40)
 GyroStraight = PID_GyroStraight(base, 1.5, 0, 5, gyro)
-GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.7, gyro)
+GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.8, gyro)
 
 # battery alert
 print(ev3.battery.voltage())
@@ -68,7 +68,6 @@ def debug_LineSquare():
 def scanHouseEV3(house, sensor, speed, condition):   
   # initialise pid for gyrostraight
   kp, ki, kd = GyroStraight.kp, GyroStraight.ki, GyroStraight.kd
-  gyro.reset_angle(0)
   gyroPID = PID(kp, ki, kd)
   
   while condition():
@@ -144,27 +143,33 @@ def collectSurplus(degrees, col):
   base.reset()
   GyroStraight.move(40, lambda: leftMotor.angle() < 400)
   base.hold()
-  frontClaw.run_target(50, 225)
+  frontClaw.run_target(50, 230)
   frontClaw.dc(dir = -1, speed = 20)
   
 def collectGreen():  
-  backClaw.run_time(100, 1200, wait = False)
-  LineTrack.move(colRight, 40, lambda: colLeft.color() != Color.BLACK, side = -1)
+  backClaw.run_time(100, 1000, wait = False)
+  LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
+  LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.WHITE, side = -1)
   base.hold()
   base.reset()
-  LineTrack.move(colRight, 40, lambda: leftMotor.angle() < 230, side = -1)
+  LineTrack.move(colRight, 40, lambda: leftMotor.angle() < 218, side = -1)
   base.hold()
+  
+  GyroTurn.turn(-89)
+  GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
+  base.hold()
+  PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
   wait(100)
-
-  GyroTurn.turn(-89)
-  backClaw.run_target(-50, -185)
+  base.reset()
+  GyroStraight.move(60, lambda: leftMotor.angle() < 100)
+  base.hold()
+  backClaw.run_angle(50, -190)
   GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
   GyroStraight.move(-40, lambda: colRight.color() != Color.BLACK)
   base.hold()
-  wait(50)
   # reset claw again
-  backClaw.run_time(70, 1200, wait = False)
+  backClaw.run_time(70, 1000, wait = False)
   
   # linetrack and turn to grab other 2 green
   base.reset()
@@ -172,18 +177,18 @@ def collectGreen():
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  GyroStraight.move(50, lambda: leftMotor.angle() < 355)
+  GyroStraight.move(40, lambda: leftMotor.angle() < 350)
   base.hold()
 
   GyroTurn.turn(-89)
-  backClaw.run_target(-50, -185)
+  backClaw.run_target(-50, -190)
   base.reset()
   GyroStraight.move(-30, lambda: colLeft.color() != Color.WHITE)
   base.hold()
   base.reset()
   # GyroStraight.move(30, lambda: leftMotor.angle() < 20)
   # base.hold()
-  backClaw.run_target(20, 35)
+  backClaw.run_target(20, 40)
   base.reset()
   base.hold()
   # cap speed of turns after grabbing green to stop them from jerking
@@ -347,13 +352,12 @@ def collectBlue():
   GyroStraight.move(50, lambda: leftMotor.angle() < 120)
   base.hold()
   GyroTurn.turn(89)
-  LineTrack.move(colRight, 40, lambda: colLeft.color() != Color.BLACK, side = -1)
-  base.hold()
   base.reset()
-  GyroStraight.move(-50, lambda: leftMotor.angle() > -80)
+  LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 550, side = -1)
   base.hold()
   PID_SingleMotorTurn(base, gyro, -89, 0, 1)
   base.reset()
+  wait(1000)
   LineTrack.move(colRight, 55, lambda: leftMotor.angle() < 200, side = -1)
   LineTrack.move(colRight, 55, lambda: colLeft.color() != Color.BLACK, side = -1)
   base.hold()
@@ -364,7 +368,7 @@ def collectBlue():
   base.reset()
   
   # move to blue energy area
-  GyroStraight.move(60, lambda: colRight.color() != Color.BLACK)
+  GyroStraight.move(50, lambda: colRight.color() != Color.BLACK)
   base.hold()
   base.reset()
   GyroStraight.move(-50, lambda: leftMotor.angle() > -40)
@@ -470,11 +474,12 @@ def collectYellow():
   GyroStraight.move(40, lambda: leftMotor.angle() < 620)
   base.hold()
   frontClaw.reset()
+  wait(100)
   GyroTurn.turn(89)
   base.reset()
   GyroStraight.move(40, lambda: leftMotor.angle() < 55)
   base.hold()
-  frontClaw.run_target(-40, -480)
+  frontClaw.run_target(-40, -470)
   base.reset()
   frontClaw.dc(speed = 20, dir = -1)
   GyroStraight.move(-40, lambda: leftMotor.angle() > -50)
@@ -489,7 +494,7 @@ def collectYellow():
   GyroStraight.move(40, lambda: leftMotor.angle() < 750)
   base.hold()
   frontClaw.run_target(-30, -250)
-  GyroTurn.turn(-90)
+  GyroTurn.turn(-89)
   base.reset()
   GyroStraight.move(40, lambda: leftMotor.angle() < 250)
   base.hold()
@@ -624,17 +629,19 @@ def main():
   
   else:
     LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1)
+    LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.WHITE, side = -1)
     base.reset()
     LineTrack.move(colRight, 60, lambda: leftMotor.angle() < 700, side = -1)
     base.hold()
-    PID_AngleOffSet(base, gyro, 81)
+    gyro.reset_angle(0)
+    PID_AngleOffSet(base, gyro, 80)
     base.hold()
-    GyroStraight.move(-50, lambda: colLeft.color() != Color.WHITE)
+    GyroStraight.move(-40, lambda: colLeft.color() != Color.WHITE)
     base.hold()
     PID_LineSquare(base, direction = -1)
     gyro.reset_angle(0)
     base.reset()
-    GyroStraight.move(-100, lambda: leftMotor.angle() > -300)
+    GyroStraight.move(-60, lambda: leftMotor.angle() > -300)
     base.hold()
     wait(10)    
     
@@ -666,14 +673,14 @@ def main():
   base.hold()
   GyroTurn.turn(-89)
   base.reset()
-  GyroStraight.move(-50, lambda: leftMotor.angle() > -50)
+  GyroStraight.move(-40, lambda: leftMotor.angle() > -50)
   base.hold()
   
   # scan house 3
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
   base.reset()
-  GyroStraight.move(-100, lambda: leftMotor.angle() > -300)
+  GyroStraight.move(-60, lambda: leftMotor.angle() > -300)
   base.hold()
   scanHouseEV3(Houses[2], ev3Col, 50, lambda: colLeft.color() != Color.BLACK)
   base.reset()
@@ -789,16 +796,18 @@ def main():
   base.run_time(-100, 1500)
   
 
-# frontClaw.dc(dir=-1)
-# backClaw.dc()
-# wait(1500)
-# frontClaw.hold()
-# backClaw.hold()
-# main()
-collectGreen()
-# debug_LineSquare()
 
 
+frontClaw.dc(dir=-1)
+backClaw.dc()
+wait(1500)
+frontClaw.hold()
+backClaw.hold()
+main()
+
+# FIX GREEN SCANNING FOR HOUSE 2
+# FIX COLLECT GREEN AGAIN
+# FIX LINESQUARE
 
 #test claw strength
 
