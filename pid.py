@@ -49,25 +49,49 @@ class PID_LineTrack(PID):
                threshold: int):
     super().__init__(kp, ki, kd)
     self.base = base
-    self.threshold = threshold
+    self.threshold = threshold    
     
   def move(self, 
            sensor: ColorSensor,
-           speed: float, 
+           maxSpeed: float, 
            condition, 
            threshold: int = None, 
            kp: float = None, 
            ki: float = None, 
            kd: float = None, 
-           side = 1):
+           side = 1, 
+           target = None, 
+           minSpeed = 45):
     # update control constants if given
     if threshold is None:
       threshold = self.threshold
+    if target is not None:
+      self.base.reset()
+      rate = maxSpeed / (target * 0.04)
+      speed = maxSpeed /abs(maxSpeed) * minSpeed
+    else:
+      speed = maxSpeed
     while condition():
       error = threshold - sensor.reflection()
       self.update(error, kp, ki, kd)
-      self.base.run(speed + side * self.correction, speed - side * self.correction)        
+      if target is not None: # decceleration
+        angle = self.base.leftMotor.angle()
+        if abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
+          if abs(speed) > minSpeed:
+            speed = (abs(speed) - rate) *  speed/abs(speed) 
+          if speed < minSpeed:
+            speed = minSpeed
+        else:
+          # otherwise accelerate up to speed from minSpeed
+          if speed < maxSpeed:
+            speed = (abs(speed) + rate * 2) *  speed/abs(speed) 
+          if speed > maxSpeed:
+            speed = maxSpeed
+      self.base.run(speed + side * self.correction, speed - side * self.correction)    
+          
     
+    
+
 class PID_GyroStraight(PID):
   def __init__(self, 
                base: Base, 
@@ -117,17 +141,17 @@ class PID_GyroStraightDegrees(PID):
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
-           minSpeed = 40):
+           minSpeed = 45):
     self.base.reset()
     angle = self.base.leftMotor.angle()
-    rate = maxSpeed / (target * 0.055)
+    rate = maxSpeed / (target * 0.04)
     speed = maxSpeed /abs(maxSpeed) * minSpeed
     while (target < 0 and  angle > target) or (target >= 0 and angle < target):
       angle = self.base.leftMotor.angle()
       error = self.gyro.angle() 
       self.update(error, kp, ki, kd)
       print(speed)
-      # start decelerating when 100 degrees away from target
+      
       if abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
         
         if abs(speed) > minSpeed:
@@ -137,7 +161,7 @@ class PID_GyroStraightDegrees(PID):
       else:
         # otherwise accelerate up to speed from minSpeed
         if speed < maxSpeed:
-          speed = (abs(speed) + rate) *  speed/abs(speed) 
+          speed = (abs(speed) + rate * 2) *  speed/abs(speed) 
         if speed > maxSpeed:
           speed = maxSpeed
         

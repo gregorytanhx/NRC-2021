@@ -229,7 +229,7 @@ def collectGreen():
   base.reset()
   base.hold()
   # cap speed of turns after grabbing green to stop them from jerking
-  GyroTurn.maxSpeed = 50
+  GyroTurn.maxSpeed = 70
   
 def depositHouse(house, time, houseNum):
   # TO DO 
@@ -445,7 +445,7 @@ def collectBlue():
   GyroStraight.move(-10, lambda: leftMotor.angle() > -90)
   base.hold()
   backClaw.run_target(55, 80)
-  GyroTurn.maxSpeed = 50
+  GyroTurn.maxSpeed = 70
   
   GyroStraight.move(95, lambda: colRight.color() != Color.BLACK)
   base.hold()
@@ -688,7 +688,7 @@ def checkHouse3():
     depositHouse(Houses[2], 1, 3)
   else:
     GyroTurn.turn(-89)
-  GyroTurn.maxSpeed = 50
+  GyroTurn.maxSpeed = 100
   
 def returnBase():
   if Color.BLUE or Color.YELLOW in Houses[0]:
@@ -843,7 +843,8 @@ def main():
 # backClaw.hold()
 # main()
 # gyro.reset_angle(0)
-GyroStraightDeg.move(95, 1000)
+#GyroStraight.move(95, lambda: True)
+LineTrack.move(colLeft, 95, lambda: colRight.color() != Color.BLACK)
 base.hold()
 wait(1000)
 
