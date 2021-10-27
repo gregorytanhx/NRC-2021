@@ -42,8 +42,10 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
 LineTrack = PID_LineTrack(base, 0.2, 0, 6, 40)
-GyroStraight = PID_GyroStraight(base, 1.5, 0, 5, gyro)
+GyroStraight = PID_GyroStraight(base, 1, 0, 5, gyro)
+GyroStraightDeg = PID_GyroStraightDegrees(base, 2.5, 0, 5, gyro)
 GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.8, gyro)
+
 
 surplus = None
 
@@ -841,10 +843,16 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-GyroStraight.move(-70, lambda: leftMotor.angle() > - 670)
-base.hold()
-wait(100)
-PID_LineSquare(base, direction = -1)
+# gyro.reset_angle(0)
+# GyroStraight.move(70, lambda: True)
+# base.hold()
+
+while True:
+  base.run(70, 70)
+  print(leftMotor.speed())
+# wait(1000)
+# while True: 
+#   print(gyro.angle())
 
 # collectYellow()
 # wait(10000)

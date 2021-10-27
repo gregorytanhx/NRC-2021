@@ -101,7 +101,7 @@ class PID_GyroStraight(PID):
       self.base.run(speed - self.correction, speed + self.correction)
       
 class PID_GyroStraightDegrees(PID):
-    def __init__(self, 
+  def __init__(self, 
                base: Base, 
                kp: float,
                ki: float,
@@ -112,25 +112,34 @@ class PID_GyroStraightDegrees(PID):
     self.gyro = gyro
     
   def move(self, 
-           speed: float, 
+           maxSpeed: float, 
            target, 
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
            minSpeed = 30):
     self.base.reset()
-    
-    while (target < 0 and self.base.leftMotor.angle() > target) or (target >= 0 and self.base.leftMotor.angle() < target):
-      error = self.gyro.angle() - target
+    angle = self.base.leftMotor.angle()
+    rate = maxSpeed / (target * 0.055)
+    speed = maxSpeed /abs(maxSpeed) * minSpeed
+    while (target < 0 and  angle > target) or (target >= 0 and angle < target):
+      angle = self.base.leftMotor.angle()
+      error = self.gyro.angle() 
       self.update(error, kp, ki, kd)
-      if abs(self.correction) > maxSpeed:
-        self.correction = maxSpeed * self.correction/abs(self.correction)
-      if abs(self.correction) < minSpeed:
-        self.correction = minSpeed * self.correction/abs(self.correction)
-      # start decelerating when 2/3 to target
-      if abs(self.base.leftMotor.angle()) / target > 0.66:
+      print(speed)
+      # start decelerating when 100 degrees away from target
+      if abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
+        
         if abs(speed) > minSpeed:
-          speed = (abs(speed) - 1) *  speed/abs(speed) 
+          speed = (abs(speed) - rate) *  speed/abs(speed) 
+        if speed < minSpeed:
+          speed = minSpeed
+      else:
+        # otherwise accelerate up to speed from minSpeed
+        if speed < maxSpeed:
+          speed = (abs(speed) + rate) *  speed/abs(speed) 
+        if speed > maxSpeed:
+          speed = maxSpeed
         
       self.base.run(speed - self.correction, speed + self.correction)
   
