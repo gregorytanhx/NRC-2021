@@ -67,15 +67,15 @@ class PID_LineTrack(PID):
     # update control constants if given
     if threshold is None:
       threshold = self.threshold
-    if target is not None and accel:
-   
-      rate = maxSpeed / (target * 0.04)
-      speed = maxSpeed /abs(maxSpeed) * minSpeed
-    else:
-      speed = maxSpeed
+    speed = maxSpeed
+    if target is not None:
+      rate =  2* maxSpeed / (target * 0.04)
+      if accel:
+        speed = maxSpeed /abs(maxSpeed) * minSpeed
+        
     while condition():
       error = threshold - sensor.reflection()
-      kd = 8 + (speed - 50) / 8
+      kd = 10 + (speed - 50) / 8
       #kp = 0.2 + (speed - 60) / 50
       self.update(error, kp, ki, kd)
       if target is not None: # decceleration
@@ -147,22 +147,19 @@ class PID_GyroStraightDegrees(PID):
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
-           minSpeed = 25, 
+           minSpeed = 30, 
            accel = False,
            decel = True):
-    self.base.reset()
     angle = self.base.leftMotor.angle()
-    rate = maxSpeed / (target * 0.04)
+    rate =  2 * maxSpeed / (target * 0.04)
     if accel:
       speed = maxSpeed /abs(maxSpeed) * minSpeed
     else:
       speed = maxSpeed
-    while (target < 0 and  angle > target) or (target >= 0 and angle < target):
-      
+    while (target < 0 and angle > target) or (target >= 0 and angle < target):
       error = self.gyro.angle() 
-      self.update(error, kp, ki, kd)
-      
-      
+      self.update(error, kp, ki, kd)      
+      angle = self.base.leftMotor.angle()
       if abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40 and decel:
         
         if abs(speed) > minSpeed:
@@ -172,7 +169,7 @@ class PID_GyroStraightDegrees(PID):
       elif accel:
         # otherwise accelerate up to speed from minSpeed
         if speed < maxSpeed:
-          speed = (abs(speed) + rate * 2) *  speed/abs(speed) 
+          speed = (abs(speed) + rate) *  speed/abs(speed) 
         if speed > maxSpeed:
           speed = maxSpeed
         
