@@ -77,8 +77,6 @@ class PID_LineTrack(PID):
     
     while condition():
       error = threshold - sensor.reflection()
-      #kd = 20 + (speed - 70) / 2
-      #kp = 0.2 - (speed - 60) / 400
       self.update(error, kp, ki, kd)
       
       if target is not None: # decceleration
@@ -103,8 +101,6 @@ class PID_LineTrack(PID):
       self.base.run(speed + side * self.correction, speed - side * self.correction)   
       
           
-    
-    
 
 class PID_GyroStraight(PID):
   def __init__(self, 
