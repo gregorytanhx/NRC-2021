@@ -69,13 +69,15 @@ class PID_LineTrack(PID):
       threshold = self.threshold
     speed = maxSpeed
     if target is not None:
-      rate =  2* maxSpeed / (target * 0.04)
-      if accel:
-        speed = maxSpeed /abs(maxSpeed) * minSpeed
+      rate = 2 * maxSpeed / (target * 0.04)
+    else:
+      rate = 2
+    if accel:
+      speed = maxSpeed /abs(maxSpeed) * minSpeed
         
     while condition():
       error = threshold - sensor.reflection()
-      kd = 10 + (speed - 50) / 8
+      kd = 30 + (speed - 70) / 8
       #kp = 0.2 + (speed - 60) / 50
       self.update(error, kp, ki, kd)
       if target is not None: # decceleration
@@ -91,6 +93,11 @@ class PID_LineTrack(PID):
             speed = (abs(speed) + rate) *  speed/abs(speed) 
           if speed > maxSpeed:
             speed = maxSpeed
+      if accel and not decel:
+        if speed < maxSpeed:
+            speed = (abs(speed) + rate) *  speed/abs(speed) 
+        if speed > maxSpeed:
+          speed = maxSpeed
       
       self.base.run(speed + side * self.correction, speed - side * self.correction)   
       
