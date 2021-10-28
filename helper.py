@@ -8,11 +8,12 @@ from pybricks.iodevices import Ev3devSensor
 
 
 def CorrectSpeed(x):
-  return (x/100) * 1000 
+  return (x/100) * 1400 
 
 class Claw:
   def __init__(self, port: Port):
     self.motor = Motor(port)
+    self.motor.control.limits(1500)
 
   def run_target(self, speed, angle, wait = True):
     self.motor.reset_angle(0)
