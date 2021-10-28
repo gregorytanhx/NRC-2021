@@ -156,24 +156,26 @@ class PID_GyroStraightDegrees(PID):
            decel = True):
     angle = self.base.leftMotor.angle()
     rate =  2 * maxSpeed / (target * 0.04)
+   
+    polarity = maxSpeed /abs(maxSpeed)
     if accel:
-      speed = maxSpeed /abs(maxSpeed) * minSpeed
+      speed = polarity * minSpeed
     else:
       speed = maxSpeed
+      
     while (target < 0 and angle > target) or (target >= 0 and angle < target):
       error = self.gyro.angle() 
       self.update(error, kp, ki, kd)      
       angle = self.base.leftMotor.angle()
-      if abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40 and decel:
-        
+      if abs(abs(angle) - abs(target)) <= 100 * abs(maxSpeed) / 40 and decel:
         if abs(speed) > minSpeed:
-          speed = (abs(speed) - rate) *  speed/abs(speed) 
-        if speed < minSpeed:
-          speed = minSpeed
+          speed = (abs(speed) - rate) * polarity
+        if abs(speed) < (minSpeed):
+          speed = minSpeed * polarity
       elif accel:
         # otherwise accelerate up to speed from minSpeed
         if speed < maxSpeed:
-          speed = (abs(speed) + rate) *  speed/abs(speed) 
+          speed = (abs(speed) + rate) * polarity 
         if speed > maxSpeed:
           speed = maxSpeed
         

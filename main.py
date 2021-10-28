@@ -491,26 +491,24 @@ def collectBlue():
 def collectYellow():
   # line track to intersection
   frontClaw.dc()
-  LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK)
-  base.hold()
-  base.reset()
-  
-  GyroStraight.move(50, lambda: leftMotor.angle() < 110)
+  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 800)
+  base.reset()  
+  LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 140, target = 140)
   base.hold()
   GyroTurn.turn(89)
   # push solar panels
   
   frontClaw.hold()
-  frontClaw.run_target(-40, -405)
+  frontClaw.run_target(-40, -405, wait = False)
   base.reset()
-  LineTrack.move(colRight, 35, lambda: leftMotor.angle() < 500, threshold = 45)
+  LineTrack.move(colRight, 40, lambda: leftMotor.angle() < 500, threshold = 45, target = 500)
   base.hold()
   gyro.reset_angle(0)
   GyroStraight.move(30, lambda: colLeft.color() != Color.BLACK and colRight.color() != Color.BLACK)
   GyroStraight.move(30, lambda: colLeft.color() != Color.WHITE and colRight.color() != Color.WHITE)
   base.hold()
   base.reset()
-  GyroStraight.move(40, lambda: leftMotor.angle() < 50)
+  GyroStraightDef.move(40, lambda: leftMotor.angle() < 50)
   base.hold()
   frontClaw.run_target(70, 120) 
 
@@ -524,26 +522,29 @@ def collectYellow():
   GyroTurn.turn(-89)
   frontClaw.dc()
   base.reset()
-  LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 500, side = -1)
-  GyroStraight.move(50, lambda: leftMotor.angle() < 620)
+  LineTrack.move(colRight, 70, lambda: leftMotor.angle() < 500, side = -1)
+  GyroStraightDeg.move(70, 620)
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  GyroStraight.move(50, lambda: leftMotor.angle() < 50)
+  GyroStraightDeg.move(50, 50)
   base.hold()
   frontClaw.run_target(-60, -460)
   base.reset()
   frontClaw.dc(speed = 20, dir = -1)
-  GyroStraight.move(-40, lambda: leftMotor.angle() > -40)
+  GyroStraightDeg.move(-50, -40)
   base.hold()
     
   # collect next 2 in catchment area
   GyroTurn.turn(89)
-  LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK)
-  base.reset()  
-  LineTrack.move(colLeft, 40, lambda: leftMotor.angle() < 500)
+  base.reset()
+  LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK, target = 600)
+  base.reset()
+  LineTrack.move(colLeft, 60, lambda: leftMotor.angle() < 600)
   gyro.reset_angle(0)
-  GyroStraight.move(40, lambda: leftMotor.angle() < 750)
+  GyroStraightDeg.move(70, 730)
+  base.hold()
+
   base.hold()
   frontClaw.run_target(-50, -250)
   GyroTurn.turn(-89)
@@ -604,8 +605,7 @@ def depositBatteryBack():
  
 def depositBattery(time, extraCol):
   base.reset()
-  LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 400)
-  LineTrack.move(colLeft, 20, lambda: colRight.color() != Color.BLACK)
+  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 600, minSpeed = 25)
   base.hold()
   
   if time == 1:
@@ -616,7 +616,7 @@ def depositBattery(time, extraCol):
     else:
       # single motor turn to avoid hitting wall of battery area
       base.reset()
-      GyroStraight.move(-50, lambda: leftMotor.angle() > -80)
+      GyroStraightDeg.move(-60, -80)
       base.hold()
       PID_SingleMotorTurn(base, gyro, 89, 1, 0)
   else:
@@ -727,7 +727,7 @@ def checkHouse3():
   base.hold()
   scanHouseEV3(Houses[2], ev3Col)
   base.reset()
-  GyroStraightDeg.move(85,  120)
+  GyroStraightDeg.move(85, 140)
   base.hold()
   
   # deposit at house 3
@@ -859,9 +859,31 @@ def main():
   # deposit last energy and return to base
   returnBase()
   
-GyroTurn.maxSpeed = 40
-checkHouse3()
+# GyroTurn.maxSpeed = 40
+# checkHouse3()
 
+
+# GyroTurn.turn(-89)
+# base.reset()
+# GyroStraightDeg.move(60, 180)
+# base.hold()
+# frontClaw.run_target(50, 255)
+# frontClaw.dc(speed = 20, dir = -1)
+# base.reset()
+# GyroStraightDeg.move(-80, -300, accel = True)
+# base.hold()
+# GyroTurn.turn(-89)
+# base.reset()
+# GyroStraightDeg.move(-90, -670, accel = True)
+# base.hold()
+# wait(100)
+# PID_LineSquare(base, direction = -1)
+# gyro.reset_angle(0)
+# base.reset()
+base.reset()
+GyroStraightDeg.move(-90, -850)
+base.hold()
+wait(1000)
 # frontClaw.dc(dir=-1)
 # backClaw.dc()
 # wait(1200)
