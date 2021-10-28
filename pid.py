@@ -49,25 +49,49 @@ class PID_LineTrack(PID):
                threshold: int):
     super().__init__(kp, ki, kd)
     self.base = base
-    self.threshold = threshold
+    self.threshold = threshold    
     
   def move(self, 
            sensor: ColorSensor,
-           speed: float, 
+           maxSpeed: float, 
            condition, 
            threshold: int = None, 
            kp: float = None, 
            ki: float = None, 
            kd: float = None, 
-           side = 1):
+           side = 1, 
+           target = None, 
+           minSpeed = 45):
     # update control constants if given
     if threshold is None:
       threshold = self.threshold
+    if target is not None:
+      self.base.reset()
+      rate = maxSpeed / (target * 0.04)
+      speed = maxSpeed /abs(maxSpeed) * minSpeed
+    else:
+      speed = maxSpeed
     while condition():
       error = threshold - sensor.reflection()
       self.update(error, kp, ki, kd)
-      self.base.run(speed + side * self.correction, speed - side * self.correction)        
+      if target is not None: # decceleration
+        angle = self.base.leftMotor.angle()
+        if abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
+          if abs(speed) > minSpeed:
+            speed = (abs(speed) - rate) *  speed/abs(speed) 
+          if speed < minSpeed:
+            speed = minSpeed
+        else:
+          # otherwise accelerate up to speed from minSpeed
+          if speed < maxSpeed:
+            speed = (abs(speed) + rate * 2) *  speed/abs(speed) 
+          if speed > maxSpeed:
+            speed = maxSpeed
+      self.base.run(speed + side * self.correction, speed - side * self.correction)    
+          
     
+    
+
 class PID_GyroStraight(PID):
   def __init__(self, 
                base: Base, 
@@ -82,13 +106,14 @@ class PID_GyroStraight(PID):
   def move(self, 
            speed: float, 
            condition,
+           decel = False, 
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
            target = 0, 
            maxSpeed = 100,
            minSpeed = 0):
-    
+
     while condition():
       error = self.gyro.angle() - target
       self.update(error, kp, ki, kd)
@@ -98,7 +123,49 @@ class PID_GyroStraight(PID):
         self.correction = minSpeed * self.correction/abs(self.correction)
       
       self.base.run(speed - self.correction, speed + self.correction)
-
+      
+class PID_GyroStraightDegrees(PID):
+  def __init__(self, 
+               base: Base, 
+               kp: float,
+               ki: float,
+               kd: float,
+               gyro: GyroSensor):
+    super().__init__(kp, ki, kd)
+    self.base = base
+    self.gyro = gyro
+    
+  def move(self, 
+           maxSpeed: float, 
+           target, 
+           kp: float = None, 
+           ki: float = None, 
+           kd: float = None,
+           minSpeed = 45):
+    self.base.reset()
+    angle = self.base.leftMotor.angle()
+    rate = maxSpeed / (target * 0.04)
+    speed = maxSpeed /abs(maxSpeed) * minSpeed
+    while (target < 0 and  angle > target) or (target >= 0 and angle < target):
+      angle = self.base.leftMotor.angle()
+      error = self.gyro.angle() 
+      self.update(error, kp, ki, kd)
+      print(speed)
+      
+      if abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
+        
+        if abs(speed) > minSpeed:
+          speed = (abs(speed) - rate) *  speed/abs(speed) 
+        if speed < minSpeed:
+          speed = minSpeed
+      else:
+        # otherwise accelerate up to speed from minSpeed
+        if speed < maxSpeed:
+          speed = (abs(speed) + rate * 2) *  speed/abs(speed) 
+        if speed > maxSpeed:
+          speed = maxSpeed
+        
+      self.base.run(speed - self.correction, speed + self.correction)
   
 class PID_GyroTurn(PID_GyroStraight):  
   def __init__(self,
@@ -137,18 +204,18 @@ def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 1.1, ki = 0.00001
 def PID_AngleOffSet(base, gyro, angle):
   if angle > 0:
     PID_SingleMotorTurn(base, gyro, angle, 1, 0, reset = False)
-    wait(50)
+    wait(10)
     PID_SingleMotorTurn(base, gyro, 0, 0, 1)
   else:
     PID_SingleMotorTurn(base, gyro, angle, 0, 1,reset = False)
-    wait(50)
+    wait(10)
     PID_SingleMotorTurn(base, gyro, 0, 1, 0)
     
 
 def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 3): # direction = 1 for forward, direction = -1 for backwar
-  kp = 0.13
-  ki = 0.0008
-  kd = 0.35
+  kp = 0.14
+  ki = 0.0005
+  kd = 0.3
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   while True:
