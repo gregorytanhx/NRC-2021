@@ -240,7 +240,7 @@ def collectGreen():
   base.reset()
   base.hold()
   # cap speed of turns after grabbing green to stop them from jerking
-  GyroTurn.maxSpeed = 50
+  GyroTurn.maxSpeed = 40
   
 def depositHouse(house, time, houseNum):
   
@@ -480,7 +480,7 @@ def collectBlue():
   GyroStraight.move(-5, lambda: leftMotor.angle() > -90)
   base.hold()
   backClaw.run_target(30, 80)
-  GyroTurn.maxSpeed = 50
+  GyroTurn.maxSpeed = 40
   
   GyroStraight.move(60, lambda: colRight.color() != Color.BLACK)
   base.hold()
@@ -705,30 +705,29 @@ def checkHouse2():
        
 def checkHouse3():
   # move to house 3 
-  LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK)
   base.reset()
-  LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 100)
+  LineTrack.move(colLeft, 75, lambda: colRight.color() != Color.BLACK, target = 600)
+  base.reset()
+  LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 140, target = 140)
   base.hold()
   GyroTurn.turn(89)
-  LineTrack.move(colRight, 70, lambda: colLeft.color() != Color.RED)
-  base.hold()
   base.reset()
-  GyroTurn.move(-60, lambda: leftMotor.angle() > -120)
-  base.hold()
+  LineTrack.move(colRight, 85, lambda: leftMotor.angle() < 800, target = 800, accel = True)
+  base.hold()  
   GyroTurn.turn(-89)
   base.reset()
-  GyroStraight.move(-40, lambda: leftMotor.angle() > -50)
+  GyroStraightDeg.move(-40, -50)
   base.hold()
   
   # scan house 3
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
   base.reset()
-  GyroStraight.move(-80, lambda: leftMotor.angle() > -300)
+  GyroStraightDeg.move(-85, -300)
   base.hold()
   scanHouseEV3(Houses[2], ev3Col)
   base.reset()
-  GyroStraight.move(50, lambda: leftMotor.angle() < 120)
+  GyroStraightDeg.move(85,  120)
   base.hold()
   
   # deposit at house 3
@@ -736,7 +735,7 @@ def checkHouse3():
     depositHouse(Houses[2], 1, 3)
   else:
     GyroTurn.turn(-89)
-  GyroTurn.maxSpeed = 50
+  GyroTurn.maxSpeed = 100
   
 def returnBase():
   if Color.BLUE or Color.YELLOW in Houses[0]:
@@ -860,9 +859,9 @@ def main():
   # deposit last energy and return to base
   returnBase()
   
+GyroTurn.maxSpeed = 40
+checkHouse3()
 
-PID_SingleMotorTurn(base, gyro, -180, 0.1, 1)
-wait(1000)
 # frontClaw.dc(dir=-1)
 # backClaw.dc()
 # wait(1200)
