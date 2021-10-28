@@ -47,14 +47,14 @@ colRight = ColorSensor(Port.S4)
 base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
-LineTrack = PID_LineTrack(base, 0.2, 0, 6, 40)
+LineTrack = PID_LineTrack(base, 0.22, 0, 6, 40)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 5, gyro)
 GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.8, gyro)
 
 # battery alert
 print(ev3.battery.voltage())
-if ev3.battery.voltage() <= 7600:
+if ev3.battery.voltage() <= 7500:
   print('LOW BATTERY')
   ev3.speaker.beep()
   sys.exit()
@@ -864,17 +864,19 @@ def main():
   # deposit last energy and return to base
   returnBase()
   
-LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True, decel = False)
-base.reset()
-LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.WHITE, side = -1)
-LineTrack.move(colRight, 85, lambda: colLeft.color() != Color.BLACK, side = -1, target = 1100)
-base.hold()
-base.reset() 
-GyroStraightDeg.move(70, 150)
-base.hold()
-wait(1000)
-
-GyroTurn.turn(-89)
+#LineTrack.move(colRight, 80, lambda: True, side = -1, kp = 0.25, ki = 0, kd = 8)
+# LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.WHITE, side = -1)
+# base.reset()
+# LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1, target = 1000, accel = True)
+# base.hold()
+# base.reset() 
+# GyroStraightDeg.move(70, 150)
+# base.hold()
+# wait(1000)
+start = clock.time()
+LineTrack.move(colRight, 85, lambda: True, side = -1, kp = 0.16, ki = 0, kd = 10)
+amt = clock.time() - start
+print(amt / 1000)
 # frontClaw.dc(dir=-1)
 # backClaw.dc()
 # wait(1200)
@@ -882,3 +884,4 @@ GyroTurn.turn(-89)
 # frontClaw.hold()
 # backClaw.hold()
 # main()
+dt = 0.00197 

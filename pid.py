@@ -71,15 +71,16 @@ class PID_LineTrack(PID):
     if target is not None:
       rate = 2 * maxSpeed / (target * 0.04)
     else:
-      rate = 2
+      rate = 1
     if accel:
       speed = maxSpeed /abs(maxSpeed) * minSpeed
-        
+    
     while condition():
       error = threshold - sensor.reflection()
-      kd = 30 + (speed - 70) / 8
-      #kp = 0.2 + (speed - 60) / 50
+      #kd = 20 + (speed - 70) / 2
+      #kp = 0.2 - (speed - 60) / 400
       self.update(error, kp, ki, kd)
+      
       if target is not None: # decceleration
         angle = self.base.leftMotor.angle()
         if decel and abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
