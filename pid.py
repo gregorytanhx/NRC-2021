@@ -63,7 +63,7 @@ class PID_LineTrack(PID):
            target = None, 
            minSpeed = 30,
            accel = False, 
-           decel = True):
+           deccel = True):
     # update control constants if given
     if threshold is None:
       threshold = self.threshold
@@ -81,7 +81,7 @@ class PID_LineTrack(PID):
       
       if target is not None: # decceleration
         angle = self.base.leftMotor.angle()
-        if decel and abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
+        if deccel and abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
           if abs(speed) > minSpeed:
             speed = (abs(speed) - rate) *  speed/abs(speed) 
           if speed < minSpeed:
@@ -92,7 +92,7 @@ class PID_LineTrack(PID):
             speed = (abs(speed) + rate) *  speed/abs(speed) 
           if speed > maxSpeed:
             speed = maxSpeed
-      if accel and not decel:
+      if accel and not deccel:
         if speed < maxSpeed:
             speed = (abs(speed) + rate) *  speed/abs(speed) 
         if speed > maxSpeed:
@@ -116,7 +116,7 @@ class PID_GyroStraight(PID):
   def move(self, 
            speed: float, 
            condition,
-           decel = False, 
+           deccel = False, 
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
@@ -153,7 +153,8 @@ class PID_GyroStraightDegrees(PID):
            kd: float = None,
            minSpeed = 30, 
            accel = False,
-           decel = True):
+           deccel = True, 
+           condition = lambda: True):
     angle = self.base.leftMotor.angle()
     rate =  2 * maxSpeed / (target * 0.04)
    
@@ -162,12 +163,13 @@ class PID_GyroStraightDegrees(PID):
       speed = polarity * minSpeed
     else:
       speed = maxSpeed
+    
       
-    while (target < 0 and angle > target) or (target >= 0 and angle < target):
+    while (target < 0 and angle > target) or (target >= 0 and angle < target) and condition():
       error = self.gyro.angle() 
       self.update(error, kp, ki, kd)      
       angle = self.base.leftMotor.angle()
-      if abs(abs(angle) - abs(target)) <= 100 * abs(maxSpeed) / 40 and decel:
+      if abs(abs(angle) - abs(target)) <= 100 * abs(maxSpeed) / 40 and deccel :
         if abs(speed) > minSpeed:
           speed = (abs(speed) - rate) * polarity
         if abs(speed) < (minSpeed):
@@ -228,15 +230,17 @@ def PID_AngleOffSet(base, gyro, angle):
 
 def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 3): # direction = 1 for forward, direction = -1 for backwar
   kp = 0.14
-  ki = 0.0005
+  ki = 0.0002
   kd = 0.3
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   while True:
+    
     leftVal = base.colLeft.reflection()
     rightVal = base.colRight.reflection()
-    leftError = base.colLeft.reflection() - threshold
-    rightError = base.colRight.reflection() - threshold
+    
+    leftError = leftVal - threshold
+    rightError = rightVal - threshold
     if abs(leftError) <= leeway and abs(rightError) <= leeway:
       break
     leftPID.update(leftError, kp, ki, kd)

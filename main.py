@@ -339,7 +339,7 @@ def depositHouse(house, time, houseNum):
       GyroStraight.move(-60, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
       base.hold()
       base.reset()
-      GyroStraightDeg.move(70, < 80)
+      GyroStraightDeg.move(70, 80)
       base.hold()
       if houseNum ==  1:
         GyroTurn.turn(-89)
@@ -429,40 +429,17 @@ def depositHouse(house, time, houseNum):
       GyroTurn.maxspeed = 100
 
 def collectBlue():
-  # # line track to intersection at house 2   
-  # backClaw.run_time(100, 1000, wait = False)
-  # LineTrack.move(colRight, 60, lambda: leftMotor.angle() < 200, side = -1)
-  # LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1)
-  # base.hold()
-  # base.reset()
-  # GyroStraight.move(-50, lambda: leftMotor.angle() > -85)
-  # base.hold()
-  # GyroTurn.turn(-90)
-  # base.reset()
-  # GyroStraight.move(-50, lambda: leftMotor.angle() > -100)
-  # base.hold()
-  # wait(100)
-  # PID_LineSquare(base, direction = -1)
-  # gyro.reset_angle(0)
-  # base.reset()
-  
-  # # move to blue energy area
-  # base.reset()
-  # GyroStraight.move(50, lambda: leftMotor.angle() < 300)
-  # GyroStraight.move(50, lambda: colLeft.color() != Color.WHITE)
-  # base.hold()
-  
-  
-  # # collect first 2 blue energy
-  # GyroStraight.move(-50,  lambda: colRight.color() != Color.WHITE)
-  # base.hold()
-  # GyroTurn.turn(-89)
-  
-  
-  
-  backClaw.run_target(-50, -230)
+
+  PID_LineSquare(base, direction = -1, leeway = 2)
+  gyro.reset_angle(0)
+  wait(100)
   base.reset()
-  GyroStraight.move(-20, lambda: leftMotor.angle() > -100)
+  backClaw.hold()
+  backClaw.run_target(-50, -230, wait = False)
+  GyroStraightDeg.move(-95, -850)
+  base.hold()  
+  base.reset()
+  GyroStraightDeg.move(-60, -150)
   base.hold()
   backClaw.run_angle(-50, -40)
   base.reset()
@@ -470,14 +447,14 @@ def collectBlue():
   base.hold()
   backClaw.run_time(100, 1000)
   base.reset()
-  GyroStraight.move(50, lambda: leftMotor.angle() < 120)
+  GyroStraightDeg.move(70, 120)
   base.hold()
   
   # collect next 2
   GyroTurn.turn(89)
   GyroStraight.move(50,  lambda: colRight.color() != Color.BLACK)
   base.reset()
-  GyroStraight.move(50,  lambda: leftMotor.angle() < 250)
+  GyroStraightDeg.move(70, 250)
   base.hold()
   GyroTurn.turn(-89)
   backClaw.run_target(-30, -230, wait = False)
@@ -487,10 +464,7 @@ def collectBlue():
   backClaw.run_target(30, 80)
   GyroTurn.maxSpeed = 40
   
-  GyroStraight.move(60, lambda: colRight.color() != Color.BLACK)
-  base.hold()
-  base.reset()
-  GyroStraight.move(50, lambda: leftMotor.angle() < 120)
+  GyroStraightDeg.move(95, 900)
   base.hold()
     
 def collectYellow():
@@ -572,6 +546,27 @@ def collectYellow():
   base.reset()
   GyroStraight.move(-70, lambda: leftMotor.angle() > - 900)
   base.hold()
+  LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK, target = 500)
+  base.reset()
+  LineTrack.move(colLeft, 60, lambda: leftMotor.angle() < 600)
+  GyroStraightDeg.move(70, 740)
+  base.hold()
+  GyroTurn.turn(-90)
+  base.reset()
+  GyroStraightDeg.move(60, 180)
+  base.hold()
+  #frontClaw.run_target(50, 255)
+  frontClaw.dc(speed = 20, dir = -1)
+  base.reset()
+  backClaw.run_time(100, 1000, wait = False)
+  GyroStraightDeg.move(-95, -360)
+  base.hold()
+  GyroTurn.turn(-90)
+  base.reset()
+  GyroStraightDeg.move(-95, -500, deccel = False)
+  GyroStraightDeg.move(-95, -750, condition = lambda: colLeft.color() != Color.BLACK)
+  base.hold()
+
   
   
   # GyroStraight.move(60, lambda: colRight.color() != Color.BLACK)
@@ -868,27 +863,12 @@ def main():
 # checkHouse3()
 
 
-# GyroTurn.turn(-89)
-# base.reset()
-# GyroStraightDeg.move(60, 180)
-# base.hold()
-# frontClaw.run_target(50, 255)
-# frontClaw.dc(speed = 20, dir = -1)
-# base.reset()
-# GyroStraightDeg.move(-80, -300, accel = True)
-# base.hold()
-# GyroTurn.turn(-89)
-# base.reset()
-# GyroStraightDeg.move(-90, -670, accel = True)
-# base.hold()
-# wait(100)
-# PID_LineSquare(base, direction = -1)
-# gyro.reset_angle(0)
-# base.reset()
-base.reset()
-GyroStraightDeg.move(-90, -850)
-base.hold()
+#while True: print(colLeft.reflection(), colRight.reflection())
+backClaw.run_time(100, 1000)
+collectBlue()
 wait(1000)
+#debug_LineSquare()
+
 # frontClaw.dc(dir=-1)
 # backClaw.dc()
 # wait(1200)
