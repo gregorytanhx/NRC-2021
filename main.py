@@ -396,8 +396,8 @@ def depositHouse(house, time, houseNum):
     backClaw.run_target(-30, -deg)
     print(tmp)
     base.reset()
-    # go more if 4 ring blocks have to be deposited
-    if numCol == 4 and tmp == 2:
+    # go more if last set of ring blocks to be deposited
+    if numCol == 4 and tmp == 2 or numCol == 2:
       GyroStraightDeg.move(70, 170) 
       if RingCol == Color.GREEN:
         numGreen = 0
@@ -432,7 +432,7 @@ def depositHouse(house, time, houseNum):
 
 def collectBlue():
 
-  PID_LineSquare(base, direction = -1, leeway = 2)
+  PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
   wait(100)
   base.reset()
@@ -448,7 +448,7 @@ def collectBlue():
 
   GyroStraight.move(-10, lambda: leftMotor.angle() > -15)
   base.hold()
-  backClaw.run_time(100, 1000)
+  backClaw.run_time(80, 1000)
   base.reset()
   GyroStraightDeg.move(70, 160)
   base.hold()
@@ -462,9 +462,9 @@ def collectBlue():
   GyroTurn.turn(-89)
   backClaw.run_target(-50, -230)
   base.reset()
-  GyroStraight.move(-5, lambda: leftMotor.angle() > -90)
+  GyroStraight.move(-10, lambda: leftMotor.angle() > -100)
   base.hold()
-  backClaw.run_target(30, 80)
+  backClaw.run_target(15, 75)
   GyroTurn.maxSpeed = 40
   
   GyroStraightDeg.move(95, 950)
@@ -597,9 +597,9 @@ def depositBatteryFront():
 def depositBatteryBack():
   GyroTurn.turn(180)
   base.reset()
-  GyroStraightDeg.move(-70, -150)
+  GyroStraightDeg.move(-70, -160)
   base.hold()
-  wait(50)
+  wait(1000)
   backClaw.run_target(-50, -100)
   base.reset()
   GyroStraightDeg.move(60, 40)
@@ -612,9 +612,11 @@ def depositBattery(time, extraCol):
   base.hold()
   
   if time == 1:
-    depositBatteryFront()
+    if numSurplus != 0:
+      depositBatteryFront()
     if extraCol == Color.GREEN:
       depositBatteryBack()
+      numGreen -= 2
       GyroTurn.turn(-89)
     else:
       # single motor turn to avoid hitting wall of battery area
@@ -862,23 +864,12 @@ def main():
   # deposit last energy and return to base
   returnBase()
   
-# GyroTurn.maxSpeed = 40
-# checkHouse3()
 
-#LineTrack.move(colRight, 70, lambda: True)
-#while True: print(colLeft.reflection(), colRight.reflection())
-
-debug_LineSquare()
-# PID_LineSquare(base, direction = -1)
-
-# backClaw.run_time(100, 1000)
-# start = clock.time()
-# collectBlue()
-# print((clock.time() - start)/1000)
-# wait(1000)
-
-
-#debug_LineSquare()
+GyroTurn.maxSpeed = 40
+backClaw.defaultPos()
+wait(5000)
+depositBatteryBack()
+wait(1000)
 
 # frontClaw.dc(dir=-1)
 # backClaw.dc()
