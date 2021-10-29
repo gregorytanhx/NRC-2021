@@ -228,17 +228,16 @@ def PID_AngleOffSet(base, gyro, angle):
     PID_SingleMotorTurn(base, gyro, 0, 1, 0)
     
 
-def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 3): # direction = 1 for forward, direction = -1 for backwar
-  kp = 0.14
-  ki = 0.0002
-  kd = 0.3
+def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 1): # direction = 1 for forward, direction = -1 for backwar
+  kp = 0.15
+  ki = 0.0018
+  kd = 3.123
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   while True:
     
     leftVal = base.colLeft.reflection()
     rightVal = base.colRight.reflection()
-    
     leftError = leftVal - threshold
     rightError = rightVal - threshold
     if abs(leftError) <= leeway and abs(rightError) <= leeway:
@@ -247,6 +246,7 @@ def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 3): # direction
     rightPID.update(rightError, kp, ki, kd)
     outLeft = direction * leftPID.correction
     outRight = direction * rightPID.correction
+    #print(leftVal, rightVal, outLeft, outRight)
     base.run(outLeft, outRight)
     
   base.hold()

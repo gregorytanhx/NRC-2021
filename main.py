@@ -66,12 +66,14 @@ def print_degrees():
 def debug_LineSquare():
   GyroStraight.move(-50, lambda: colLeft.color() != Color.WHITE)
   base.hold()
+  start = clock.time()
   PID_LineSquare(base, direction = -1)
+  print(clock.time() - start)
   gyro.reset_angle(0)
   base.hold()
   base.reset()
-  GyroStraight.move(40, lambda: leftMotor.angle() < 200)
-  base.hold()
+  GyroStraight.move(50, lambda: leftMotor.angle() < 200)
+  base.stop()
   wait(1000)
   
 def scanHouseEV3(house, sensor):   
@@ -436,35 +438,36 @@ def collectBlue():
   base.reset()
   backClaw.hold()
   backClaw.run_target(-50, -230, wait = False)
-  GyroStraightDeg.move(-95, -850)
-  base.hold()  
-  base.reset()
-  GyroStraightDeg.move(-60, -150)
+  GyroStraightDeg.move(-95, -900)
   base.hold()
-  backClaw.run_angle(-50, -40)
   base.reset()
-  GyroStraight.move(-10, lambda: leftMotor.angle() > -35)
+  GyroStraightDeg.move(-60, -80)
+  base.hold()  
+  backClaw.run_target(-50, -40)
+  base.reset()
+
+  GyroStraight.move(-10, lambda: leftMotor.angle() > -15)
   base.hold()
   backClaw.run_time(100, 1000)
   base.reset()
-  GyroStraightDeg.move(70, 120)
+  GyroStraightDeg.move(70, 160)
   base.hold()
   
   # collect next 2
   GyroTurn.turn(89)
   GyroStraight.move(50,  lambda: colRight.color() != Color.BLACK)
   base.reset()
-  GyroStraightDeg.move(70, 250)
+  GyroStraightDeg.move(80, 260)
   base.hold()
   GyroTurn.turn(-89)
-  backClaw.run_target(-30, -230, wait = False)
+  backClaw.run_target(-50, -230)
   base.reset()
   GyroStraight.move(-5, lambda: leftMotor.angle() > -90)
   base.hold()
   backClaw.run_target(30, 80)
   GyroTurn.maxSpeed = 40
   
-  GyroStraightDeg.move(95, 900)
+  GyroStraightDeg.move(95, 950)
   base.hold()
     
 def collectYellow():
@@ -862,11 +865,19 @@ def main():
 # GyroTurn.maxSpeed = 40
 # checkHouse3()
 
-
+#LineTrack.move(colRight, 70, lambda: True)
 #while True: print(colLeft.reflection(), colRight.reflection())
-backClaw.run_time(100, 1000)
-collectBlue()
-wait(1000)
+
+debug_LineSquare()
+# PID_LineSquare(base, direction = -1)
+
+# backClaw.run_time(100, 1000)
+# start = clock.time()
+# collectBlue()
+# print((clock.time() - start)/1000)
+# wait(1000)
+
+
 #debug_LineSquare()
 
 # frontClaw.dc(dir=-1)
