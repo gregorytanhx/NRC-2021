@@ -47,7 +47,7 @@ colRight = ColorSensor(Port.S4)
 base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
-LineTrack = PID_LineTrack(base, 0.15, 0, 10, 40)
+LineTrack = PID_LineTrack(base, 0.15, 0, 11, 40)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 5, gyro)
 GyroTurn = PID_GyroTurn(base, 0.9, 0.0001, 1.8, gyro)
@@ -151,7 +151,7 @@ def collectSurplus(degrees, col):
     # start opening claw
     frontClaw.dc()
     base.reset()
-    LineTrack.move(colLeft, 85, lambda: colRight.color() != Color.BLACK, target = 1000)
+    LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.BLACK, target = 1000, minSpeed = 40)
     base.hold()
     base.reset()
     
@@ -198,24 +198,21 @@ def collectSurplus(degrees, col):
     base.hold()
   
   elif col == Color.BLUE:
-    GyroStraightDeg.move(-90, -720)
+    GyroStraightDeg.move(-90, -750)
     base.hold()
 
 def collectGreen():  
   backClaw.run_time(100, 1000, wait = False)
   base.reset()
-  LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1, target = 500)
+  LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1, target = 550)
   base.reset()
-
-  LineTrack.move(colRight, 40, lambda: leftMotor.angle() < 225, side = -1, target = 220)
-  base.hold()
-  wait(100)
   gyro.reset_angle(0)
-  
+  LineTrack.move(colRight, 40, lambda: leftMotor.angle() < 220, side = -1, target = 220)
+  base.hold()
 
-  backClaw.run_angle(50, -185, wait = False)
+  backClaw.run_angle(50, -190, wait = False)
   GyroTurn.turn(-89)
-  GyroStraight.move(-50, lambda: colRight.color() != Color.WHITE)
+  GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
   GyroStraight.move(-40, lambda: colRight.color() != Color.BLACK)
   base.hold()
   # reset claw again
@@ -225,22 +222,19 @@ def collectGreen():
   base.reset()
   GyroStraightDeg.move(80, 200)
   base.hold()
-  GyroTurn.turn(89)
+  GyroTurn.turn(90)
   base.reset()
-  GyroStraightDeg.move(80, 345)
+  GyroStraightDeg.move(80, 335)
   base.hold()
-  backClaw.run_target(-50, -185, wait = False)
+ 
   GyroTurn.turn(-89)
-
   base.reset()
-  GyroStraightDeg.move(-60, -80)
+  backClaw.run_angle(50, -195)
+  GyroStraightDeg.move(-60, -110)
   base.hold()
-  base.reset()
   # GyroStraight.move(30, lambda: leftMotor.angle() < 20)
   # base.hold()
-  backClaw.run_target(50, 40)
-  base.reset()
-  base.hold()
+  backClaw.run_angle(50, 50)
   # cap speed of turns after grabbing green to stop them from jerking
   GyroTurn.maxSpeed = 40
   
@@ -652,11 +646,10 @@ def getExtra():
   
 def checkHouse1():
   base.reset()
-  GyroStraight.move(85, lambda: leftMotor.angle() < 250)   
-  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1, target = 900)  
-  base.hold()
+  GyroStraight.move(85, lambda: leftMotor.angle() < 200)   
+  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1, target = 950)  
   base.reset()
-  GyroStraightDeg.move(85, 320)
+  GyroStraightDeg.move(80, 320)
   base.hold()
   GyroTurn.turn(-89)
   base.run_time(-100, 500)
@@ -793,13 +786,10 @@ def main():
     collectSurplus(190, Color.YELLOW)
 
   else:
-    gyro.reset_angle(0)
-    GyroTurn.turn(179)
-    wait(1000)
+    PID_SingleMotorTurn(base, gyro, 180, 0.6, 1)
     #PID_AngleOffSet(base, gyro, 25)
     
   # collect green energy
-  wait(10000)
   collectGreen()
   
   # collect green surplus if present, else go collect blue surplus
@@ -879,19 +869,6 @@ def main():
 
 
 
-
-
-
-
-
-
-backClaw.run_time(100, 1000)
-collectBlue()
-
-# backClaw.run_target(-30, -160)
-# wait(50)
-# backClaw.run_target(50, 160)
-
 # frontClaw.dc(dir=-1)
 # backClaw.dc()
 # wait(1200)
@@ -899,3 +876,9 @@ collectBlue()
 # frontClaw.hold()
 # backClaw.hold()
 # main()
+start = clock.time()
+collectGreen()
+GyroTurn.turn(-89)
+collectSurplus(415, Color.BLUE)
+print((clock.time() - start) / 1000)
+wait(1000)
