@@ -158,7 +158,7 @@ def collectSurplus(degrees, col):
     # start opening claw
     frontClaw.dc()
     base.reset()
-    LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 900, accel = True)
+    LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.BLACK, target = 1000, accel = True)
     base.hold()
     wait(1000)
     base.reset()
@@ -874,14 +874,12 @@ def main():
 # depositBattery(2, Color.YELLOW)
 # wait(1000)
 base.reset()
-LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target =10800)
 base.hold()
-wait(1000)
+GyroTurn.turn(89)
 base.reset()
-
-GyroStraightDeg.move(-70, -120)
-base.hold()
-
+LineTrack.move(colRight,80, lambda: leftMotor.angle() < 850, target = 850)
+base.hold()  
+GyroTurn.turn(-89)
 wait(1000)
 # TO DO
 # FIX 180 turn after collect green
