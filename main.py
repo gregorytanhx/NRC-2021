@@ -158,9 +158,9 @@ def collectSurplus(degrees, col):
     # start opening claw
     frontClaw.dc()
     base.reset()
-    wait(5000)
     LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 900, accel = True)
     base.hold()
+    wait(1000)
     base.reset()
     
     GyroStraightDeg.move(-70, -120)
@@ -239,7 +239,7 @@ def collectGreen():
 
   backClaw.run_angle(50, -195)
   base.reset()
-  GyroStraightDeg.move(-50, -85)
+  GyroStraightDeg.move(-50, -105)
   base.hold()
   # GyroStraight.move(30, lambda: leftMotor.angle() < 20)
   # base.hold()
@@ -873,12 +873,16 @@ def main():
 # GyroTurn.maxSpeed = 40
 # depositBattery(2, Color.YELLOW)
 # wait(1000)
-GyroTurn.turn(89)
 base.reset()
-GyroStraightDeg.move(-50, -250)
+LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target =10800)
 base.hold()
 wait(1000)
+base.reset()
 
+GyroStraightDeg.move(-70, -120)
+base.hold()
+
+wait(1000)
 # TO DO
 # FIX 180 turn after collect green
 # FIX collect yellow
