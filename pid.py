@@ -111,7 +111,6 @@ class PID_GyroStraight(PID):
   def move(self, 
            speed: float, 
            condition,
-           deccel = False, 
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
@@ -120,6 +119,7 @@ class PID_GyroStraight(PID):
            minSpeed = 0):
 
     while condition():
+
       error = self.gyro.angle() - target
       self.update(error, kp, ki, kd)
       if abs(self.correction) > maxSpeed and self.correction != 0:
@@ -194,12 +194,12 @@ class PID_GyroTurn(PID_GyroStraight):
     self.gyro.reset_angle(0)
     self.resetIntegral()
     
-    self.move(0, lambda: self.gyro.angle() != angle, kp, ki, kd, target = angle, maxSpeed = self.maxSpeed, minSpeed = 5)
+    self.move(0, lambda: self.gyro.angle() != angle, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed, minSpeed = 5)
     self.base.hold()
     self.gyro.reset_angle(0)
     
       
-def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.9, ki = 0.0001, kd = 1.8, minSpeed = 20, reset = True):
+def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.9, ki = 0, kd = 1.2, minSpeed = 20, reset = True):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle)
