@@ -196,6 +196,7 @@ class PID_GyroTurn(PID_GyroStraight):
     
     self.move(0, lambda: self.gyro.angle() != angle, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed, minSpeed = 5)
     self.base.hold()
+    
     self.gyro.reset_angle(0)
     
       

@@ -59,6 +59,12 @@ if ev3.battery.voltage() <= 7400:
   ev3.speaker.beep()
   sys.exit()
 
+def calibrate_gyro():
+  _ = gyro.speed()
+  wait(500)
+  while gyro.angle() != 0:
+    wait(1)
+
 def print_degrees():
   while True:
     print(leftMotor.angle())
@@ -147,17 +153,17 @@ def checkSurplus(degrees):
 
 def collectSurplus(degrees, col):
   if col == Color.BLUE:
-    PID_SingleMotorTurn(base, gyro, 181, 1, 0.6)
+    PID_SingleMotorTurn(base, gyro, 180, 1, 0.6)
 
     # start opening claw
     frontClaw.dc()
     base.reset()
-    wait(100)
+    wait(5000)
     LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 900, accel = True)
     base.hold()
     base.reset()
     
-    GyroStraightDeg.move(-70, -140)
+    GyroStraightDeg.move(-70, -120)
     base.hold()
     GyroTurn.turn(-89)
     
@@ -224,7 +230,7 @@ def collectGreen():
   GyroStraightDeg.move(80, 180)
   base.hold()
   
-  GyroTurn.turn(90)
+  GyroTurn.turn(89)
 
   base.reset()
   GyroStraightDeg.move(70, 345)
@@ -333,7 +339,7 @@ def depositHouse(house, time, houseNum):
   if RingCol not in house:
     if houseNum ==  1 or houseNum ==  2:
       base.reset()
-      GyroStraightDeg.move(-70, -500)
+      GyroStraightDeg.move(-70, -480)
       base.hold()
       if houseNum ==  1:
         GyroTurn.turn(-89)
@@ -341,7 +347,7 @@ def depositHouse(house, time, houseNum):
         GyroTurn.turn(89)
         
     else:
-      GyroStraightDeg.move(-80, -500)
+      GyroStraightDeg.move(-80, -200)
       base.hold()
       GyroTurn.turn(180)
     if houseNum != 1:
@@ -481,9 +487,9 @@ def collectYellow():
   # line track to intersection
   frontClaw.dc()
   base.reset()  
-  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK)
+  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 800)
   curr = leftMotor.angle()
-  LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 90 + curr, target = 90 + curr)
+  LineTrack.move(colLeft, 40, lambda: leftMotor.angle() < 110 + curr, target = 110 + curr)
   base.hold()
   GyroTurn.turn(89)
   # push solar panels
@@ -491,13 +497,14 @@ def collectYellow():
   frontClaw.hold()
   frontClaw.run_target(-40, -405, wait = False)
   base.reset()
-  LineTrack.move(colRight, 30, lambda: leftMotor.angle() < 500, target = 500, minSpeed = 30)
+  LineTrack.move(colRight, 30, lambda: leftMotor.angle() < 500)
   base.hold()
   gyro.reset_angle(0)
+
   GyroStraight.move(30, lambda: colLeft.color() != Color.BLACK and colRight.color() != Color.BLACK)
   GyroStraight.move(30, lambda: colLeft.color() != Color.WHITE and colRight.color() != Color.WHITE)
-  curr = leftMotor.angle()
-  GyroStraightDeg.move(40, 70 + curr)
+  base.reset()
+  GyroStraightDeg.move(30, 60, minSpeed = 30)
   base.hold()
   frontClaw.run_target(70, 120) 
 
@@ -510,18 +517,19 @@ def collectYellow():
   # track to first 2 yellow and grab with claw
   GyroTurn.turn(-89)
   frontClaw.dc()
+  
   base.reset()
   LineTrack.move(colRight, 60, lambda: leftMotor.angle() < 500, side = -1)
   GyroStraightDeg.move(70, 620)
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  GyroStraightDeg.move(50, 50)
+  GyroStraightDeg.move(40, 50)
   base.hold()
   frontClaw.run_target(-60, -460)
   base.reset()
   frontClaw.dc(speed = 20, dir = -1)
-  GyroStraightDeg.move(-50, -40)
+  GyroStraightDeg.move(-40, -50)
   base.hold()
     
   # collect next 2 in catchment area
@@ -533,15 +541,16 @@ def collectYellow():
   gyro.reset_angle(0)
   GyroStraightDeg.move(70, 730 + curr)
   base.hold()
+  frontClaw.run_target(-50, -255)
   GyroTurn.turn(-89)
   base.reset()
-  GyroStraightDeg.move(60, 180)
+  GyroStraightDeg.move(50, 180)
   base.hold()
-  frontClaw.run_target(50, 255)
+  frontClaw.run_target(50, 260)
   frontClaw.dc(speed = 20, dir = -1)
   base.reset()
   backClaw.run_time(100, 1000, wait = False)
-  GyroStraightDeg.move(-90, -370)
+  GyroStraightDeg.move(-85, -370)
   base.hold()
   GyroTurn.turn(-89)
   base.reset()
@@ -588,7 +597,7 @@ def depositBatteryBack():
  
 def depositBattery(time, extraCol):
   base.reset()
-  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 600, minSpeed = 25)
+  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 500, minSpeed = 20, side = -1)
   base.hold()
   
   if time == 1:
@@ -675,11 +684,9 @@ def checkHouse2():
   frontClaw.run_target(30, 300)
   scanHouseEV3(Houses[1], ev3Col)  
   base.reset()
-  GyroStraightDeg.move(60, 100)
+  GyroStraightDeg.move(50, 100)
   base.hold()
 
-  
-  
   # deposit at house 2 
   if Color.GREEN in Houses[1] or len(Houses[1]) == 1 or (surplus in Houses[1] and surplus != Color.YELLOW) :
     print('here')
@@ -696,7 +703,7 @@ def checkHouse3():
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  LineTrack.move(colRight, 80, lambda: leftMotor.angle() < 800, target = 800, accel = True)
+  LineTrack.move(colRight, 80, lambda: leftMotor.angle() < 790, target = 790, accel = True)
   base.hold()  
   GyroTurn.turn(-89)
   base.reset()
@@ -711,7 +718,7 @@ def checkHouse3():
   base.hold()
   scanHouseEV3(Houses[2], ev3Col)
   base.reset()
-  GyroStraightDeg.move(60, 120)
+  GyroStraightDeg.move(50, 120)
   base.hold()
   
   # deposit at house 3
@@ -762,7 +769,7 @@ def main():
     collectSurplus(190, Color.YELLOW)
 
   else:
-    PID_SingleMotorTurn(base, gyro, 180, 0.65, 1)
+    PID_SingleMotorTurn(base, gyro, 179, 0.65, 1)
     #PID_AngleOffSet(base, gyro, 25)
     
   # collect green energy
@@ -845,25 +852,15 @@ def main():
 
 
 
-frontClaw.dc(dir=-1)
-backClaw.dc()
-wait(1200)
-ev3.speaker.beep()
-frontClaw.hold()
-backClaw.hold()
-main()
-
-# GyroStraightDeg()
-# PID_SingleMotorTurn(base, gyro, 181, 1, 0.6)
-
-# # start opening claw
-# frontClaw.dc()
-# base.reset()
-
-# Houses = [[Color.BLUE], [], []]
-# numSurplus = 2
-# surplus = Color.BLUE
-# frontClaw.run_target(-50, -300)
-# checkHouse2()
-
-
+# frontClaw.dc(dir=-1)
+# backClaw.dc()
+# wait(1200)
+# ev3.speaker.beep()
+# frontClaw.hold()
+# backClaw.hold()
+# main()
+collectYellow()
+wait(10000)
+# TO DO
+# FIX 180 turn after collect green
+# FIX collect yellow
