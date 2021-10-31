@@ -327,9 +327,6 @@ def depositHouse(house, time, houseNum):
         base.hold()
         numYellow -= 2
 
-      base.reset()
-      GyroStraightDeg.move(-80, -350)
-      base.hold()
       
   if RingCol not in house:
     if houseNum ==  1 or houseNum ==  2:
