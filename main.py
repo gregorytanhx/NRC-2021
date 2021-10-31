@@ -357,7 +357,6 @@ def depositHouse(house, time, houseNum):
   
   else: 
     
-    
     # green/blue to be deposited
     tmp = 1    
     # check number of green/blue indicators for house
@@ -381,8 +380,10 @@ def depositHouse(house, time, houseNum):
         GyroTurn.turn(-89)     
     
     base.reset()
-    if houseNum == 1 or (houseNum == 2 and time == 2):
+    if time == 1 and (houseNum == 1 or houseNum == 2):
       GyroStraightDeg.move(-50, -200)
+    elif time == 2 and (houseNum == 1 or houseNum == 2):
+      GyroStraightDeg.move(-50, -250)
     else:
       GyroStraightDeg.move(-50, -50)
     base.hold()
@@ -572,14 +573,20 @@ def collectYellow():
   # PID_SingleMotorTurn(base, gyro, -89, 0, 1)
   # base.reset()
   
-def depositBatteryFront():
+def depositBatteryFront(numCube):
   frontClaw.run_target(-50, -300)
   base.reset()
   GyroStraightDeg.move(70, 165)
   base.hold()
   frontClaw.run_target(50, 300)
-  
-  GyroStraight.move(-10, lambda: colRight.color() != Color.BLACK or colLeft.color() != Color.BLACK)
+  if numCube == 4:
+    GyroStraight.move(-10, lambda: colRight.color() != Color.BLACK or colLeft.color() != Color.BLACK)
+    
+  else:
+    wait(50)
+    frontClaw.run_target(-50, -300)
+    GyroStraight.move(-30, lambda: colRight.color() != Color.BLACK or colLeft.color() != Color.BLACK)
+    
   base.hold()
 
 def depositBatteryBack():
@@ -602,8 +609,8 @@ def depositBattery(time, extraCol):
   
   if time == 1:
     if numSurplus != 0:
-      depositBatteryFront()
-    if extraCol == Color.GREEN:
+      depositBatteryFront(numSurplus)
+    if extraCol == Color.GREEN or (surplus == Color.GREEN and numSurplus == 0):
       depositBatteryBack()
       numGreen -= 2
       GyroTurn.turn(-89)
@@ -615,9 +622,9 @@ def depositBattery(time, extraCol):
       PID_SingleMotorTurn(base, gyro, 89, 1, 0)
   else:
     if extraCol == Color.YELLOW:
-      depositBatteryFront()
-    elif extraCol == Color.BLUE:
-      depositBatteryBack(160)
+      depositBatteryFront(numYellow)
+    if extraCol == Color.BLUE or (surplus == Color.BLUE and numSurplus == 0):
+      depositBatteryBack()
      
 def getExtra():
   cols = {Color.YELLOW: 0, Color.GREEN: 0, Color.BLUE: 0}
@@ -859,8 +866,12 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-collectYellow()
-wait(10000)
+numSurplus = 0
+numYellow = 2
+surplus = Color.BLUE
+GyroTurn.maxSpeed = 40
+depositBattery(2, Color.YELLOW)
+wait(1000)
 # TO DO
 # FIX 180 turn after collect green
 # FIX collect yellow
