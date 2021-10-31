@@ -866,12 +866,19 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-numSurplus = 0
-numYellow = 2
-surplus = Color.BLUE
-GyroTurn.maxSpeed = 40
-depositBattery(2, Color.YELLOW)
+
+# numSurplus = 0
+# numYellow = 2
+# surplus = Color.BLUE
+# GyroTurn.maxSpeed = 40
+# depositBattery(2, Color.YELLOW)
+# wait(1000)
+GyroTurn.turn(89)
+base.reset()
+GyroStraightDeg.move(-50, -250)
+base.hold()
 wait(1000)
+
 # TO DO
 # FIX 180 turn after collect green
 # FIX collect yellow
