@@ -50,11 +50,11 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 LineTrack = PID_LineTrack(base, 0.16, 0.0001, 16, 40)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 5, gyro)
-GyroTurn = PID_GyroTurn(base, 0.9, 0, 1.2, gyro)
+GyroTurn = PID_GyroTurn(base, 0.8, 0, 1.3, gyro)
 #GyroTurn = PID_GyroTurn(base, 1, 0, 0)
 # battery alert
 print(ev3.battery.voltage())
-if ev3.battery.voltage() <= 7500:
+if ev3.battery.voltage() <= 7400:
   print('LOW BATTERY')
   ev3.speaker.beep()
   sys.exit()
@@ -147,16 +147,17 @@ def checkSurplus(degrees):
 
 def collectSurplus(degrees, col):
   if col == Color.BLUE:
-    PID_SingleMotorTurn(base, gyro, 180, 1, 0.6)
+    PID_SingleMotorTurn(base, gyro, 181, 1, 0.6)
 
     # start opening claw
     frontClaw.dc()
     base.reset()
-    LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 1000, accel = True)
+    wait(100)
+    LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 900, accel = True)
     base.hold()
     base.reset()
     
-    GyroStraightDeg.move(-70, -130)
+    GyroStraightDeg.move(-70, -140)
     base.hold()
     GyroTurn.turn(-89)
     
@@ -206,12 +207,12 @@ def collectGreen():
   base.reset()
   LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
   curr = leftMotor.angle()
-  LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 225 + curr, side = -1, target = 225 + curr)
+  LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 222 + curr, side = -1, target = 222 + curr)
   gyro.reset_angle(0)
   base.hold()
 
   backClaw.run_angle(50, -190, wait = False)
-  GyroTurn.turn(-90)
+  GyroTurn.turn(-89)
   GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
   GyroStraight.move(-40, lambda: colRight.color() != Color.BLACK)
   base.hold()
@@ -226,9 +227,8 @@ def collectGreen():
   GyroTurn.turn(90)
 
   base.reset()
-  LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 340, side = -1, target = 340)
+  GyroStraightDeg.move(70, 345)
   base.hold()
-  gyro.reset_angle(0)
   GyroTurn.turn(-89)
 
   backClaw.run_angle(50, -195)
@@ -246,16 +246,17 @@ def depositHouse(house, time, houseNum):
   # TO DO 
   # add variable degree for cases when bot starts closer to house
   global numGreen, numBlue, numYellow, numSurplus, surplus
-  
+  cubeDeposited = False
   if time == 1:
     # first visit to house deposits surplus and green
     numCol = numGreen
     RingCol = Color.GREEN
     tmp = 1
-    # deposit 2 surp
+    
     if len(house) == 1 or (surplus in house and houseNum == 2):
+      cubeDeposited = True
       tmp = 1
-      if len(house) == 1 and house[0] == surplus:
+      if len(house) == 1 and house[0] == surplus and houseNum == 2:
         tmp = 2
         
       if houseNum == 1:
@@ -285,7 +286,7 @@ def depositHouse(house, time, houseNum):
         GyroStraight.move(60, lambda: colLeft.color() != Color.RED)
         base.hold()
         numSurplus = 0
-            
+    
               
   else:
     # second visit to house deposits yellow and blue
@@ -295,6 +296,7 @@ def depositHouse(house, time, houseNum):
     if Color.YELLOW in house: 
       # check number of yellow in house
       tmp = 1
+      cubeDeposited = True
       if len(house) == 2:
         if house[0] == Color.YELLOW and house[1] == Color.YELLOW:
           tmp = 2
@@ -330,10 +332,8 @@ def depositHouse(house, time, houseNum):
       
   if RingCol not in house:
     if houseNum ==  1 or houseNum ==  2:
-      GyroStraight.move(-50, lambda: colLeft.color() != Color.BLACK and colRight.color() != Color.BLACK)
-      base.hold()
       base.reset()
-      GyroStraightDeg.move(70, 80)
+      GyroStraightDeg.move(-70, -500)
       base.hold()
       if houseNum ==  1:
         GyroTurn.turn(-89)
@@ -350,6 +350,8 @@ def depositHouse(house, time, houseNum):
     #frontClaw.dc(dir = -1, speed = 20)
   
   else: 
+    
+    
     # green/blue to be deposited
     tmp = 1    
     # check number of green/blue indicators for house
@@ -357,46 +359,51 @@ def depositHouse(house, time, houseNum):
       if house[0] == RingCol and house[1] == RingCol:
         tmp = 2
 
-    if (time == 1 and len(house) == 2) or (time == 2 and Color.YELLOW not in house):
+    if cubeDeposited:
+      base.reset()
+      GyroStraightDeg.move(-50, -200)
+      base.hold()
+      if houseNum == 3:
+        GyroTurn.turn(180)  
+      else:
+        GyroTurn.turn(-180)  
+    else:
       if houseNum == 1:
         GyroTurn.turn(89)
         
       else:
-        GyroTurn.turn(-89)
-        
-    else:
-      GyroTurn.turn(180)      
+        GyroTurn.turn(-89)     
     
     base.reset()
     if houseNum == 1 or (houseNum == 2 and time == 2):
-      GyroStraightDeg.move(-80, -200)
+      GyroStraightDeg.move(-50, -200)
     else:
-      GyroStraight.move(-70, -50)
+      GyroStraightDeg.move(-50, -50)
     base.hold()
     
     if RingCol == Color.GREEN:
       if numGreen == 4:
         deg = 105
       else:
-        deg = 110
+        deg = 111
     if RingCol == Color.BLUE:
       if numBlue == 4:
         deg = 105
       else:
-        deg = 110
+        deg = 111
     
     backClaw.run_target(-30, -deg)
     print(tmp)
     base.reset()
     # go more if last set of ring blocks to be deposited
-    if numCol == 4 and tmp == 2 or numCol == 2:
-      GyroStraightDeg.move(70, 170) 
+    if (numCol == 4 and tmp == 2) or numCol == 2:
+      GyroStraightDeg.move(40, 170) 
       if RingCol == Color.GREEN:
         numGreen = 0
       else:
         numBlue = 0
     else:
-      GyroStraightDeg.move(70, 105)
+      GyroStraightDeg.move(40, 95)
       if RingCol == Color.GREEN:
         numGreen -= 2
       else:
@@ -405,13 +412,13 @@ def depositHouse(house, time, houseNum):
     base.hold()
 
     backClaw.run_target(30, deg)
-    GyroStraightDeg.move(-60, 50)
+    
     base.hold()
     if houseNum == 1 or houseNum == 2:
       GyroStraight.move(50, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
       base.hold()
       base.reset()
-      GyroStraightDeg.move(70, 150)
+      GyroStraightDeg.move(50, 130)
       base.hold()
       if houseNum == 1:
         GyroTurn.turn(89)
@@ -484,14 +491,13 @@ def collectYellow():
   frontClaw.hold()
   frontClaw.run_target(-40, -405, wait = False)
   base.reset()
-  LineTrack.move(colRight, 40, lambda: leftMotor.angle() < 500, threshold = 45, target = 500)
+  LineTrack.move(colRight, 30, lambda: leftMotor.angle() < 500, target = 500, minSpeed = 30)
   base.hold()
   gyro.reset_angle(0)
   GyroStraight.move(30, lambda: colLeft.color() != Color.BLACK and colRight.color() != Color.BLACK)
   GyroStraight.move(30, lambda: colLeft.color() != Color.WHITE and colRight.color() != Color.WHITE)
   curr = leftMotor.angle()
-
-  GyroStraightDeg.move(40, 50 + leftMotor.angle())
+  GyroStraightDeg.move(40, 70 + curr)
   base.hold()
   frontClaw.run_target(70, 120) 
 
@@ -619,7 +625,7 @@ def checkHouse1():
   GyroStraight.move(85, lambda: leftMotor.angle() < 200)   
   LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1)  
   curr = leftMotor.angle()
-  GyroStraightDeg.move(80, 305 + curr)
+  GyroStraightDeg.move(60, 305 + curr)
   base.hold()
   GyroTurn.turn(-89)
   base.run_time(-100, 500)
@@ -635,10 +641,8 @@ def returnHouse1():
     GyroTurn.turn(-89)      
   
   base.reset()
-  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True)
-  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.WHITE, side = -1)
+  LineTrack.move(colRight, 75, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True)
   curr = leftMotor.angle()
-  
   LineTrack.move(colRight, 80, lambda: leftMotor.angle() < 1250 + curr, side = -1, target = 1250 + curr)
   base.hold()
 
@@ -666,20 +670,19 @@ def checkHouse2():
     base.hold()
     gyro.reset_angle(0)
     wait(100)
-    PID_AngleOffSet(base, gyro, 72)
+    PID_AngleOffSet(base, gyro, 75)
     
-  frontClaw.run_target(50, 300)
+  frontClaw.run_target(30, 300)
   scanHouseEV3(Houses[1], ev3Col)  
-  print('here')
   base.reset()
-  print('here')
-  GyroStraightDeg.move(60, 120)
+  GyroStraightDeg.move(60, 100)
   base.hold()
+
   
-  print('here')
   
   # deposit at house 2 
   if Color.GREEN in Houses[1] or len(Houses[1]) == 1 or (surplus in Houses[1] and surplus != Color.YELLOW) :
+    print('here')
     depositHouse(Houses[1], 1, 2)
   else:
     PID_SingleMotorTurn(base, gyro, -180, 0.1, 1)
@@ -708,7 +711,7 @@ def checkHouse3():
   base.hold()
   scanHouseEV3(Houses[2], ev3Col)
   base.reset()
-  GyroStraightDeg.move(85, 110)
+  GyroStraightDeg.move(60, 120)
   base.hold()
   
   # deposit at house 3
@@ -759,7 +762,7 @@ def main():
     collectSurplus(190, Color.YELLOW)
 
   else:
-    PID_SingleMotorTurn(base, gyro, 180, 0.7, 1)
+    PID_SingleMotorTurn(base, gyro, 180, 0.65, 1)
     #PID_AngleOffSet(base, gyro, 25)
     
   # collect green energy
@@ -842,25 +845,25 @@ def main():
 
 
 
-# frontClaw.dc(dir=-1)
-# backClaw.dc()
-# wait(1200)
-# ev3.speaker.beep()
-# frontClaw.hold()
-# backClaw.hold()
-# main()
+frontClaw.dc(dir=-1)
+backClaw.dc()
+wait(1200)
+ev3.speaker.beep()
+frontClaw.hold()
+backClaw.hold()
+main()
+
+# GyroStraightDeg()
+# PID_SingleMotorTurn(base, gyro, 181, 1, 0.6)
+
+# # start opening claw
+# frontClaw.dc()
+# base.reset()
+
+# Houses = [[Color.BLUE], [], []]
+# numSurplus = 2
+# surplus = Color.BLUE
+# frontClaw.run_target(-50, -300)
+# checkHouse2()
 
 
-numSurplus = 2
-numGreen = 4
-checkHouse2()
-
-  
-# collectSurplus(420, Color.BLUE)
-# GyroTurn.turn(-89)
-# start = clock.time()
-# collectGreen()
-# GyroTurn.turn(-89)
-# collectSurplus(415, Color.BLUE)
-# print((clock.time() - start) / 1000)
-# wait(1000)
