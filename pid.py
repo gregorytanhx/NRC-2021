@@ -168,6 +168,7 @@ class PID_GyroStraightDegrees(PID):
       
     while (target < 0 and angle > target) or (target >= 0 and angle < target) and condition():
       error = self.gyro.angle() 
+      print(speed)
       self.update(error, kp, ki, kd)      
       angle = self.base.leftMotor.angle()
       if abs(abs(angle) - abs(target)) <= 100 * abs(maxSpeed) / 40 and deccel :

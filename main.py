@@ -48,8 +48,8 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
 LineTrack = PID_LineTrack(base, 0.16, 0.0001, 16, 40)
-GyroStraight = PID_GyroStraight(base, 1.2, 0, 5, gyro)
-GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 5, gyro)
+GyroStraight = PID_GyroStraight(base, 0.9, 0, 0, gyro)
+GyroStraightDeg = PID_GyroStraightDegrees(base, 0.9, 0, 0, gyro)
 GyroTurn = PID_GyroTurn(base, 0.8, 0, 1.3, gyro)
 #GyroTurn = PID_GyroTurn(base, 1, 0, 0)
 # battery alert
@@ -233,7 +233,7 @@ def collectGreen():
   GyroTurn.turn(89)
 
   base.reset()
-  GyroStraightDeg.move(70, 345)
+  GyroStraightDeg.move(60, 343)
   base.hold()
   GyroTurn.turn(-89)
 
@@ -783,7 +783,6 @@ def main():
 
   else:
     PID_SingleMotorTurn(base, gyro, 179, 0.65, 1)
-    #PID_AngleOffSet(base, gyro, 25)
     
   # collect green energy
   collectGreen()
@@ -863,8 +862,6 @@ def main():
   returnBase()
   
 
-
-
 # frontClaw.dc(dir=-1)
 # backClaw.dc()
 # wait(1200)
@@ -872,16 +869,11 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-
-
 base.reset()
-GyroStraightDeg.move(-50, -200)
-base.hold()
-GyroTurn.turn(180)
-base.reset()
-GyroStraightDeg.move(-50, -50)
+GyroStraightDeg.move(80, 500)
 base.hold()
 wait(1000)
+
 # numSurplus = 0
 # numYellow = 2
 # surplus = Color.BLUE
