@@ -503,20 +503,19 @@ def collectYellow():
   frontClaw.hold()
   frontClaw.run_target(-40, -405, wait = False)
   base.reset()
-  LineTrack.move(colRight, 30, lambda: leftMotor.angle() < 500)
+  LineTrack.move(colRight, 30, lambda: leftMotor.angle() < 400)
   base.hold()
   gyro.reset_angle(0)
 
   GyroStraight.move(30, lambda: colLeft.color() != Color.BLACK and colRight.color() != Color.BLACK)
   GyroStraight.move(30, lambda: colLeft.color() != Color.WHITE and colRight.color() != Color.WHITE)
-  base.reset()
-  GyroStraightDeg.move(30, 60, minSpeed = 30)
+
+  curr = leftMotor.angle()
+  GyroStraight.move(20, lambda: leftMotor.angle() < 60 + curr)
   base.hold()
-  frontClaw.run_target(70, 120) 
+  frontClaw.run_target(70, 130) 
 
   base.reset()
-  # GyroStraight.move(-15, lambda: leftMotor.angle() > -20)
-  # base.hold()
 
   frontClaw.run_target(-100, -400)
   
@@ -869,10 +868,24 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
+frontClaw.dc()
+wait(1500)
+
+frontClaw.hold()
+frontClaw.run_target(-40, -405)
 base.reset()
-GyroStraightDeg.move(80, 500)
+LineTrack.move(colRight, 30, lambda: leftMotor.angle() < 400, threshold = 50)
 base.hold()
-wait(1000)
+gyro.reset_angle(0)
+base.reset()
+GyroStraight.move(30, lambda: colLeft.color() != Color.BLACK and colRight.color() != Color.BLACK)
+GyroStraight.move(30, lambda: colLeft.color() != Color.WHITE or colRight.color() != Color.WHITE)
+curr = leftMotor.angle()
+GyroStraight.move(20, lambda: leftMotor.angle() < 60 + curr)
+base.hold()
+frontClaw.run_target(70, 130) 
+
+base.reset()
 
 # numSurplus = 0
 # numYellow = 2
