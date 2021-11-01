@@ -61,7 +61,7 @@ class PID_LineTrack(PID):
            kd: float = None, 
            side = 1, 
            target = None, 
-           minSpeed = 40,
+           minSpeed = 35,
            accel = False, 
            deccel = True):
     # update control constants if given
@@ -154,8 +154,7 @@ class PID_GyroStraightDegrees(PID):
            kd: float = None,
            minSpeed = 30, 
            accel = False,
-           deccel = True, 
-           condition = lambda: True):
+           deccel = True):
     angle = self.base.leftMotor.angle()
     rate =  2 * maxSpeed / (target * 0.04)
    
@@ -166,10 +165,12 @@ class PID_GyroStraightDegrees(PID):
       speed = maxSpeed
     
       
-    while (target < 0 and angle > target) or (target >= 0 and angle < target) and condition():
+    while (target < 0 and angle > target) or (target >= 0 and angle < target):
       error = self.gyro.angle() 
       self.update(error, kp, ki, kd)      
       angle = self.base.leftMotor.angle()
+      print(angle)
+      print(speed)
       if abs(abs(angle) - abs(target)) <= 100 * abs(maxSpeed) / 40 and deccel :
         if abs(speed) > minSpeed:
           speed = (abs(speed) - rate) * polarity

@@ -86,23 +86,24 @@ def scanHouseEV3(house, sensor):
   # initialise pid for gyrostraight
   kp, ki, kd = GyroStraight.kp, GyroStraight.ki, GyroStraight.kd
   gyroPID = PID(kp, ki, kd)
-  target = 320
+  target = 300
   speed = 80
   maxSpeed = 80
   minSpeed = 30
   rate = 2 * maxSpeed / (target * 0.04)
   base.reset()
+  deccel = False
   while colRight.color() != Color.BLACK and colLeft.color() != Color.BLACK:
     detected = False
     gyroPID.update(gyro.angle(), kp, ki, kd)
     angle = base.leftMotor.angle()
     if abs(abs(angle) - abs(target)) <= 80 * maxSpeed / 40:
-      
+      deccel = True
       if abs(speed) > minSpeed:
         speed = (abs(speed) - rate) *  speed/abs(speed) 
       if speed < minSpeed:
         speed = minSpeed
-    else:
+    elif not deccel:
       speed += rate
       if speed > maxSpeed:
         speed = maxSpeed
@@ -385,7 +386,7 @@ def depositHouse(house, time, houseNum):
     
     base.reset()
     if cubeDeposited:
-      GyroStraightDeg.move(-30, -10)
+      GyroStraightDeg.move(-30, -15)
     elif time == 1 and houseNum == 1:
       GyroStraightDeg.move(-50, -200)
     elif time == 2 and (houseNum == 1 or houseNum == 2):
@@ -432,7 +433,7 @@ def depositHouse(house, time, houseNum):
     if houseNum == 1 or houseNum == 2:
       if not cubeDeposited:
         GyroStraight.move(40, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
-        base.reset()
+      base.reset()
       GyroStraightDeg.move(50, 130)
       base.hold()
       if houseNum == 1:
@@ -506,7 +507,7 @@ def collectYellow():
   frontClaw.hold()
   frontClaw.run_target(-40, -405, wait = False)
   base.reset()
-  LineTrack.move(colRight, 30, lambda: leftMotor.angle() < 400)
+  LineTrack.move(colRight, 30, lambda: leftMotor.angle() < 400, threshold = 50)
   base.hold()
   gyro.reset_angle(0)
 
@@ -521,7 +522,8 @@ def collectYellow():
   base.reset()
 
   frontClaw.run_target(-100, -400)
-  
+  GyroStraight.move(20, lambda: leftMotor.angle() < 10)
+  base.hold()
   # track to first 2 yellow and grab with claw
   GyroTurn.turn(-89)
   frontClaw.dc()
@@ -537,7 +539,7 @@ def collectYellow():
   frontClaw.run_target(-60, -460)
   base.reset()
   frontClaw.dc(speed = 20, dir = -1)
-  GyroStraightDeg.move(-40, -50)
+  GyroStraightDeg.move(-40, -40)
   base.hold()
     
   # collect next 2 in catchment area
@@ -612,8 +614,9 @@ def depositBatteryBack():
 def depositBattery(time, extraCol):
   global numSurplus, numYellow
   base.reset()
-  LineTrack.move(colLeft, 70, lambda: leftMotor.angle() < 500, target = 500, minSpeed = 20, side = -1)
-  LineTrack.move(colLeft, 20, lambda: colRight.color() != Color.BLACK, side = -1)
+  LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 600, target = 600, minSpeed = 20)
+  gyro.reset_angle(0)
+  GyroStraight.move(20, lambda: colLeft.color() != Color.BLACK)
   base.hold()
   
   if time == 1:
@@ -625,7 +628,7 @@ def depositBattery(time, extraCol):
     else:
       # single motor turn to avoid hitting wall of battery area
       base.reset()
-      GyroStraightDeg.move(-60, -80)
+      GyroStraightDeg.move(-40, -80)
       base.hold()
       PID_SingleMotorTurn(base, gyro, 89, 1, 0)
   else:
@@ -698,10 +701,11 @@ def checkHouse2():
     
   frontClaw.run_target(30, 300)
   scanHouseEV3(Houses[1], ev3Col)  
-  base.reset()
+  
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
-  GyroStraightDeg.move(50, 100)
+  base.reset()
+  GyroStraightDeg.move(50, 110)
   base.hold()
 
   # deposit at house 2 
@@ -713,6 +717,7 @@ def checkHouse2():
        
 def checkHouse3():
   # move to house 3 
+  
   base.reset()
   LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 500)
   curr = leftMotor.angle()
@@ -720,21 +725,23 @@ def checkHouse3():
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  LineTrack.move(colRight, 75, lambda: leftMotor.angle() < 840, target = 840, accel = True)
+  LineTrack.move(colLeft, 70, lambda: leftMotor.angle() < 810, target = 810, side = -1)
   base.hold()  
   GyroTurn.turn(-89)
   base.reset()
-  GyroStraightDeg.move(-40, -50)
+  GyroStraightDeg.move(-40, -20)
   base.hold()
   
   # scan house 3
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
+  wait(100)
   base.reset()
   GyroStraightDeg.move(-85, -300)
   base.hold()
   scanHouseEV3(Houses[2], ev3Col)
   base.reset()
+  wait(1000)
   GyroStraightDeg.move(50, 120)
   base.hold()
   
@@ -816,6 +823,8 @@ def main():
       GyroTurn.turn(89)
         
   checkHouse2()
+  if numSurplus == 0:
+    frontClaw.run_target(-50, -350, wait = False)
   checkHouse3()
   # based on houses, determine which energy is extra  
   extraCol = getExtra()
@@ -829,7 +838,6 @@ def main():
  
   # deposit at house 3 again
   if Color.YELLOW or Color.BLUE in Houses[2]:
-    GyroTurn.turn(89)
     # add condition to turn based on whether blue is in the house
     depositHouse(Houses[2], 2, 3)
   else:
@@ -873,56 +881,63 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-GyroTurn.maxSpeed = 40
-numSurplus = 2
-surplus = Color.BLUE
-Houses = [[Color.BLUE], [], []]
-checkHouse2()
-checkHouse3()
-# based on houses, determine which energy is extra  
-extraCol = getExtra()
-# always deposit two surplus into battery storage from claw, deposit any remaining green
 
-depositBattery(1, extraCol)
+# GyroTurn.maxSpeed = 40
+# numSurplus = 0
+# surplus = Color.BLUE
+# Houses = [[Color.BLUE], [Color.BLUE, Color.GREEN], []]
 
-# collect yellow and blue energy
-collectYellow()
-collectBlue()  
+# #checkHouse2()
+# checkHouse3()
 
-# deposit at house 3 again
-if Color.YELLOW or Color.BLUE in Houses[2]:
-  GyroTurn.turn(89)
-  # add condition to turn based on whether blue is in the house
-  depositHouse(Houses[2], 2, 3)
-else:
-  GyroTurn.turn(-89)
+# # based on houses, determine which energy is extra  
+# extraCol = getExtra()
+# # always deposit two surplus into battery storage from claw, deposit any remaining green
+
+# depositBattery(1, extraCol)
+
+# # collect yellow and blue energy
+# collectYellow()
+# collectBlue()  
+
+# # deposit at house 3 again
+# if Color.YELLOW or Color.BLUE in Houses[2]:
+#   # add condition to turn based on whether blue is in the house
+#   depositHouse(Houses[2], 2, 3)
+# else:
+#   GyroTurn.turn(-89)
   
-depositBattery(2, extraCol)
-  # go back to house 2 if needed
-if Color.BLUE or Color.YELLOW in Houses[1] and surplus != Color.BLUE:
-  if extraCol == Color.YELLOW:
-    GyroStraightDeg.move(-40, -80)
-    base.hold()
-    PID_SingleMotorTurn(base, gyro, -89, 0, 1)
-  elif extraCol == Color.BLUE:
-    GyroTurn.turn(89)
-  base.reset()      
-  LineTrack.move(colRight, 80, lambda: leftMotor.angle() < 700, side = -1, target = 700)
-  base.hold()
+# depositBattery(2, extraCol)
+# # go back to house 2 if needed
+# if Color.BLUE or Color.YELLOW in Houses[1] and surplus != Color.BLUE:
+#   if extraCol == Color.YELLOW:
+#     GyroStraightDeg.move(-40, -80)
+#     base.hold()
+#     PID_SingleMotorTurn(base, gyro, -89, 0, 1)
+#   elif extraCol == Color.BLUE:
+#     GyroTurn.turn(89)
+#   base.reset()      
+#   LineTrack.move(colRight, 80, lambda: leftMotor.angle() < 700, side = -1, target = 700)
+#   base.hold()
 
-  depositHouse(Houses[1], 2, 2)
-  LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.BLACK, accel = True)
-  LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.WHITE)
+#   depositHouse(Houses[1], 2, 2)
+#   LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.BLACK, accel = True)
+#   LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.WHITE)
   
   
-elif Color.BLUE or Color.YELLOW in Houses[0]:
-  if extraCol == Color.YELLOW:
-    GyroStraight.move(-40, lambda: leftMotor.angle() > -80)
-    base.hold()
-    PID_SingleMotorTurn(base, gyro, 89, 1, 0)
-  elif extraCol == Color.BLUE:
-    GyroTurn.turn(-89)
+# elif Color.BLUE or Color.YELLOW in Houses[0]:
+#   if extraCol == Color.YELLOW:
+#     GyroStraight.move(-40, lambda: leftMotor.angle() > -80)
+#     base.hold()
+#     PID_SingleMotorTurn(base, gyro, 89, 1, 0)
+#   elif extraCol == Color.BLUE:
+#     GyroTurn.turn(-89)
     
 
-# deposit last energy and return to base
-returnBase()
+# # deposit last energy and return to base
+# returnBase()
+
+#GyroTurn.turn(-89)
+base.reset()
+GyroStraightDeg.move(-40, -20)
+base.hold()
