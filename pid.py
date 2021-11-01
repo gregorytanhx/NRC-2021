@@ -69,7 +69,7 @@ class PID_LineTrack(PID):
       threshold = self.threshold
     speed = maxSpeed
     if target is not None:
-      rate = 2 * maxSpeed / (target * 0.04)
+      rate = maxSpeed / (target * 0.04)
     else:
       rate = 1
     if accel:
@@ -156,7 +156,7 @@ class PID_GyroStraightDegrees(PID):
            accel = False,
            deccel = True):
     angle = self.base.leftMotor.angle()
-    rate =  max(abs(2 * maxSpeed / (target * 0.04)), 10)
+    rate =  min(abs(2 * maxSpeed / (target * 0.04)), 10)
    
     polarity = maxSpeed /abs(maxSpeed)
     if accel:
@@ -169,8 +169,7 @@ class PID_GyroStraightDegrees(PID):
       error = self.gyro.angle() 
       self.update(error, kp, ki, kd)      
       angle = self.base.leftMotor.angle()
-      print(rate)
-      print(speed)
+
       if abs(abs(angle) - abs(target)) <= 100 * abs(maxSpeed) / 40 and deccel :
         if abs(speed) > minSpeed:
           speed = (abs(speed) - rate) * polarity

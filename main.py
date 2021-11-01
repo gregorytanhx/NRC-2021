@@ -1,6 +1,6 @@
 #!/usr/bin/env pybricks-micropython
 from pybricks.hubs import EV3Brick
-from pybricks.ev3devices import (Motor, ColorSensor, GyroSensor)
+from pybricks.ev3devices import (Motor, ColorSensor, GyroSensor, InfraredSensor)
 from pybricks.nxtdevices import ColorSensor as nxtColorSensor
 from pybricks.parameters import Port, Stop, Direction, Button, Color
 from pybricks.tools import wait, StopWatch, DataLog
@@ -60,8 +60,9 @@ if ev3.battery.voltage() <= 7400:
   sys.exit()
 
 def calibrate_gyro():
+  ev3.speaker.beep()
+  gyro = GyroSensor(Port.S2)
   _ = gyro.speed()
-  wait(500)
   while gyro.angle() != 0:
     wait(1)
 
@@ -547,9 +548,9 @@ def collectYellow():
   base.reset()
   LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK)
   curr = leftMotor.angle()
-  LineTrack.move(colLeft, 60, lambda: leftMotor.angle() < 600 + curr)
+  LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 600 + curr)
   gyro.reset_angle(0)
-  GyroStraightDeg.move(70, 730 + curr)
+  GyroStraightDeg.move(60, 730 + curr)
   base.hold()
   frontClaw.run_target(-50, -255)
   GyroTurn.turn(-89)
@@ -563,6 +564,7 @@ def collectYellow():
   GyroStraightDeg.move(-85, -370)
   base.hold()
   GyroTurn.turn(-89)
+  # add wall align here?
   base.reset()
   GyroStraightDeg.move(-90, -500, deccel = False)
   GyroStraightDeg.move(-90, -750, condition = lambda: colLeft.color() != Color.BLACK)
@@ -614,9 +616,9 @@ def depositBatteryBack():
 def depositBattery(time, extraCol):
   global numSurplus, numYellow
   base.reset()
-  LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 600, target = 600, minSpeed = 20)
-  gyro.reset_angle(0)
-  GyroStraight.move(20, lambda: colLeft.color() != Color.BLACK)
+  LineTrack.move(colRight, 50, lambda: leftMotor.angle() < 600, target = 550, minSpeed = 20)
+
+  LineTrack.move(colRight, 20, lambda: colLeft.color() != Color.BLACK)
   base.hold()
   
   if time == 1:
@@ -741,7 +743,6 @@ def checkHouse3():
   base.hold()
   scanHouseEV3(Houses[2], ev3Col)
   base.reset()
-  wait(1000)
   GyroStraightDeg.move(50, 120)
   base.hold()
   
@@ -882,62 +883,5 @@ def main():
 # backClaw.hold()
 # main()
 
-# GyroTurn.maxSpeed = 40
-# numSurplus = 0
-# surplus = Color.BLUE
-# Houses = [[Color.BLUE], [Color.BLUE, Color.GREEN], []]
 
-# #checkHouse2()
-# checkHouse3()
-
-# # based on houses, determine which energy is extra  
-# extraCol = getExtra()
-# # always deposit two surplus into battery storage from claw, deposit any remaining green
-
-# depositBattery(1, extraCol)
-
-# # collect yellow and blue energy
-# collectYellow()
-# collectBlue()  
-
-# # deposit at house 3 again
-# if Color.YELLOW or Color.BLUE in Houses[2]:
-#   # add condition to turn based on whether blue is in the house
-#   depositHouse(Houses[2], 2, 3)
-# else:
-#   GyroTurn.turn(-89)
-  
-# depositBattery(2, extraCol)
-# # go back to house 2 if needed
-# if Color.BLUE or Color.YELLOW in Houses[1] and surplus != Color.BLUE:
-#   if extraCol == Color.YELLOW:
-#     GyroStraightDeg.move(-40, -80)
-#     base.hold()
-#     PID_SingleMotorTurn(base, gyro, -89, 0, 1)
-#   elif extraCol == Color.BLUE:
-#     GyroTurn.turn(89)
-#   base.reset()      
-#   LineTrack.move(colRight, 80, lambda: leftMotor.angle() < 700, side = -1, target = 700)
-#   base.hold()
-
-#   depositHouse(Houses[1], 2, 2)
-#   LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.BLACK, accel = True)
-#   LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.WHITE)
-  
-  
-# elif Color.BLUE or Color.YELLOW in Houses[0]:
-#   if extraCol == Color.YELLOW:
-#     GyroStraight.move(-40, lambda: leftMotor.angle() > -80)
-#     base.hold()
-#     PID_SingleMotorTurn(base, gyro, 89, 1, 0)
-#   elif extraCol == Color.BLUE:
-#     GyroTurn.turn(-89)
-    
-
-# # deposit last energy and return to base
-# returnBase()
-
-#GyroTurn.turn(-89)
-base.reset()
-GyroStraightDeg.move(-40, -20)
-base.hold()
+calibrate_gyro()
