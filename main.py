@@ -239,11 +239,11 @@ def collectGreen():
 
   backClaw.run_angle(50, -195)
   base.reset()
-  GyroStraightDeg.move(-50, -105)
+  GyroStraightDeg.move(-50, -85)
+  
   base.hold()
-  # GyroStraight.move(30, lambda: leftMotor.angle() < 20)
-  # base.hold()
   backClaw.run_angle(50, 50)
+  GyroStraightDeg.move(-50, -105)
   # cap speed of turns after grabbing green to stop them from jerking
   GyroTurn.maxSpeed = 40
   
@@ -380,10 +380,15 @@ def depositHouse(house, time, houseNum):
         GyroTurn.turn(-89)     
     
     base.reset()
-    if time == 1 and (houseNum == 1 or houseNum == 2):
+    if cubeDeposited:
+      GyroStraightDeg.move(-50, -50)
+    elif time == 1 and houseNum == 1:
       GyroStraightDeg.move(-50, -200)
     elif time == 2 and (houseNum == 1 or houseNum == 2):
-      GyroStraightDeg.move(-50, -250)
+      if tmp == 1:
+        GyroStraightDeg.move(-50, -230)
+      else:
+        GyroStraightDeg.move(-50, -300)
     else:
       GyroStraightDeg.move(-50, -50)
     base.hold()
@@ -490,7 +495,7 @@ def collectYellow():
   base.reset()  
   LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 800)
   curr = leftMotor.angle()
-  LineTrack.move(colLeft, 40, lambda: leftMotor.angle() < 110 + curr, target = 110 + curr)
+  LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 110 + curr, target = 110 + curr)
   base.hold()
   GyroTurn.turn(89)
   # push solar panels
@@ -603,8 +608,10 @@ def depositBatteryBack():
   backClaw.run_target(50, 100)
  
 def depositBattery(time, extraCol):
+  global numSurplus, numYellow
   base.reset()
-  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 500, minSpeed = 20, side = -1)
+  LineTrack.move(colLeft, 70, lambda: leftMotor.angle() < 500, target = 500, minSpeed = 20, side = -1)
+  LineTrack.move(colLeft, 20, lambda: colRight.color() != Color.BLACK, side = -1)
   base.hold()
   
   if time == 1:
@@ -612,7 +619,6 @@ def depositBattery(time, extraCol):
       depositBatteryFront(numSurplus)
     if extraCol == Color.GREEN or (surplus == Color.GREEN and numSurplus == 0):
       depositBatteryBack()
-      numGreen -= 2
       GyroTurn.turn(-89)
     else:
       # single motor turn to avoid hitting wall of battery area
@@ -704,13 +710,13 @@ def checkHouse2():
 def checkHouse3():
   # move to house 3 
   base.reset()
-  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK)
+  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 500)
   curr = leftMotor.angle()
-  LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 90 + curr, target = 90 + curr)
+  LineTrack.move(colLeft, 50, lambda: leftMotor.angle() < 110 + curr, target = 110 + curr)
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  LineTrack.move(colRight, 80, lambda: leftMotor.angle() < 790, target = 790, accel = True)
+  LineTrack.move(colRight, 75, lambda: leftMotor.angle() < 840, target = 840, accel = True)
   base.hold()  
   GyroTurn.turn(-89)
   base.reset()
@@ -867,20 +873,21 @@ def main():
 # backClaw.hold()
 # main()
 
+
+base.reset()
+GyroStraightDeg.move(-50, -200)
+base.hold()
+GyroTurn.turn(180)
+base.reset()
+GyroStraightDeg.move(-50, -50)
+base.hold()
+wait(1000)
 # numSurplus = 0
 # numYellow = 2
 # surplus = Color.BLUE
 # GyroTurn.maxSpeed = 40
 # depositBattery(2, Color.YELLOW)
 # wait(1000)
-base.reset()
-base.hold()
-GyroTurn.turn(89)
-base.reset()
-LineTrack.move(colRight,80, lambda: leftMotor.angle() < 850, target = 850)
-base.hold()  
-GyroTurn.turn(-89)
-wait(1000)
 # TO DO
 # FIX 180 turn after collect green
 # FIX collect yellow
