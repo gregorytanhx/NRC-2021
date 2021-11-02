@@ -50,7 +50,7 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 LineTrack = PID_LineTrack(base, 0.16, 0.0001, 18, 40)
 GyroStraight = PID_GyroStraight(base, 0.9, 0, 0, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 0.9, 0, 0, gyro)
-GyroTurn = PID_GyroTurn(base, 0.8, 0, 1.3, gyro)
+GyroTurn = PID_GyroTurn(base, 0.8, 0, 0, gyro)
 #GyroTurn = PID_GyroTurn(base, 1, 0, 0)
 # battery alert
 print(ev3.battery.voltage())
@@ -561,7 +561,7 @@ def collectYellow():
   frontClaw.dc(speed = 20, dir = -1)
   base.reset()
   backClaw.run_time(100, 1000, wait = False)
-  GyroStraightDeg.move(-85, -370)
+  GyroStraightDeg.move(-80, -380)
   base.hold()
   GyroTurn.turn(-89)
   # add wall align here?
@@ -728,7 +728,7 @@ def checkHouse3():
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  LineTrack.move(colRight, 70, lambda: leftMotor.angle() < 820, target = 800)
+  LineTrack.move(colRight, 70, lambda: leftMotor.angle() < 830, target = 800)
   base.hold()  
   gyro.reset_angle(0)
   GyroTurn.turn(-89)
@@ -883,8 +883,47 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
-# checkHouse3()
 
-while True:
-  GyroTurn.turn(89)
-  wait(500)
+Houses = [[Color.BLUE], [Color.GREEN, Color.BLUE], [Color.YELLOW, Color.GREEN]]
+surplus = Color.BLUE
+extraCol = Color.YELLOW
+numSurplus = 0
+collectYellow()
+collectBlue()
+
+
+if Color.YELLOW or Color.BLUE in Houses[2]:
+  # add condition to turn based on whether blue is in the house
+  depositHouse(Houses[2], 2, 3)
+else:
+  GyroTurn.turn(-89)
+  
+depositBattery(2, extraCol)
+  # go back to house 2 if needed
+if Color.BLUE or Color.YELLOW in Houses[1] and surplus != Color.BLUE:
+  if extraCol == Color.YELLOW:
+    GyroStraightDeg.move(-40, -80)
+    base.hold()
+    PID_SingleMotorTurn(base, gyro, -89, 0, 1)
+  elif extraCol == Color.BLUE:
+    GyroTurn.turn(89)
+  base.reset()      
+  LineTrack.move(colRight, 80, lambda: leftMotor.angle() < 700, side = -1, target = 700)
+  base.hold()
+
+  depositHouse(Houses[1], 2, 2)
+  LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.BLACK, accel = True)
+  LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.WHITE)
+  
+  
+elif Color.BLUE or Color.YELLOW in Houses[0]:
+  if extraCol == Color.YELLOW:
+    GyroStraight.move(-40, lambda: leftMotor.angle() > -80)
+    base.hold()
+    PID_SingleMotorTurn(base, gyro, 89, 1, 0)
+  elif extraCol == Color.BLUE:
+    GyroTurn.turn(-89)
+    
+
+# deposit last energy and return to base
+returnBase()
