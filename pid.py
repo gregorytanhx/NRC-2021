@@ -85,7 +85,7 @@ class PID_LineTrack(PID):
           speed = maxSpeed
       
       if target is not None: # decceleration
-        angle = self.base.leftMotor.angle()
+        angle = self.base.rightMotor.angle()
         if deccel and abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
           slowingDown = True
           if abs(speed) > minSpeed:
@@ -155,7 +155,7 @@ class PID_GyroStraightDegrees(PID):
            minSpeed = 30, 
            accel = False,
            deccel = True, condition = lambda: True):
-    angle = self.base.leftMotor.angle()
+    angle = self.base.rightMotor.angle()
     rate =  min(abs(2 * maxSpeed / (target * 0.04)), 10)
    
     polarity = maxSpeed /abs(maxSpeed)
