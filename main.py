@@ -47,7 +47,7 @@ colRight = ColorSensor(Port.S4)
 base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
-LineTrack = PID_LineTrack(base, 0.16, 0.0001, 16, 40)
+LineTrack = PID_LineTrack(base, 0.16, 0.0001, 18, 40)
 GyroStraight = PID_GyroStraight(base, 0.9, 0, 0, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 0.9, 0, 0, gyro)
 GyroTurn = PID_GyroTurn(base, 0.8, 0, 1.3, gyro)
@@ -168,7 +168,7 @@ def collectSurplus(degrees, col):
     base.hold()
     base.reset()
     
-    GyroStraightDeg.move(-70, -120)
+    GyroStraightDeg.move(-70, -110)
     base.hold()
     GyroTurn.turn(-89)
     
@@ -194,7 +194,7 @@ def collectSurplus(degrees, col):
   frontClaw.run_target(60, -700)
  
   base.reset()
-  GyroStraightDeg.move(70, 400)
+  GyroStraightDeg.move(70, 420)
   base.hold()
   frontClaw.run_target(50, 230)
   frontClaw.dc(dir = -1, speed = 20)
@@ -210,7 +210,7 @@ def collectSurplus(degrees, col):
     base.hold()
   
   elif col == Color.BLUE:
-    GyroStraightDeg.move(-90, -750)
+    GyroStraightDeg.move(-80, -780)
     base.hold()
 
 def collectGreen():  
@@ -238,17 +238,17 @@ def collectGreen():
   GyroTurn.turn(89)
 
   base.reset()
-  GyroStraightDeg.move(60, 343)
+  GyroStraightDeg.move(60, 340)
   base.hold()
   GyroTurn.turn(-89)
 
   backClaw.run_angle(50, -195)
   base.reset()
-  GyroStraightDeg.move(-50, -85)
+  GyroStraightDeg.move(-40, -85)
   
   base.hold()
   backClaw.run_angle(50, 50)
-  GyroStraightDeg.move(-50, -105)
+  GyroStraightDeg.move(-40, -100)
   # cap speed of turns after grabbing green to stop them from jerking
   GyroTurn.maxSpeed = 40
   
@@ -387,7 +387,7 @@ def depositHouse(house, time, houseNum):
     
     base.reset()
     if cubeDeposited:
-      GyroStraightDeg.move(-30, -15)
+      GyroStraightDeg.move(-40, -40)
     elif time == 1 and houseNum == 1:
       GyroStraightDeg.move(-50, -200)
     elif time == 2 and (houseNum == 1 or houseNum == 2):
@@ -396,7 +396,7 @@ def depositHouse(house, time, houseNum):
       else:
         GyroStraightDeg.move(-50, -300)
     else:
-      GyroStraightDeg.move(-50, -50)
+      GyroStraightDeg.move(-40, -50)
     base.hold()
     
     if RingCol == Color.GREEN:
@@ -421,7 +421,7 @@ def depositHouse(house, time, houseNum):
       else:
         numBlue = 0
     else:
-      GyroStraightDeg.move(40, 95)
+      GyroStraightDeg.move(40, 90)
       if RingCol == Color.GREEN:
         numGreen -= 2
       else:
@@ -435,7 +435,7 @@ def depositHouse(house, time, houseNum):
       if not cubeDeposited:
         GyroStraight.move(40, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
       base.reset()
-      GyroStraightDeg.move(50, 130)
+      GyroStraightDeg.move(40, 130)
       base.hold()
       if houseNum == 1:
         GyroTurn.turn(89)
@@ -670,7 +670,7 @@ def returnHouse1():
     GyroTurn.turn(-89)      
   
   base.reset()
-  LineTrack.move(colRight, 75, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True)
+  LineTrack.move(colRight, 75, lambda: colLeft.color() != Color.BLACK, side = -1)
   curr = leftMotor.angle()
   LineTrack.move(colRight, 80, lambda: leftMotor.angle() < 1250 + curr, side = -1, target = 1250 + curr)
   base.hold()
@@ -703,7 +703,8 @@ def checkHouse2():
     
   frontClaw.run_target(30, 300)
   scanHouseEV3(Houses[1], ev3Col)  
-  
+  base.hold()
+  wait(100)
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
   base.reset()
@@ -719,7 +720,7 @@ def checkHouse2():
        
 def checkHouse3():
   # move to house 3 
-  
+  base.hold()
   base.reset()
   LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 500)
   curr = leftMotor.angle()
@@ -727,8 +728,9 @@ def checkHouse3():
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  LineTrack.move(colLeft, 70, lambda: leftMotor.angle() < 810, target = 810, side = -1)
+  LineTrack.move(colRight, 70, lambda: leftMotor.angle() < 820, target = 800)
   base.hold()  
+  gyro.reset_angle(0)
   GyroTurn.turn(-89)
   base.reset()
   GyroStraightDeg.move(-40, -20)
@@ -737,7 +739,6 @@ def checkHouse3():
   # scan house 3
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
-  wait(100)
   base.reset()
   GyroStraightDeg.move(-85, -300)
   base.hold()
@@ -882,6 +883,8 @@ def main():
 # frontClaw.hold()
 # backClaw.hold()
 # main()
+# checkHouse3()
 
-
-calibrate_gyro()
+while True:
+  GyroTurn.turn(89)
+  wait(500)

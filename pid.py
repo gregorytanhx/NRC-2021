@@ -69,7 +69,7 @@ class PID_LineTrack(PID):
       threshold = self.threshold
     speed = maxSpeed
     if target is not None:
-      rate = maxSpeed / (target * 0.04)
+      rate = 2 * maxSpeed / (target * 0.04)
     else:
       rate = 1
     if accel:
@@ -80,7 +80,7 @@ class PID_LineTrack(PID):
       self.update(error, kp, ki, kd)
       if accel and target is None:
         if speed < maxSpeed:
-            speed = (abs(speed) + rate) *  speed/abs(speed) 
+            speed = speed + rate
         if speed > maxSpeed:
           speed = maxSpeed
       
@@ -89,12 +89,12 @@ class PID_LineTrack(PID):
         if deccel and abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
           slowingDown = True
           if abs(speed) > minSpeed:
-            speed = (abs(speed) - rate) *  speed/abs(speed) 
+            speed = speed - rate 
           if speed < minSpeed:
             speed = minSpeed
         elif accel and not slowingDown:
           if speed < maxSpeed:
-            speed = (abs(speed) + rate) *  speed/abs(speed) 
+            speed = speed + rate
           if speed > maxSpeed:
             speed = maxSpeed
       
@@ -206,7 +206,7 @@ class PID_GyroTurn(PID_GyroStraight):
     self.gyro.reset_angle(0)
     
       
-def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.9, ki = 0, kd = 1.2, minSpeed = 20, reset = True):
+def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.9, ki = 0, kd = 1.2, minSpeed = 15, reset = True):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle)
