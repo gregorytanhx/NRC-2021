@@ -77,6 +77,7 @@ class PID_LineTrack(PID):
     slowingDown = False
     while condition():
       error = threshold - sensor.reflection()
+
       self.update(error, kp, ki, kd)
       if accel and target is None:
         if speed < maxSpeed:

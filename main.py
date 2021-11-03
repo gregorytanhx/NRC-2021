@@ -48,7 +48,7 @@ colRight = ColorSensor(Port.S4)
 base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
-LineTrack = PID_LineTrack(base, 0.16, 0.0001, 17, 45)
+LineTrack = PID_LineTrack(base, 0.4, 0, 25, 40)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 0, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 0, gyro)
 GyroTurn = PID_GyroTurn(base, 0.8, 0, 0, gyro)
@@ -58,7 +58,7 @@ print(ev3.battery.voltage())
 if ev3.battery.voltage() <= 7400:
   print('LOW BATTERY')
   ev3.speaker.beep()
-  #sys.exit()
+  sys.exit()
 
 def calibrate_gyro():
   ev3.speaker.beep()
@@ -137,8 +137,6 @@ def scanHouseEV3(house, sensor, target = 300):
 
         base.run(speed - gyroPID.correction, speed + gyroPID.correction)
       detected = False
-
-  print(house)
   base.hold()
 
 def checkSurplus(degrees):
@@ -159,8 +157,9 @@ def checkSurplus(degrees):
 
 def collectSurplus(degrees, col):
   if col == Color.BLUE:
-    PID_SingleMotorTurn(base, gyro, 180, 1, 0.6)
 
+    PID_SingleMotorTurn(base, gyro, 180, 1, 0.65)
+    wait(1000)
     # start opening claw
     frontClaw.dc()
     base.reset()
@@ -210,13 +209,13 @@ def collectSurplus(degrees, col):
     base.hold()
   
   elif col == Color.BLUE:
-    GyroStraightDeg.move(-80, -780)
+    GyroStraightDeg.move(-80, -775)
     base.hold()
 
 def collectGreen():  
   backClaw.run_time(100, 1000, wait = False)
   base.reset()
-  LineTrack.move(colRight, 60, lambda: colLeft.color() != Color.BLACK, side = -1)
+  LineTrack.move(colRight, 55, lambda: colLeft.color() != Color.BLACK, side = -1)
   curr = rightMotor.angle()
   LineTrack.move(colRight, 50, lambda: rightMotor.angle() < 222 + curr, side = -1, target = 222 + curr)
   gyro.reset_angle(0)
@@ -238,7 +237,7 @@ def collectGreen():
   GyroTurn.turn(89)
 
   base.reset()
-  GyroStraightDeg.move(60, 340)
+  GyroStraightDeg.move(60, 337)
   base.hold()
   GyroTurn.turn(-89)
 
@@ -249,6 +248,7 @@ def collectGreen():
   base.hold()
   backClaw.run_angle(50, 50)
   GyroStraightDeg.move(-40, -105)
+  base.hold()
   # cap speed of turns after grabbing green to stop them from jerking
   GyroTurn.maxSpeed = 40
   
@@ -344,7 +344,7 @@ def depositHouse(house, time, houseNum):
   if RingCol not in house:
     if houseNum ==  1 or houseNum ==  2:
       base.reset()
-      GyroStraightDeg.move(-70, -490)
+      GyroStraightDeg.move(-70, -485)
       base.hold()
       if houseNum ==  1:
         GyroTurn.turn(-89)
@@ -387,7 +387,7 @@ def depositHouse(house, time, houseNum):
     
     base.reset()
     if cubeDeposited:
-      GyroStraightDeg.move(-40, -20)
+      GyroStraightDeg.move(-40, -40)
     elif time == 1 and houseNum == 1:
       GyroStraightDeg.move(-50, -300)
     elif time == 2 and (houseNum == 1 or houseNum == 2):
@@ -408,7 +408,6 @@ def depositHouse(house, time, houseNum):
     #     deg = 105
     deg = 105
     backClaw.run_target(-30, -deg)
-    print(deg)
     base.reset()
     # go more if last set of ring blocks to be deposited
     if (numCol == 4 and tmp == 2) or numCol == 2:
@@ -434,7 +433,7 @@ def depositHouse(house, time, houseNum):
         GyroStraight.move(40, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
         base.hold()
       base.reset()
-      GyroStraightDeg.move(40, 135)
+      GyroStraightDeg.move(40, 150)
       base.hold()
       
       
@@ -606,7 +605,6 @@ def depositBatteryBack():
   base.reset()
   GyroStraightDeg.move(-30, -10)
 
- 
 def depositBattery(time, extraCol):
   global numSurplus, numYellow, numBlue
   base.reset()
@@ -636,7 +634,7 @@ def depositBattery(time, extraCol):
     else:
       # single motor turn to avoid hitting wall of battery area
       base.reset()
-      GyroStraightDeg.move(-40, -80)
+      GyroStraightDeg.move(-40, -100)
       base.hold()
       PID_SingleMotorTurn(base, gyro, 89, 1, 0)
   else:
@@ -645,12 +643,9 @@ def depositBattery(time, extraCol):
       depositBatteryFront(numYellow)
       numYellow -= 2
     
-    print(numSurplus)
-    print(surplus)
     
     if extraCol == Color.BLUE or (surplus == Color.BLUE and numSurplus == 0):
       numBlue -= 2
-      print('here')
       depositBatteryBack()
       
     else:
@@ -671,7 +666,7 @@ def getExtra():
 def checkHouse1():
   base.reset()
   GyroStraight.move(85, lambda: rightMotor.angle() < 200)   
-  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1)  
+  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1, threshold = 40)  
   curr = rightMotor.angle()
   GyroStraightDeg.move(60, 305 + curr)
   base.hold()
@@ -689,16 +684,16 @@ def returnHouse1():
     GyroTurn.turn(-89)      
   
   base.reset()
-  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True)
+  LineTrack.move(colRight, 85, lambda: colLeft.color() != Color.BLACK, side = -1)
   curr = rightMotor.angle()
-  LineTrack.move(colRight, 80, lambda: rightMotor.angle() < 1150 + curr, side = -1, target = 1150 + curr)
+  LineTrack.move(colRight, 85, lambda: rightMotor.angle() < 1200 + curr, side = -1, target = 1200 + curr)
   base.hold()
 
   depositHouse(Houses[0], 1, 1)
   
   # return to house 2 intersection
-  LineTrack.move(colRight, 75, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True)
-  LineTrack.move(colRight, 75, lambda: colLeft.color() != Color.WHITE, side = -1)  
+  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True)
+  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.WHITE, side = -1)  
 
 def checkHouse2():
   # scan house 2
@@ -731,7 +726,6 @@ def checkHouse2():
 
   # deposit at house 2 
   if Color.GREEN in Houses[1] or len(Houses[1]) == 1 or (surplus in Houses[1] and surplus != Color.YELLOW) :
-    print('here')
     depositHouse(Houses[1], 1, 2)
   else:
     PID_SingleMotorTurn(base, gyro, -180, 0.1, 1)
@@ -746,7 +740,7 @@ def checkHouse3():
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  LineTrack.move(colRight, 80, lambda: rightMotor.angle() < 820, target = 800, accel = True)
+  LineTrack.move(colRight, 80, lambda: rightMotor.angle() < 820, target = 800)
   base.hold()  
   GyroTurn.turn(-89)
   base.reset()
@@ -761,7 +755,7 @@ def checkHouse3():
   base.hold()
   scanHouseEV3([], ev3Col)
   base.reset()
-  GyroStraightDeg.move(40, 110)
+  GyroStraightDeg.move(40, 145)
   base.hold()
   
   # deposit at house 3
@@ -773,7 +767,7 @@ def checkHouse3():
   
 def returnBase():
   base.reset()
-  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, accel = True)
+  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK)
   LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.WHITE)
   if Color.BLUE in Houses[0] or Color.YELLOW in Houses[0]:
     curr = rightMotor.angle()
@@ -807,12 +801,9 @@ def returnBase():
   base.hold()
   wait(1000)
 
-
 def main():
   global surplus
   global extraCol
-  gyro.reset_angle(0)
-  base.reset()
   checkHouse1()
   
   # if yellow surplus is present, collect it 
@@ -855,7 +846,17 @@ def main():
   # based on houses, determine which energy is extra  
   extraCol = getExtra()
   # always deposit two surplus into battery storage from claw, deposit any remaining green
-  depositBattery(1, extraCol)
+  if extraCol != Color.GREEN and numSurplus == 0:
+    frontClaw.run_target(-50, -200, wait = False)
+    base.reset()
+    LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 600)
+    base.hold()
+    base.reset()
+    GyroStraightDeg.move(-40, -100)
+    base.hold()
+    PID_SingleMotorTurn(base, gyro, 89, 1, 0)
+  else:
+    depositBattery(1, extraCol)
   
   # collect yellow and blue energy
   collectYellow()
@@ -884,7 +885,7 @@ def main():
     base.hold()
 
     depositHouse(Houses[1], 2, 2)
-    LineTrack.move(colLeft, 85, lambda: colRight.color() != Color.BLACK, accel = True)
+    LineTrack.move(colLeft, 85, lambda: colRight.color() != Color.BLACK)
     LineTrack.move(colLeft, 85, lambda: colRight.color() != Color.WHITE)
     
     
@@ -903,10 +904,7 @@ def main():
 # frontClaw.dc(dir=-1)
 # backClaw.dc()
 # wait(1200)
-# ev3.speaker.beep()
-# frontClaw.hold()
-# backClaw.hold()
-# main()
+LineTrack.move(colRight, 85, lambda: True, side = -1)
+# # while len(ev3.buttons.pressed()) == 0:
+# #   wait(1)
 
-LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 600)
-base.hold()
