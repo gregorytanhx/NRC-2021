@@ -166,6 +166,7 @@ class PID_GyroStraightDegrees(PID):
     
       
     while (target < 0 and angle > target) or (target >= 0 and angle < target) and condition():
+
       error = self.gyro.angle() 
       self.update(error, kp, ki, kd)      
       angle = self.base.rightMotor.angle()
@@ -233,7 +234,7 @@ def PID_AngleOffSet(base, gyro, angle):
 def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 2): # direction = 1 for forward, direction = -1 for backwar
   kp = 0.15
   ki = 0.0018
-  kd = 3.123
+  kd = 3
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   while True:
