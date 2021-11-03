@@ -219,6 +219,7 @@ def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.9, ki = 0, kd =
   base.hold()
   if reset:
     gyro.reset_angle(0)
+    wait(10)
 
 def PID_AngleOffSet(base, gyro, angle):
   if angle > 0:
