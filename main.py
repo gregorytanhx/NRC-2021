@@ -49,17 +49,17 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
 # old: 0.16, 0.0001, 17
-LineTrack = PID_LineTrack(base, 0.16, 0.0001, 20, 45)
+LineTrack = PID_LineTrack(base, 0.16, 0.0001, 25, 45)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 0, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 0, gyro)
 GyroTurn = PID_GyroTurn(base, 0.8, 0, 0, gyro)
 #GyroTurn = PID_GyroTurn(base, 1, 0, 0)
 # battery alert
 print(ev3.battery.voltage())
-if ev3.battery.voltage() <= 7400:
+if ev3.battery.voltage() <= 7700:
   print('LOW BATTERY')
   ev3.speaker.beep()
-  #sys.exit()
+  sys.exit()
 
 def calibrate_gyro():
   ev3.speaker.beep()
@@ -159,7 +159,7 @@ def checkSurplus(degrees):
 def collectSurplus(degrees, col):
   if col == Color.BLUE:
 
-    PID_SingleMotorTurn(base, gyro, 180, 1, 0.6)
+    PID_SingleMotorTurn(base, gyro, 180, 1, 0.62)
     # start opening claw
     frontClaw.dc()
     base.reset()
@@ -434,7 +434,7 @@ def depositHouse(house, time, houseNum):
         GyroStraight.move(40, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
         base.hold()
       base.reset()
-      GyroStraightDeg.move(40, 180)
+      GyroStraightDeg.move(40, 175)
       base.hold()
       
       
@@ -693,8 +693,8 @@ def returnHouse1():
   depositHouse(Houses[0], 1, 1)
   
   # return to house 2 intersection
-  LineTrack.move(colRight, 85, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True)
-  LineTrack.move(colRight, 85, lambda: colLeft.color() != Color.WHITE, side = -1)
+  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True)
+  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.WHITE, side = -1)
 
 def checkHouse2():
   # scan house 2
@@ -906,12 +906,7 @@ def main():
 # frontClaw.dc(dir=-1)
 # backClaw.dc()
 # wait(1200)
-# ev3.speaker.beep()
-# main()
+ev3.speaker.beep()
+main()
 # # while len(ev3.buttons.pressed()) == 0:
 # #   wait(1)
-
-LineTrack.move(colRight, 85, lambda: colLeft.color() != Color.BLACK, side = -1, accel = True)
-curr = rightMotor.angle()
-LineTrack.move(colRight, 85, lambda: rightMotor.angle() < 1200 + curr, side = -1, target = 1200 + curr)
-base.hold()
