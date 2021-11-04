@@ -61,7 +61,7 @@ class PID_LineTrack(PID):
            kd: float = None, 
            side = 1, 
            target = None, 
-           minSpeed = 40,
+           minSpeed = 35,
            accel = False, 
            deccel = True):
     # update control constants if given
