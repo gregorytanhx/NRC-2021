@@ -61,7 +61,7 @@ class PID_LineTrack(PID):
            kd: float = None, 
            side = 1, 
            target = None, 
-           minSpeed = 35,
+           minSpeed = 40,
            accel = False, 
            deccel = True):
     # update control constants if given
@@ -208,7 +208,7 @@ class PID_GyroTurn(PID_GyroStraight):
     self.gyro.reset_angle(0)
     
       
-def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.9, ki = 0, kd = 1.2, minSpeed = 15, reset = True):
+def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.9, ki = 0, kd = 1.2, minSpeed = 20, reset = True):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle)
@@ -224,11 +224,11 @@ def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.9, ki = 0, kd =
 
 def PID_AngleOffSet(base, gyro, angle):
   if angle > 0:
-    PID_SingleMotorTurn(base, gyro, angle, 1, 0, reset = False)
+    PID_SingleMotorTurn(base, gyro, angle, 1, 0, reset = False, kp = 1.1)
     wait(10)
     PID_SingleMotorTurn(base, gyro, 0, 0, 1)
   else:
-    PID_SingleMotorTurn(base, gyro, angle, 0, 1,reset = False)
+    PID_SingleMotorTurn(base, gyro, angle, 0, 1,reset = False, kp = 1.1)
     wait(10)
     PID_SingleMotorTurn(base, gyro, 0, 1, 0)
     
