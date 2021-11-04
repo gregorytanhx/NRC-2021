@@ -49,14 +49,14 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
 # old: 0.16, 0.0001, 17
-LineTrack = PID_LineTrack(base, 0.18, 0.0001, 25, 45)
+LineTrack = PID_LineTrack(base, 0.18, 0.0001, 30, 45)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 0, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 0, gyro)
 GyroTurn = PID_GyroTurn(base, 0.8, 0, 0, gyro)
 #GyroTurn = PID_GyroTurn(base, 1, 0, 0)
 # battery alert
 print(ev3.battery.voltage())
-if ev3.battery.voltage() <= 7700:
+if ev3.battery.voltage() <= 7500:
   print('LOW BATTERY')
   ev3.speaker.beep()
   sys.exit()
@@ -463,15 +463,12 @@ def collectBlue():
   base.stop()  
 
 
-  GyroTurn.maxSpeed = 40
-  backClaw.run_target(50, 60)
+
+  backClaw.run_target(50, 70)
   base.reset()
-  GyroStraightDeg.move(40, 165)
+  GyroStraightDeg.move(40, 160)
   base.hold()
-  wait(500)
-  backClaw.run_target(-100, -150)
-  base.reset()
-  backClaw.run_target(70, 150)
+  backClaw.run_time(100, 500)
   
   # collect next 2
   GyroTurn.turn(89)
@@ -482,22 +479,23 @@ def collectBlue():
   base.hold()
   GyroTurn.turn(-89)
 
-  backClaw.run_target(-30, -60)
+  backClaw.run_target(-30, -225)
  
   base.reset()
-  GyroStraight.move(-10, lambda: rightMotor.angle() > -123)
+  GyroStraight.move(-10, lambda: rightMotor.angle() > -118)
   base.hold()
   backClaw.run_target(15, 75)
+  GyroTurn.maxSpeed = 40
 
   base.reset()
-  GyroStraightDeg.move(90, 1070)
+  GyroStraightDeg.move(90, 1110)
   base.hold()
     
 def collectYellow():
   # line track to intersection
   frontClaw.dc()
   base.reset()  
-  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 750)
+  LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK, target = 700)
   curr = rightMotor.angle()
   LineTrack.move(colLeft, 40, lambda: rightMotor.angle() < 105 + curr, target = 105 + curr)
   base.hold()
@@ -507,18 +505,17 @@ def collectYellow():
   frontClaw.hold()
   frontClaw.run_target(-40, -405, wait = False)
   base.reset()
-  LineTrack.move(colRight, 30, lambda: rightMotor.angle() < 550, ki = 0, threshold = 50)
+  LineTrack.move(colRight, 30, lambda: rightMotor.angle() < 550, threshold = 50)
   base.hold()
   gyro.reset_angle(0)
   wait(50)
-
   GyroStraight.move(30, lambda: colLeft.color() != Color.BLACK and colRight.color() != Color.BLACK)
   GyroStraight.move(30, lambda: colLeft.color() != Color.WHITE and colRight.color() != Color.WHITE)
 
   curr = rightMotor.angle()
   GyroStraight.move(20, lambda: rightMotor.angle() < 80 + curr)
   base.hold()
-  frontClaw.run_target(60, 109) 
+  frontClaw.run_target(60, 105) 
 
 
   frontClaw.run_target(-100, -400)
@@ -534,14 +531,14 @@ def collectYellow():
   LineTrack.move(colRight, 50, lambda: rightMotor.angle() < 500, side = -1)
   GyroStraightDeg.move(60, 620)
   base.hold()
-  GyroTurn.turn(89)
+  GyroTurn.turn(90)
   base.reset()
-  GyroStraightDeg.move(40, 55)
+  GyroStraightDeg.move(40, 60)
   base.hold()
   frontClaw.run_target(-60, -720)
   base.reset()
   frontClaw.dc(speed = 20, dir = -1)
-  GyroStraightDeg.move(-40, -60)
+  GyroStraightDeg.move(-40, -65)
   base.hold()
     
   # collect next 2 in catchment area
@@ -551,18 +548,19 @@ def collectYellow():
   LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK)
   curr = rightMotor.angle()
   LineTrack.move(colLeft, 60, lambda: rightMotor.angle() < 600 + curr)
-  gyro.reset_angle(0)
-  GyroStraightDeg.move(60, 730 + curr)
+  #gyro.reset_angle(0)
+  GyroStraightDeg.move(60, 740 + curr)
   base.hold()
   GyroTurn.turn(-89)
   base.reset()
-  GyroStraightDeg.move(40, 190)
+  GyroStraightDeg.move(40, 220)
   base.hold()
   frontClaw.run_target(40, 255)
   frontClaw.dc(speed = 20, dir = -1)
   base.reset()
+  GyroTurn.maxSpeed = 40
   GyroTurn.turn(180)
-  base.run_time(-100, 800)
+  base.run_time(-80, 800)
   base.hold()
   gyro.reset_angle(0)
   base.reset()
@@ -570,15 +568,16 @@ def collectYellow():
   base.hold()
   GyroTurn.turn(89)
   # add wall align here?
-  base.reset()
+
   backClaw.run_time(100, 1200, wait = False)
+  base.reset()
   GyroStraightDeg.move(-80, -730)
   base.hold()
   
 def depositBatteryFront(numCube):
   
   base.reset()
-  GyroStraightDeg.move(50, 190)
+  GyroStraightDeg.move(50, 200)
   base.hold()
   frontClaw.run_target(60, 300)
   if numCube == 4:
@@ -594,7 +593,7 @@ def depositBatteryFront(numCube):
 def depositBatteryBack():
   GyroTurn.turn(180)
   base.reset()
-  GyroStraightDeg.move(-40, -145, minSpeed = 20)
+  GyroStraightDeg.move(-40, -150, minSpeed = 20)
   base.hold()
 
   backClaw.run_target(-100, -100)
@@ -604,6 +603,7 @@ def depositBatteryBack():
   backClaw.run_target(50, 100)
   base.reset()
   GyroStraightDeg.move(-30, -10)
+  base.hold()
 
 def depositBattery(time, extraCol):
   global numSurplus, numYellow, numBlue
@@ -620,10 +620,9 @@ def depositBattery(time, extraCol):
 
       frontClaw.run_target(30, 300)
       
-  LineTrack.move(colRight, 50, lambda: rightMotor.angle() < 550, target = 500, ki = 0, minSpeed = 20, threshold = 35)
-
-  LineTrack.move(colRight, 20, lambda: colLeft.color() != Color.BLACK, ki = 0, threshold = 35)
+  LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK, target = 500, minSpeed = 20)
   base.hold()
+ 
   
   if time == 1:
     if numSurplus != 0:
@@ -901,27 +900,9 @@ def main():
   
   # deposit last energy and return to base
   returnBase()
-  
 
-# frontClaw.dc(dir=-1)
-# backClaw.dc()
-# wait(1200)
+ev3.speaker.beep()
+while len(ev3.buttons.pressed()) == 0:
+  wait(1)
 
-# ev3.speaker.beep()
-# while len(ev3.buttons.pressed()) == 0:
-#   wait(1)
-
-# main()
-
-# backClaw.run_time(100, 1000)
-# backClaw.run_target(-40, -225)
-# wait(2000)
-# backClaw.run_target(50, 60)
-# base.reset()
-# GyroStraightDeg.move(40, 165)
-# base.hold()
-# wait(500)
-backClaw.run_time(100, 500)
-# base.reset()
-# backClaw.run_angle(70, 150)
-# wait(10000)
+main()
