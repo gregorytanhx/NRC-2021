@@ -14,7 +14,7 @@ from helper import *
 from pid import *
 
 # declare global variables
-Houses = [[Color.BLUE], [Color.GREEN, Color.BLUE], [Color.YELLOW, Color.GREEN]]
+Houses = [[], [], []]
 numYellow = 4
 numBlue = 4
 numGreen = 4
@@ -672,7 +672,7 @@ def checkHouse1():
   GyroTurn.turn(-89)
   base.run_time(-100, 500)
   gyro.reset_angle(0)  
-  scanHouseEV3([], ev3Col)
+  scanHouseEV3(Houses[0], ev3Col)
   PID_SingleMotorTurn(base, gyro, -179, 0.06, 1)
 
 def returnHouse1():
@@ -715,7 +715,7 @@ def checkHouse2():
     PID_AngleOffSet(base, gyro, 75)
     
   frontClaw.run_target(30, 300)
-  scanHouseEV3([], ev3Col, target = 250)  
+  scanHouseEV3(Houses[1], ev3Col, target = 250)  
   base.reset()
   GyroStraightDeg.move(30, 20, minSpeed = 20)
   base.hold()
@@ -754,7 +754,7 @@ def checkHouse3():
   base.reset()
   GyroStraightDeg.move(-85, -300)
   base.hold()
-  scanHouseEV3([], ev3Col)
+  scanHouseEV3(Houses[2], ev3Col)
   base.reset()
   GyroStraightDeg.move(40, 147)
   base.hold()
@@ -846,18 +846,18 @@ def main():
   # based on houses, determine which energy is extra  
   extraCol = getExtra()
   # always deposit two surplus into battery storage from claw, deposit any remaining green
-  # if extraCol != Color.GREEN and numSurplus == 0:
-  #   print('here')
-  frontClaw.run_target(-50, -300, wait = False)
-  base.reset()
-  LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 550)
-  base.hold()
-  base.reset()
-  GyroStraightDeg.move(-40, -95)
-  base.hold()
-  PID_SingleMotorTurn(base, gyro, 89, 1, 0)
-  # else:
-  #   depositBattery(1, extraCol)
+  if extraCol != Color.GREEN and numSurplus == 0:
+   
+    frontClaw.run_target(-50, -300, wait = False)
+    base.reset()
+    LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 550)
+    base.hold()
+    base.reset()
+    GyroStraightDeg.move(-40, -95)
+    base.hold()
+    PID_SingleMotorTurn(base, gyro, 89, 1, 0)
+  else:
+    depositBattery(1, extraCol)
   
   # collect yellow and blue energy
   collectYellow()
