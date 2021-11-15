@@ -903,4 +903,6 @@ def main():
   returnBase()
   
 
-LineTrack.move(colRight, 35, lambda: True, side = -1)
+while True:
+  GyroTurn.turn(89)
+  wait(100)
