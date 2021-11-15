@@ -49,7 +49,7 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
 # old: 0.16, 0.0001, 17
-LineTrack = PID_LineTrack(base, 0.18, 0.0001, 30, 45)
+LineTrack = PID_LineTrack(base, 0.3, 0.003, 10, 45)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 0, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 0, gyro)
 GyroTurn = PID_GyroTurn(base, 0.8, 0, 0, gyro)
@@ -139,6 +139,7 @@ def scanHouseEV3(house, sensor, target = 300):
         base.run(speed - gyroPID.correction, speed + gyroPID.correction)
       detected = False
   base.hold()
+  print(house)
 
 def checkSurplus(degrees):
   # reverse for certain amount of degrees to check if surplus is present
@@ -205,7 +206,7 @@ def collectSurplus(degrees, col):
     GyroTurn.turn(89)
     
   elif col == Color.GREEN:
-    GyroStraightDeg.move(-80,  -(degrees + 300))
+    GyroStraightDeg.move(-80,  -(degrees + 350))
     base.hold()
   
   elif col == Color.BLUE:
@@ -900,9 +901,6 @@ def main():
   
   # deposit last energy and return to base
   returnBase()
+  
 
-ev3.speaker.beep()
-while len(ev3.buttons.pressed()) == 0:
-  wait(1)
-
-main()
+LineTrack.move(colRight, 35, lambda: True, side = -1)

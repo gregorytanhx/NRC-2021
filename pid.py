@@ -35,7 +35,7 @@ class PID(object):
       ki = self.ki
     if kd is None:
       kd = self.kd
-    self.integral += error * 0.5
+    self.integral = self.integral * 0.5 + error
     self.correction = kp * error + ki * self.integral + kd * (error - self.lastError)
     self.lastError = error
     
@@ -65,6 +65,7 @@ class PID_LineTrack(PID):
            accel = False, 
            deccel = True):
     # update control constants if given
+
     if threshold is None:
       threshold = self.threshold
     speed = maxSpeed
@@ -76,8 +77,9 @@ class PID_LineTrack(PID):
       speed = maxSpeed /abs(maxSpeed) * minSpeed
     slowingDown = False
     while condition():
-      error = threshold - sensor.reflection()
 
+      error = threshold - sensor.reflection()
+      
       self.update(error, kp, ki, kd)
       if accel and target is None:
         if speed < maxSpeed:
@@ -98,9 +100,8 @@ class PID_LineTrack(PID):
             speed = speed + rate
           if speed > maxSpeed:
             speed = maxSpeed
-      
-      
-      self.base.run(speed + side * self.correction, speed - side * self.correction)   
+      #print(speed + side * self.correction, speed - side * self.correction)
+      self.base.run(max(min(speed + side * self.correction, 100), 0), max(min(speed - side * self.correction, 100),0) )   
       
           
 
