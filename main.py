@@ -279,7 +279,7 @@ def depositHouse(house, time, houseNum):
       
              
       if numSurplus == 4 and tmp == 1:
-        catchMentDeposit = True
+        catchmentDeposit = True
         # lift claw, move forward then reverse to deposit surplus from within catchment area
         frontClaw.run_target(-50, -300, wait = False)
         GyroStraight.move(60, lambda: colLeft.color() != Color.RED)
@@ -338,7 +338,7 @@ def depositHouse(house, time, houseNum):
         
       else:
         # deposit yellow from catchment area
-        catchMentDeposit = True
+        catchmentDeposit = True
         base.reset()
         frontClaw.run_target(-50, -300, wait = False)
         GyroStraight.move(60, lambda: colLeft.color() != Color.RED)
@@ -376,7 +376,7 @@ def depositHouse(house, time, houseNum):
       if house[0] == RingCol and house[1] == RingCol:
         tmp = 2
 
-    if cubeDeposited:
+    if clawDeposit:
       base.reset()
       GyroStraightDeg.move(-50, -200)
       base.hold()
@@ -385,6 +385,14 @@ def depositHouse(house, time, houseNum):
       else:
         GyroTurn.turn(-180)  
       wait(100)
+    elif catchmentDeposit:
+      base.reset()
+      GyroStraightDeg.move(-50, -250)
+      base.hold()
+      if houseNum == 3:
+        GyroTurn.turn(180)  
+      else:
+        GyroTurn.turn(-180)  
     else:
       if houseNum == 1:
         GyroTurn.turn(89)
@@ -393,7 +401,9 @@ def depositHouse(house, time, houseNum):
         GyroTurn.turn(-89)     
     
     base.reset()
-    if cubeDeposited:
+    if catchmentDeposit:
+      pass
+    elif clawDeposit:
       GyroStraightDeg.move(-40, -30)
     elif time == 1 and houseNum == 1:
       GyroStraightDeg.move(-50, -300)
@@ -911,4 +921,5 @@ def main():
   
 
 #main()
+GyroTurn.maxSpeed = 40
 depositHouse([Color.GREEN], 1, 1)
