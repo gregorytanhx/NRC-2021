@@ -26,7 +26,7 @@ class Claw:
   def run_time(self, speed, time, wait = True):
     self.motor.run_time(CorrectSpeed(speed), time, wait = wait)    
   
-  def dc(self, dir = 1, speed = 55):
+  def dc(self, dir = 1, speed = 50):
     self.motor.dc(speed * dir)
     
   def hold(self):
@@ -43,8 +43,9 @@ class FrontClaw(Claw):
     wait(1500)
     self.run_target(-50, self.closeDist, wait=False)
   
-  def reset(self, dir = 1, deg = 700):
-    self.run_angle(100 * dir, deg)
+  def reset(self, dir = 1, deg = 750):
+    self.run_target(100 * dir, deg)
+    self.hold()
     self.dc(dir = dir)
 
 
