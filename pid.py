@@ -234,8 +234,8 @@ def PID_AngleOffSet(base, gyro, angle):
     PID_SingleMotorTurn(base, gyro, 0, 1, 0)
     
 
-def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 1): # direction = 1 for forward, direction = -1 for backwar
-  kp = 0.15
+def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 2): # direction = 1 for forward, direction = -1 for backwar
+  kp = 0.13
   ki = 0.03
   kd = 3
   leftPID = PID(kp, ki, kd)

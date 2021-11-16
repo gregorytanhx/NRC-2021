@@ -93,7 +93,7 @@ def debug_GyroTurn():
     base.hold()
     wait(100)
   
-def scanHouseEV3(house, sensor, target = 300):   
+def scanHouseEV3(house, target = 300):   
   # initialise pid for gyrostraight
   kp, ki, kd = GyroStraight.kp, GyroStraight.ki, GyroStraight.kd
   gyroPID = PID(kp, ki, kd)
@@ -119,7 +119,7 @@ def scanHouseEV3(house, sensor, target = 300):
         speed = maxSpeed
     
     base.run(speed - gyroPID.correction, speed + gyroPID.correction)
-    r, g, b = sensor.read('RGB-RAW')
+    r, g, b = ev3Col.read('RGB-RAW')
     if r + g + b >= 20:
       detected = True     
       if r - b >= 3 and r - g >= 3:
@@ -133,8 +133,8 @@ def scanHouseEV3(house, sensor, target = 300):
     
     # once an indicator has been detected, move until nothing is detected
     if detected:
-      while r + g + b > 12:
-        r, g, b = sensor.read('RGB-RAW')
+      while r + g + b > 15:
+        r, g, b = ev3Col.read('RGB-RAW')
         gyroPID.update(gyro.angle(), kp, ki, kd)
         angle = base.rightMotor.angle()
         if abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
@@ -299,7 +299,7 @@ def depositHouse(house, time, houseNum):
         numSurplus -= 2
         
       elif numSurplus == 2:
-        cubeDeposit = True
+        clawDeposit = True
         # deposit surplus from claw
         base.run_time(60, 500)
         base.hold()
@@ -308,13 +308,12 @@ def depositHouse(house, time, houseNum):
         
       elif tmp == 2:
         # deposit all
-      
-        frontClaw.dc()
-        base.run_time(60, 500)
+        clawDeposit = True
+        frontClaw.run_target(100, 300)
+        base.run_time(80, 600)
         base.hold()
         numSurplus = 0
-    
-              
+     
   else:
     # second visit to house deposits yellow and blue
     numCol = numBlue
@@ -334,6 +333,7 @@ def depositHouse(house, time, houseNum):
       
       if tmp == 2:
         # deposit all yellow
+        clawDeposit = True
         frontClaw.dc()
         base.run_time(80, 600)
         base.hold()
@@ -361,8 +361,12 @@ def depositHouse(house, time, houseNum):
   # exit if 4 energy has been deposited
   if RingCol not in house or tmp == 2:
     if houseNum ==  1 or houseNum ==  2:
+      wait(100)
       base.reset()
-      GyroStraightDeg.move(-70, -490)
+      if clawDeposit:  
+        GyroStraightDeg.move(-70, -410)
+      else:
+        GyroStraightDeg.move(-70, -580)
       base.hold()
       if houseNum ==  1:
         GyroTurn.turn(-89)
@@ -373,7 +377,7 @@ def depositHouse(house, time, houseNum):
       GyroStraightDeg.move(-80, -200)
       base.hold()
       GyroTurn.turn(180)
-    if houseNum == 2:
+    if houseNum == 2 and numSurplus == 2:
       # lower claw if not house 1
       frontClaw.run_target(30, 300)
     #frontClaw.dc(dir = -1, speed = 20)
@@ -458,7 +462,7 @@ def depositHouse(house, time, houseNum):
     
     if houseNum == 1 or houseNum == 2:
       base.reset()
-      wait(5000)
+      
       if not clawDeposit:
         GyroStraight.move(35, lambda: colLeft.color() != Color.BLACK or colRight.color() != Color.BLACK)
         base.hold()
@@ -527,7 +531,7 @@ def collectYellow():
   base.reset()  
   LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK, target = 700)
   curr = rightMotor.angle()
-  LineTrack.move(colLeft, 40, lambda: rightMotor.angle() < 105 + curr, target = 105 + curr)
+  GyroStraightDeg.move(40, 110 + curr)
   base.hold()
   GyroTurn.turn(89)
   # push solar panels
@@ -550,9 +554,9 @@ def collectYellow():
 
   frontClaw.run_target(-100, -400)
   frontClaw.hold()
-  base.reset()
-  GyroStraight.move(-20, lambda: rightMotor.angle() > -20)
-  base.hold()
+  # base.reset()
+  # GyroStraight.move(-20, lambda: rightMotor.angle() > -20)
+  # base.hold()
   # track to first 2 yellow and grab with claw
   GyroTurn.turn(-89)
   frontClaw.dc()
@@ -702,7 +706,7 @@ def checkHouse1():
   GyroTurn.turn(-89)
   base.run_time(-100, 500)
   gyro.reset_angle(0)  
-  scanHouseEV3(Houses[0], ev3Col)
+  scanHouseEV3(Houses[0])
   PID_SingleMotorTurn(base, gyro, -179, 0.06, 1)
 
 def returnHouse1():
@@ -729,7 +733,7 @@ def checkHouse2():
   if surplus == Color.BLUE and Color.GREEN not in Houses[0] and len(Houses[0]) != 1:
     # if house 1 has nothing to be deposited, go to house 2 directly from blue surplus area
     PID_SingleMotorTurn(base, gyro, 89, 0, 1)    
-  
+    wait(10000)
   else:
     if numSurplus == 4:
       # only raise claw if it hasnt been raised at house 1
@@ -748,7 +752,7 @@ def checkHouse2():
     
   
   frontClaw.run_target(30, 300)
-  scanHouseEV3(Houses[1], ev3Col, target = 250)  
+  scanHouseEV3(Houses[1], target = 250)  
   base.reset()
   GyroStraightDeg.move(30, 20, minSpeed = 20)
   base.hold()
@@ -768,14 +772,15 @@ def checkHouse2():
 def checkHouse3():
   # move to house 3 
   base.reset()
-  LineTrack.move(colLeft, 65, lambda: colRight.color() != Color.BLACK, target = 500)
+  LineTrack.move(colLeft, 65, lambda: colRight.color() != Color.BLACK, target = 600)
   curr = rightMotor.angle()
-  LineTrack.move(colLeft, 40, lambda: rightMotor.angle() < 110 + curr, target = 110 + curr)
+  GyroStraightDeg.move(40, 110 + curr)
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  LineTrack.move(colLeft, 80, lambda: rightMotor.angle() < 830, target = 790, side = -1, accel = True)
+  LineTrack.move(colLeft, 80, lambda: rightMotor.angle() < 820, target = 700, side = -1)
   base.hold()  
+  wait(100)
   GyroTurn.turn(-89)
   base.reset()
   GyroStraightDeg.move(-40, -60)
@@ -787,8 +792,11 @@ def checkHouse3():
   base.reset()
   GyroStraightDeg.move(-85, -300)
   base.hold()
-  scanHouseEV3(Houses[2], ev3Col)
   base.reset()
+
+  scanHouseEV3(Houses[2])
+  base.reset()
+
   GyroStraightDeg.move(40, 147)
   base.hold()
   
@@ -884,7 +892,7 @@ def main():
   # based on houses, determine which energy is extra  
   extraCol = getExtra()
   # always deposit two surplus into battery storage from claw, deposit any remaining green
-  if extraCol != Color.GREEN and numSurplus == 0:
+  if extraCol != Color.GREEN and numSurplus == 0 and surplus != Color.GREEN:
    
     frontClaw.run_target(-50, -300, wait = False)
     base.reset()
@@ -936,4 +944,4 @@ def main():
   # deposit last energy and return to base
   returnBase()
 
-main()
+# main()
