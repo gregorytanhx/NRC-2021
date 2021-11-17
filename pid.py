@@ -28,15 +28,21 @@ class PID(object):
              error: float, 
              kp: float = None,
              ki: float = None, 
-             kd: float = None):
+             kd: float = None, 
+             modded_integral = True):
     if kp is None:
       kp = self.kp
     if ki is None:
       ki = self.ki
     if kd is None:
       kd = self.kd
-    self.integral = self.integral * 0.5 + error
-    self.correction = kp * error + ki * self.integral + kd * (error - self.lastError)
+    self.proportional = kp * error
+    if modded_integral:
+      self.integral = self.integral * 0.5 + error
+    else:
+      self.integral += error
+    self.derivative =  kd * (error - self.lastError)
+    self.correction = self.proportional  + ki * self.integral + self.derivative
     self.lastError = error
     
    
@@ -124,18 +130,23 @@ class PID_GyroStraight(PID):
            kd: float = None,
            target = 0, 
            maxSpeed = 100,
-           minSpeed = 0):
+           minSpeed = 0, 
+           precision = False):
 
     while condition():
-
+      
       error = self.gyro.angle() - target
       self.update(error, kp, ki, kd)
+      
       if abs(self.correction) > maxSpeed and self.correction != 0:
         self.correction = maxSpeed * self.correction/abs(self.correction)
       if abs(self.correction) < minSpeed and self.correction != 0:
         self.correction = minSpeed * self.correction/abs(self.correction)
       
       self.base.run(speed - self.correction, speed + self.correction)
+     
+        
+        
       
 class PID_GyroStraightDegrees(PID):
   def __init__(self, 
@@ -184,7 +195,7 @@ class PID_GyroStraightDegrees(PID):
           speed = (abs(speed) + rate) * polarity 
         if speed > maxSpeed:
           speed = maxSpeed
-        
+      
       self.base.run(speed - self.correction, speed + self.correction)
   
 class PID_GyroTurn(PID_GyroStraight):  
@@ -194,16 +205,19 @@ class PID_GyroTurn(PID_GyroStraight):
                 ki: float, 
                 kd: float, 
                 gyro: GyroSensor,
-                maxSpeed = 100):
+                maxSpeed = 100, 
+                ):
       super().__init__(base, kp, ki, kd, gyro)
       self.maxSpeed = maxSpeed
       
-  def turn(self, angle, kp = None, ki = None, kd = None):
+  def turn(self, angle, kp = None, ki = None, kd = None, precision = False):
     self.base.reset()
     self.gyro.reset_angle(0)
     self.resetIntegral()
-    
-    self.move(0, lambda: self.gyro.angle() != angle, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed, minSpeed = 5)
+    if precision:
+      self.move(0, lambda: self.gyro.angle() != angle or self.base.leftMotor.speed() != 0 or self.base.rightMotor.speed() != 0, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
+    else:
+      self.move(0, lambda: self.gyro.angle() != angle, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
     self.base.hold()
     
     self.gyro.reset_angle(0)

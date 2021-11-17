@@ -50,13 +50,13 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 # set up defaults for PID functions
 # old: 0.16, 0.0001, 17
 LineTrack = PID_LineTrack(base, 0.21, 0.0013, 10, 40)
-GyroStraight = PID_GyroStraight(base, 1.2, 0, 0, gyro)
-GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 0, gyro)
+GyroStraight = PID_GyroStraight(base, 1.2, 0.005, 20, gyro)
+GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0.005, 20, gyro)
 GyroTurn = PID_GyroTurn(base, 0.8, 0.005, 2, gyro)
 #GyroTurn = PID_GyroTurn(base, 1, 0, 0)
 # battery alert
 print(ev3.battery.voltage())
-if ev3.battery.voltage() <= 8050:
+if ev3.battery.voltage() <= 805:
   print('LOW BATTERY')
   ev3.speaker.beep()
   sys.exit()
@@ -283,7 +283,7 @@ def depositHouse(house, time, houseNum):
     if len(house) == 1 or (surplus in house and houseNum == 2 and surplus == Color.BLUE):
      
       tmp = 1
-      if len(house) == 1 and house[0] == surplus and houseNum == 2:
+      if len(house) == 1 and house[0] == surplus and houseNum == 2 and surplus == Color.BLUE:
         tmp = 2
         
       if houseNum == 1:
@@ -490,10 +490,11 @@ def collectBlue():
 
   PID_LineSquare(base, direction = -1)
   gyro.reset_angle(0)
+  wait(50)
   base.reset()
   backClaw.hold()
   backClaw.run_target(-40, -225, wait = False)
-  GyroStraightDeg.move(-90, -900, minSpeed = 25)
+  GyroStraightDeg.move(-80, -900, minSpeed = 25)
   base.stop()
   # wait(1000)
   base.reset()
@@ -504,7 +505,7 @@ def collectBlue():
 
   backClaw.run_target(50, 70)
   base.reset()
-  GyroStraightDeg.move(40, 160)
+  GyroStraightDeg.move(40, 150)
   base.hold()
   backClaw.run_time(100, 500)
   
@@ -520,7 +521,7 @@ def collectBlue():
   backClaw.run_target(-30, -225)
  
   base.reset()
-  GyroStraight.move(-10, lambda: rightMotor.angle() > -113)
+  GyroStraight.move(-10, lambda: rightMotor.angle() > -103)
   base.hold()
   backClaw.run_target(15, 75)
   GyroTurn.maxSpeed = 40
@@ -599,9 +600,10 @@ def collectYellow():
   base.reset()
   GyroTurn.maxSpeed = 40
   GyroTurn.turn(180)
-  base.run_time(-60, 800)
+  base.run_time(-670, 800)
   base.hold()
   gyro.reset_angle(0)
+  wait(50)
   base.reset()
   GyroStraightDeg.move(80, 645)
   base.hold()
@@ -672,7 +674,7 @@ def depositBattery(time, extraCol):
     else:
       # single motor turn to avoid hitting wall of battery area
       base.reset()
-      GyroStraightDeg.move(-40, -80)
+      GyroStraightDeg.move(-40, -70)
       base.hold()
       PID_SingleMotorTurn(base, gyro, 89, 1, 0)
   else:
@@ -967,10 +969,14 @@ def main():
 # main()
 # end = clock.time() - start
 # print(end)
-surplus = Color.GREEN
-depositHouse([Color.GREEN, Color.YELLOW], 1, 2)
 
-wait(1000)
+GyroTurn = PID_GyroTurn(base, 0.8, 0.005, 2, gyro) 
+
+GyroTurn.turn(90)
+
+
+
+
 # TEST HOUSE 2 with surplus + green
 # DEPOSIT BATTERY BACK NEEDS TO GO RIGHT
 # COLLECT YELLOW GYRO FUCKS UP
