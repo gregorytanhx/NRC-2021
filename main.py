@@ -172,7 +172,7 @@ def collectSurplus(degrees, col):
     # start opening claw
     frontClaw.dc()
     base.reset()
-    LineTrack.move(colLeft, 85, lambda: colRight.color() != Color.BLACK, target = 1200)
+    LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.BLACK, target = 1200)
     base.hold()
     base.reset()
 
@@ -236,7 +236,7 @@ def collectGreen():
   gyro.reset_angle(0)
   wait(100)
   
-  backClaw.run_angle(50, -190, wait = False)
+  backClaw.run_angle(50, -195, wait = False)
   GyroTurn.turn(-89)
   GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
   GyroStraight.move(-40, lambda: colRight.color() != Color.BLACK)
@@ -253,7 +253,7 @@ def collectGreen():
 
   base.reset()
 
-  GyroStraightDeg.move(60, 352)
+  GyroStraightDeg.move(60, 350)
   base.hold()
   GyroTurn.turn(-89)
   backClaw.run_angle(50, -195)
@@ -740,7 +740,11 @@ def checkHouse2():
     base.reset()
     GyroStraightDeg.move(-10, -5)
     base.hold()
-    PID_SingleMotorTurn(base, gyro, 89, 0, 1)    
+    PID_SingleMotorTurn(base, gyro, 89, 0, 1)  
+    base.reset()
+    GyroStraightDeg.move(-40, -50) 
+    base.hold()
+     
    
   else:
     if numSurplus == 4:
@@ -787,7 +791,7 @@ def checkHouse3():
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  LineTrack.move(colLeft, 80, lambda: rightMotor.angle() < 820, target = 700, side = -1)
+  LineTrack.move(colLeft, 80, lambda: rightMotor.angle() < 830, target = 750, side = -1)
   base.hold()  
   wait(100)
   GyroTurn.turn(-89)
@@ -878,6 +882,7 @@ def main():
     else:
       surplus = Color.BLUE
       PID_SingleMotorTurn(base, gyro, 180, 1, 0.7)
+
       collectSurplus(422, Color.BLUE)
   
   
@@ -922,7 +927,7 @@ def main():
   collectBlue()  
  
   # deposit at house 3 again
-  if Color.YELLOW or Color.BLUE in Houses[2]:
+  if Color.YELLOW  in Houses[2] or Color.BLUE in Houses[2]:
     # add condition to turn based on whether blue is in the house
     depositHouse(Houses[2], 2, 3)
   else:
@@ -957,6 +962,25 @@ def main():
   returnBase()
 
 
+# start = clock.time()
+# main()
+# end = clock.time() - start
+# print(end)
+collectBlue()  
+wait(1000)
 
-main()
+# deposit at house 3 again
+if Color.YELLOW or Color.BLUE in Houses[2]:
+  print("WTF")
+  # add condition to turn based on whether blue is in the house
+  depositHouse([Color.GREEN], 2, 3)
+else: 
+  print("HUHHHH")
+  GyroTurn.turn(-89)
 # RETUNE LINE TRACK WITH CORRECT BATTERY VOLTAGE
+
+# REVERSING FROM BLUE SURPLUS FUCKS UP
+# DEPOSIT BATTERY BACK NEEDS TO GO RIGHT
+# COLLECT YELLOW GYRO FUCKS UP
+# COLLECT BLUE GO BACK MORE
+# COLLECT BLUE GOES BACKWARD FOR SOME FUCKING REASON
