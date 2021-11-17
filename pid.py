@@ -77,7 +77,8 @@ class PID_LineTrack(PID):
       speed = maxSpeed /abs(maxSpeed) * minSpeed
     slowingDown = False
     while condition():
-
+      
+        
       error = threshold - sensor.reflection()
       
       self.update(error, kp, ki, kd)
@@ -234,18 +235,21 @@ def PID_AngleOffSet(base, gyro, angle):
     PID_SingleMotorTurn(base, gyro, 0, 1, 0)
     
 
-def PID_LineSquare(base, threshold = 40, direction = 1, leeway = 2): # direction = 1 for forward, direction = -1 for backwar
-  kp = 0.13
-  ki = 0.03
+def PID_LineSquare(base, direction = 1, leeway = 1): # direction = 1 for forward, direction = -1 for backwar
+  kp = 0.15
+  ki = 0.01
   kd = 3
+  leftThresh = 34
+  rightThresh = 42
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   while True:
     
     leftVal = base.colLeft.reflection()
     rightVal = base.colRight.reflection()
-    leftError = leftVal - threshold
-    rightError = rightVal - threshold
+
+    leftError = leftVal - leftThresh
+    rightError = rightVal - rightThresh
     if abs(leftError) <= leeway and abs(rightError) <= leeway:
       break
     leftPID.update(leftError, kp, ki, kd)

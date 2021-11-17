@@ -87,7 +87,7 @@ class Base:
   def hold(self):
     self.leftMotor.hold()
     self.rightMotor.hold()
-    wait(10)
+    wait(25)
     
   def move(self, speed, condition):
     while condition():
