@@ -49,14 +49,14 @@ base = Base(leftMotor, rightMotor, colLeft, colRight, frontClaw, backClaw)
 
 # set up defaults for PID functions
 # old: 0.16, 0.0001, 17
-LineTrack = PID_LineTrack(base, 0.25, 0.005, 20, 40)
+LineTrack = PID_LineTrack(base, 0.21, 0.0013, 10, 40)
 GyroStraight = PID_GyroStraight(base, 1.2, 0, 0, gyro)
 GyroStraightDeg = PID_GyroStraightDegrees(base, 1.2, 0, 0, gyro)
-GyroTurn = PID_GyroTurn(base, 0.8, 0.1, 2.5, gyro)
+GyroTurn = PID_GyroTurn(base, 0.8, 0.005, 2, gyro)
 #GyroTurn = PID_GyroTurn(base, 1, 0, 0)
 # battery alert
 print(ev3.battery.voltage())
-if ev3.battery.voltage() <= 7500:
+if ev3.battery.voltage() <= 8050:
   print('LOW BATTERY')
   ev3.speaker.beep()
   sys.exit()
@@ -231,38 +231,38 @@ def collectGreen():
   base.reset()
   LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
   curr = rightMotor.angle()
-  LineTrack.move(colRight, 50, lambda: rightMotor.angle() < 227 + curr, side = -1, target = 210 + curr)
+  LineTrack.move(colRight, 40, lambda: rightMotor.angle() < 207 + curr, side = -1, target = 200 + curr)
   base.hold()
   gyro.reset_angle(0)
+  wait(100)
   
   backClaw.run_angle(50, -190, wait = False)
   GyroTurn.turn(-89)
   GyroStraight.move(-40, lambda: colRight.color() != Color.WHITE)
+  GyroStraight.move(-40, lambda: colRight.color() != Color.BLACK)
   base.hold()
-  PID_LineSquare(base, direction = -1)
-  gyro.reset_angle(0)
   # reset claw again
   backClaw.run_time(100, 1000, wait = False)
   
   # linetrack and turn to grab other 2 green
   base.reset()
-  GyroStraightDeg.move(80, 190)
+  GyroStraightDeg.move(60, 165)
   base.hold()
   
   GyroTurn.turn(89)
 
   base.reset()
 
-  GyroStraightDeg.move(60, 360)
+  GyroStraightDeg.move(60, 352)
   base.hold()
   GyroTurn.turn(-89)
-  backClaw.run_angle(50, -190)
+  backClaw.run_angle(50, -195)
   base.reset()
-  GyroStraightDeg.move(-40, -95)
+  GyroStraightDeg.move(-40, -80)
   
   base.hold()
-  backClaw.run_angle(50, 45)
-  GyroStraightDeg.move(-40, -105)
+  backClaw.run_angle(50, 50)
+  GyroStraightDeg.move(40, -75)
   base.hold()
   # cap speed of turns after grabbing green to stop them from jerking
   GyroTurn.maxSpeed = 40
@@ -560,7 +560,7 @@ def collectYellow():
   frontClaw.hold()
  
   base.reset()
-  GyroStraight.move(-20, lambda: rightMotor.angle() > -10)
+  GyroStraight.move(-20, lambda: rightMotor.angle() > -20)
   base.hold()
   # track to first 2 yellow and grab with claw
   GyroTurn.turn(-89)
@@ -722,9 +722,9 @@ def returnHouse1():
     GyroTurn.turn(-89)      
   wait(50)
   base.reset()
-  LineTrack.move(colRight, 80, lambda: colLeft.color() != Color.BLACK, side = -1)
+  LineTrack.move(colRight, 85, lambda: colLeft.color() != Color.BLACK, side = -1)
   curr = rightMotor.angle()
-  LineTrack.move(colRight, 70, lambda: rightMotor.angle() < 1250 + curr, side = -1, target = 1100 + curr)
+  LineTrack.move(colRight, 80, lambda: rightMotor.angle() < 1250 + curr, side = -1, target = 1100 + curr)
   base.hold()
 
   depositHouse(Houses[0], 1, 1)
@@ -736,10 +736,10 @@ def returnHouse1():
 def checkHouse2():
   # scan house 2
   if surplus == Color.BLUE and Color.GREEN not in Houses[0] and len(Houses[0]) != 1:
-    base.reset()
-    GyroStraightDeg.move(-30, -10)
-    base.hold()
     # if house 1 has nothing to be deposited, go to house 2 directly from blue surplus area
+    base.reset()
+    GyroStraightDeg.move(-10, -5)
+    base.hold()
     PID_SingleMotorTurn(base, gyro, 89, 0, 1)    
    
   else:
@@ -757,9 +757,10 @@ def checkHouse2():
     gyro.reset_angle(0)
     wait(100)
     PID_AngleOffSet(base, gyro, 77)
+    frontClaw.run_target(30, 300)
     
   
-  frontClaw.run_target(30, 300)
+    
   scanHouseEV3(Houses[1], target = 250)  
   base.reset()
   GyroStraightDeg.move(30, 20, minSpeed = 20)
@@ -898,7 +899,7 @@ def main():
   
   checkHouse2()
   if numSurplus == 0:
-    frontClaw.run_target(-50, -350, wait = False)
+    frontClaw.run_target(-30, -350, wait = False)
   checkHouse3()
   # based on houses, determine which energy is extra  
   extraCol = getExtra()
@@ -955,7 +956,7 @@ def main():
   # deposit last energy and return to base
   returnBase()
 
-# start = clock.time()
-# main()
-# print(clock.time() - start)
-debug_LineSquare()
+
+
+main()
+# RETUNE LINE TRACK WITH CORRECT BATTERY VOLTAGE

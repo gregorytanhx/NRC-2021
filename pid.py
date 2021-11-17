@@ -77,8 +77,7 @@ class PID_LineTrack(PID):
       speed = maxSpeed /abs(maxSpeed) * minSpeed
     slowingDown = False
     while condition():
-      
-        
+  
       error = threshold - sensor.reflection()
       
       self.update(error, kp, ki, kd)
