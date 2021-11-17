@@ -209,7 +209,7 @@ def collectSurplus(degrees, col):
   base.reset()
   GyroStraightDeg.move(60, 420)
   base.hold()
-  frontClaw.run_target(30, 235)
+  frontClaw.run_target(30, 220)
   frontClaw.dc(dir = -1, speed = 20)
   base.reset()
   
@@ -231,7 +231,7 @@ def collectGreen():
   base.reset()
   LineTrack.move(colRight, 50, lambda: colLeft.color() != Color.BLACK, side = -1)
   curr = rightMotor.angle()
-  LineTrack.move(colRight, 40, lambda: rightMotor.angle() < 207 + curr, side = -1, target = 200 + curr)
+  LineTrack.move(colRight, 40, lambda: rightMotor.angle() < 215 + curr, side = -1, target = 200 + curr)
   base.hold()
   gyro.reset_angle(0)
   wait(100)
@@ -280,7 +280,7 @@ def depositHouse(house, time, houseNum):
     RingCol = Color.GREEN
     tmp = 1
     
-    if len(house) == 1 or (surplus in house and houseNum == 2):
+    if len(house) == 1 or (surplus in house and houseNum == 2 and surplus == Color.BLUE):
      
       tmp = 1
       if len(house) == 1 and house[0] == surplus and houseNum == 2:
@@ -599,7 +599,7 @@ def collectYellow():
   base.reset()
   GyroTurn.maxSpeed = 40
   GyroTurn.turn(180)
-  base.run_time(-50, 800)
+  base.run_time(-60, 800)
   base.hold()
   gyro.reset_angle(0)
   base.reset()
@@ -672,7 +672,7 @@ def depositBattery(time, extraCol):
     else:
       # single motor turn to avoid hitting wall of battery area
       base.reset()
-      GyroStraightDeg.move(-40, -90)
+      GyroStraightDeg.move(-40, -80)
       base.hold()
       PID_SingleMotorTurn(base, gyro, 89, 1, 0)
   else:
@@ -738,7 +738,7 @@ def checkHouse2():
   if surplus == Color.BLUE and Color.GREEN not in Houses[0] and len(Houses[0]) != 1:
     # if house 1 has nothing to be deposited, go to house 2 directly from blue surplus area
     base.reset()
-    GyroStraightDeg.move(-10, -5)
+    GyroStraightDeg.move(-10, -10)
     base.hold()
     PID_SingleMotorTurn(base, gyro, 89, 0, 1)  
     base.reset()
@@ -791,7 +791,7 @@ def checkHouse3():
   base.hold()
   GyroTurn.turn(89)
   base.reset()
-  LineTrack.move(colLeft, 80, lambda: rightMotor.angle() < 830, target = 750, side = -1)
+  LineTrack.move(colLeft, 80, lambda: rightMotor.angle() < 825, target = 750, side = -1)
   base.hold()  
   wait(100)
   GyroTurn.turn(-89)
@@ -810,7 +810,7 @@ def checkHouse3():
   scanHouseEV3(Houses[2])
   base.reset()
 
-  GyroStraightDeg.move(40, 147)
+  GyroStraightDeg.move(40, 142)
   base.hold()
   
   # deposit at house 3
@@ -883,7 +883,7 @@ def main():
       surplus = Color.BLUE
       PID_SingleMotorTurn(base, gyro, 180, 1, 0.7)
 
-      collectSurplus(422, Color.BLUE)
+      collectSurplus(420, Color.BLUE)
   
   
   # check whether to deposit in house 1
@@ -923,6 +923,7 @@ def main():
     depositBattery(1, extraCol)
   
   # collect yellow and blue energy
+  wait(1000)
   collectYellow()
   collectBlue()  
  
@@ -966,21 +967,11 @@ def main():
 # main()
 # end = clock.time() - start
 # print(end)
-collectBlue()  
+surplus = Color.GREEN
+depositHouse([Color.GREEN, Color.YELLOW], 1, 2)
+
 wait(1000)
-
-# deposit at house 3 again
-if Color.YELLOW or Color.BLUE in Houses[2]:
-  print("WTF")
-  # add condition to turn based on whether blue is in the house
-  depositHouse([Color.GREEN], 2, 3)
-else: 
-  print("HUHHHH")
-  GyroTurn.turn(-89)
-# RETUNE LINE TRACK WITH CORRECT BATTERY VOLTAGE
-
-# REVERSING FROM BLUE SURPLUS FUCKS UP
+# TEST HOUSE 2 with surplus + green
 # DEPOSIT BATTERY BACK NEEDS TO GO RIGHT
 # COLLECT YELLOW GYRO FUCKS UP
 # COLLECT BLUE GO BACK MORE
-# COLLECT BLUE GOES BACKWARD FOR SOME FUCKING REASON
