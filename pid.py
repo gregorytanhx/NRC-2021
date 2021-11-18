@@ -132,16 +132,18 @@ class PID_GyroStraight(PID):
            maxSpeed = 100,
            minSpeed = 0, 
            precision = False):
-
+    
     while condition():
       
       error = self.gyro.angle() - target
       self.update(error, kp, ki, kd)
-      
-      if abs(self.correction) > maxSpeed and self.correction != 0:
-        self.correction = maxSpeed * self.correction/abs(self.correction)
-      if abs(self.correction) < minSpeed and self.correction != 0:
-        self.correction = minSpeed * self.correction/abs(self.correction)
+      #print(error + target)
+      if self.correction != 0:  
+        polarity = self.correction/abs(self.correction)
+        if abs(self.correction) > maxSpeed:
+          self.correction = maxSpeed * polarity
+        if abs(self.correction) < minSpeed:
+          self.correction = minSpeed * polarity
       
       self.base.run(speed - self.correction, speed + self.correction)
      
@@ -165,7 +167,7 @@ class PID_GyroStraightDegrees(PID):
            kp: float = None, 
            ki: float = None, 
            kd: float = None,
-           minSpeed = 30, 
+           minSpeed = 35, 
            accel = False,
            deccel = True, condition = lambda: True):
     angle = self.base.rightMotor.angle()
@@ -214,7 +216,7 @@ class PID_GyroTurn(PID_GyroStraight):
   
     self.resetIntegral()
     if precision:
-      self.move(0, lambda: self.gyro.angle() != angle or self.correction != 0, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
+      self.move(0, lambda: self.gyro.angle() != angle or self.base.leftMotor.speed() != 0 or self.base.rightMotor.speed() != 0, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
     else:
       self.move(0, lambda: self.gyro.angle() != angle, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
     self.base.hold()
@@ -223,7 +225,7 @@ class PID_GyroTurn(PID_GyroStraight):
     wait(10)
     
       
-def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.8, ki = 0.005, kd = 2, minSpeed = 10, reset = True):
+def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.8, ki = 0.01, kd = 2, minSpeed = 10, reset = True):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle)

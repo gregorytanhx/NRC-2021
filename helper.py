@@ -7,8 +7,12 @@ from pybricks.media.ev3dev import SoundFile, ImageFile
 from pybricks.iodevices import Ev3devSensor
 
 
+
+
 def CorrectSpeed(x):
   return (x/100) * 1400 
+
+
 
 class Claw:
   def __init__(self, port: Port):
@@ -31,7 +35,7 @@ class Claw:
     
   def hold(self):
     self.motor.hold()
-    wait(10)
+  
   
 class FrontClaw(Claw):
   def __init__(self, port: Port):
@@ -87,7 +91,7 @@ class Base:
   def hold(self):
     self.leftMotor.hold()
     self.rightMotor.hold()
-    wait(25)
+    wait(10)
     
   def move(self, speed, condition):
     while condition():
