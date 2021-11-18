@@ -19,9 +19,6 @@ class Claw:
     self.motor = Motor(port)
     self.motor.control.limits(1500)
 
-  def run_target(self, speed, angle, wait = True):
-    self.motor.reset_angle(0)
-    self.motor.run_target(CorrectSpeed(speed), angle, wait = wait)
   
   def run_angle(self, speed, angle, wait = True):
     self.motor.reset_angle(0)
@@ -35,27 +32,70 @@ class Claw:
     
   def hold(self):
     self.motor.hold()
+    
+  def reset(self):
+    self.motor.reset_angle(0)
   
+  def measureAngleRange(self, moveTime):
+    results = []
+    print("Full results:", end=' ')
+
+    while len(results) < 10:
+
+        self.motor.dc(-40)
+        wait(moveTime)
+        self.motor.hold()
+        wait(1000)
+
+        self.motor.reset_angle(0)
+
+        self.motor.dc(40)
+        wait(moveTime)
+        self.motor.hold()
+        wait(1000)
+
+        angle = self.motor.angle()
+        if angle != 0:                      # Skips erroneous results (see fixme above).
+            results.append(angle)
+            print(results[-1], end=' ')
+
+    print("\nAverage:", sum(results) / len(results))
+
   
 class FrontClaw(Claw):
   def __init__(self, port: Port):
     super().__init__(port)
     self.closeDist = -460
     
+  def run_target(self, speed, angle, wait = True):
+    self.motor.run_target(CorrectSpeed(speed), angle, wait = wait)
+  
+  def goUp(self, speed = 50, wait = True):
+    self.run_target(30, 0, wait = wait)
+  
+  def goDown(self, speed = 30, wait = True):
+    self.run_target(50, 405, wait = wait)
+  
+  def openUp(self, wait = True):
+    self.run_target(100, 865, wait = wait)
+  
   def defaultPos(self):
     self.dc()
     wait(1500)
     self.run_target(-50, self.closeDist, wait=False)
-  
-  def reset(self, dir = 1, deg = 750):
-    self.run_target(100 * dir, deg)
-    self.hold()
-    self.dc(dir = dir)
+
+    # self.run_target(100 * dir, deg)
+    # self.hold()
+    # self.dc(dir = dir)
 
 
 class BackClaw(Claw):
   def __init__(self, port: Port):
     super().__init__(port)
+  
+  def run_target(self, speed, angle, wait = True, reset = True):
+    self.motor.reset_angle(0)
+    self.motor.run_target(CorrectSpeed(speed), angle, wait = wait)
     
   def mid(self):
     self.run_target(-50, -180)
@@ -69,12 +109,12 @@ class BackClaw(Claw):
  
 class Base:
   def __init__(self, 
-               leftMotor: Motor, 
-               rightMotor: Motor, 
+               leftMotor: motor, 
+               rightMotor: motor, 
                colLeft: ColorSensor, 
                colRight: ColorSensor, 
-               frontClaw: Motor, 
-               backClaw: Motor):
+               frontClaw: motor, 
+               backClaw: motor):
     
     self.leftMotor = leftMotor
     self.rightMotor = rightMotor

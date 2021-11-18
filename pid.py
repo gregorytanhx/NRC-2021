@@ -92,9 +92,10 @@ class PID_LineTrack(PID):
             speed = speed + rate
         if speed > maxSpeed:
           speed = maxSpeed
-      
       if target is not None: # decceleration
         angle = self.base.rightMotor.angle()
+        if abs(angle) > abs(target):
+          speed = minSpeed
         if deccel and abs(abs(angle) - abs(target)) <= 100 * maxSpeed / 40:
           slowingDown = True
           if abs(speed) > minSpeed:
@@ -250,12 +251,12 @@ def PID_AngleOffSet(base, gyro, angle):
     PID_SingleMotorTurn(base, gyro, 0, 1, 0)
     
 
-def PID_LineSquare(base, direction = 1, leeway = 1): # direction = 1 for forward, direction = -1 for backwar
-  kp = 0.15
-  ki = 0.01
-  kd = 3
-  leftThresh = 34
-  rightThresh = 42
+def PID_LineSquare(base, direction = 1, leeway = 2): # direction = 1 for forward, direction = -1 for backwar
+  kp = 0.153
+  ki = 0.005
+  kd = 4.56
+  leftThresh = 40
+  rightThresh = 45
   leftPID = PID(kp, ki, kd)
   rightPID = PID(kp, ki, kd)
   while True:
