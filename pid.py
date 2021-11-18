@@ -211,16 +211,16 @@ class PID_GyroTurn(PID_GyroStraight):
       self.maxSpeed = maxSpeed
       
   def turn(self, angle, kp = None, ki = None, kd = None, precision = False):
-    self.base.reset()
-    self.gyro.reset_angle(0)
+  
     self.resetIntegral()
     if precision:
-      self.move(0, lambda: self.gyro.angle() != angle or self.base.leftMotor.speed() != 0 or self.base.rightMotor.speed() != 0, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
+      self.move(0, lambda: self.gyro.angle() != angle or self.correction != 0, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
     else:
       self.move(0, lambda: self.gyro.angle() != angle, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
     self.base.hold()
     
     self.gyro.reset_angle(0)
+    wait(10)
     
       
 def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 0.8, ki = 0.005, kd = 2, minSpeed = 10, reset = True):

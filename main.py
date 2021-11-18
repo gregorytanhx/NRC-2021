@@ -970,9 +970,11 @@ def main():
 # end = clock.time() - start
 # print(end)
 
-GyroTurn = PID_GyroTurn(base, 0.8, 0.005, 2, gyro) 
+GyroTurn = PID_GyroTurn(base, 1.1, 0.05, 10, gyro) 
 
-GyroTurn.turn(90)
+while True:
+  GyroTurn.turn(90, precision = True)
+  wait(500)
 
 
 
