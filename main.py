@@ -281,7 +281,6 @@ def depositHouse(house, time, houseNum):
     tmp = 1
     
     if len(house) == 1 or (surplus in house and houseNum == 2 and surplus == Color.BLUE):
-     
       tmp = 1
       if len(house) == 1 and house[0] == surplus and houseNum == 2 and surplus == Color.BLUE:
         tmp = 2
@@ -296,9 +295,9 @@ def depositHouse(house, time, houseNum):
         catchmentDeposit = True
         # lift claw, move forward then reverse to deposit surplus from within catchment area
         if houseNum == 1:
-          frontClaw.goUp(wait = False)
+          frontClaw.goUp(wait = False, full = True)
         else:
-          frontClaw.goUp()
+          frontClaw.goUp(full = True)
         GyroStraight.move(60, lambda: colLeft.color() != Color.RED)
         base.reset()
         GyroStraightDeg.move(60, 180)
@@ -308,9 +307,10 @@ def depositHouse(house, time, houseNum):
       elif numSurplus == 2:
         clawDeposit = True
         # deposit surplus from claw
+        frontClaw.openSmall(wait = False)
         base.run_time(60, 500)
         base.hold()
-        frontClaw.openSmall()
+        
         numSurplus = 0
         
       elif tmp == 2:
@@ -359,9 +359,9 @@ def depositHouse(house, time, houseNum):
         catchmentDeposit = True
         base.reset()
         if (houseNum == 1) or time == 2:
-          frontClaw.goUp(wait = False)
+          frontClaw.goUp(wait = False, full = True)
         else:
-          frontClaw.goUp()
+          frontClaw.goUp(full = True)
         GyroStraight.move(60, lambda: colLeft.color() != Color.RED)
         base.reset()
         GyroStraightDeg.move(70, 80)
@@ -617,7 +617,7 @@ def collectYellow():
   base.hold()
   GyroTurn.turn(-89)
   base.reset()
-  GyroStraightDeg.move(40, 220)
+  GyroStraightDeg.move(40, 215 )
   base.hold()
   frontClaw.goDown()
 
@@ -661,50 +661,55 @@ def depositBatteryBack():
 def depositBattery(time, extraCol):
   global numSurplus, numYellow, numBlue
   base.reset()
-
-  if (extraCol == Color.YELLOW and time == 2) or (numSurplus != 0 and time == 1):
-    # raise claw if not raised at house 3
-    if numYellow == 4:
- 
-      frontClaw.goUp(wait = False)
-  else:
-    # otherwise lower claw if raised at house 3
-    if numYellow == 2:
-
-      frontClaw.goDown(wait = False)
-      
-  LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK, target = 450, minSpeed = 20)
-  base.hold()
- 
-  
-  if time == 1:
-    if numSurplus != 0:
-      depositBatteryFront(numSurplus)
-    if extraCol == Color.GREEN or (surplus == Color.GREEN and numSurplus == 0):
-      depositBatteryBack()
-      GyroTurn.turn(-89)
-    else:
-      # single motor turn to avoid hitting wall of battery area
-      base.reset()
-      GyroStraightDeg.move(-40, -65)
-      base.hold()
-      PID_SingleMotorTurn(base, gyro, 89, 1, 0)
-  else:
-  
-    if extraCol == Color.YELLOW:
-      depositBatteryFront(numYellow)
-      numYellow -= 2
+  if (time == 1 and extraCol != Color.GREEN and numSurplus == 0 and surplus != Color.GREEN) or (time == 2 and extraCol == Color.GREEN ):
+    frontClaw.goUp(wait = False)
+    base.reset()
+    LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 550)
+    base.hold()
+    base.reset()
+    GyroStraightDeg.move(-40, -70)
+    base.hold()
+    PID_SingleMotorTurn(base, gyro, 89, 1, 0)
     
-    
-    if extraCol == Color.BLUE or (surplus == Color.BLUE and numSurplus == 0):
-      numBlue -= 2
-      depositBatteryBack()
-      
+  else:
+    if (extraCol == Color.YELLOW and time == 2) or (numSurplus != 0 and time == 1):
+      # raise claw if not raised at house 3
+      if numYellow == 4:
+  
+        frontClaw.goUp(wait = False)
     else:
-      base.reset()
-      GyroStraightDeg.move(-40, -65)
-      base.hold()
+      # otherwise lower claw if raised at house 3
+      if numYellow == 2:
 
+        frontClaw.goDown(wait = False)
+        
+    LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK, target = 450, minSpeed = 20)
+    base.hold()
+  
+    
+    if time == 1:
+      if numSurplus != 0:
+        depositBatteryFront(numSurplus)
+      if extraCol == Color.GREEN or (surplus == Color.GREEN and numSurplus == 0):
+        depositBatteryBack()
+        GyroTurn.turn(-89)
+      else:
+        # single motor turn to avoid hitting wall of battery area
+        base.reset()
+        GyroStraightDeg.move(-40, -65)
+        base.hold()
+        PID_SingleMotorTurn(base, gyro, 89, 1, 0)
+    else:
+    
+      if extraCol == Color.YELLOW:
+        depositBatteryFront(numYellow)
+        numYellow -= 2
+      
+      
+      if extraCol == Color.BLUE or (surplus == Color.BLUE and numSurplus == 0):
+        numBlue -= 2
+        depositBatteryBack()
+        
 def getExtra():
   cols = {Color.YELLOW: 0, Color.GREEN: 0, Color.BLUE: 0}
   for house in Houses:
@@ -825,7 +830,7 @@ def checkHouse3():
   scanHouseEV3(Houses[2])
   curr = rightMotor.angle()
 
-  GyroStraightDeg.move(50, 142 + curr)
+  GyroStraightDeg.move(50, 150 + curr)
   base.hold()
   
   # deposit at house 3
@@ -876,7 +881,7 @@ def main():
   
   # if yellow surplus is present, collect it 
   # move toward green energy
-  if checkSurplus(-165):
+  if checkSurplus(-180):
     surplus = Color.YELLOW
     collectSurplus(192, Color.YELLOW)
 
@@ -924,18 +929,9 @@ def main():
   # based on houses, determine which energy is extra  
   extraCol = getExtra()
   # always deposit two surplus into battery storage from claw, deposit any remaining green
-  if extraCol != Color.GREEN and numSurplus == 0 and surplus != Color.GREEN:
-   
-    frontClaw.goUp(wait = False)
-    base.reset()
-    LineTrack.move(colLeft, 70, lambda: colRight.color() != Color.BLACK, target = 550)
-    base.reset()
-    base.hold()
-    GyroStraightDeg.move(-40, -70)
-    base.hold()
-    PID_SingleMotorTurn(base, gyro, 89, 1, 0)
-  else:
-    depositBattery(1, extraCol)
+  
+  
+  depositBattery(1, extraCol)
   
   # collect yellow and blue energy
 
@@ -986,9 +982,11 @@ frontClaw.dc(dir = -1)
 wait(2000)
 frontClaw.reset()
 
+
 start = clock.time()
 main()
 end = clock.time() - start
 print(end/1000)
+
 
 wait(1000)
