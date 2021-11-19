@@ -251,8 +251,7 @@ def collectGreen():
   GyroTurn.turn(89)
 
   base.reset()
-  LineTrack.move(colRight, 50, lambda: rightMotor.angle() < 357, side = -1, target = 357)
-  GyroStraightDeg.move(60, 357)
+  LineTrack.move(colRight, 50, lambda: rightMotor.angle() < 360, side = -1, target = 360)
   base.hold()
   GyroTurn.turn(-89)
   backClaw.run_target(60, -192)
@@ -560,7 +559,7 @@ def collectYellow():
   frontClaw.solar(wait = False)
   LineTrack.move(colLeft, 80, lambda: colRight.color() != Color.BLACK, target = 700)
   curr = rightMotor.angle()
-  LineTrack.move(colLeft, 40, lambda: rightMotor.angle() < curr + 105, target = curr + 105)
+  LineTrack.move(colLeft, 40, lambda: rightMotor.angle() < curr + 105, target = curr + 105, reset_I = False)
   base.hold()
   GyroTurn.turn(89)
   # push solar panels
@@ -568,7 +567,7 @@ def collectYellow():
   frontClaw.hold()
   
   base.reset()
-  LineTrack.move(colRight, 35, lambda: rightMotor.angle() < 550, threshold = 45)
+  LineTrack.move(colRight, 30, lambda: rightMotor.angle() < 550, threshold = 45)
   base.hold()
   gyro.reset_angle(0)
   wait(10)
@@ -611,7 +610,7 @@ def collectYellow():
   backClaw.run_time(100, 1200, wait = False)
   LineTrack.move(colLeft, 60, lambda: colRight.color() != Color.BLACK)
   curr = rightMotor.angle()
-  LineTrack.move(colLeft, 60, lambda: rightMotor.angle() < 600 + curr)
+  LineTrack.move(colLeft, 60, lambda: rightMotor.angle() < 600 + curr, reset_I = False)
   #gyro.reset_angle(0)
   GyroStraightDeg.move(60, 730 + curr)
   base.hold()
@@ -650,18 +649,25 @@ def depositBatteryBack(time):
   if time == 2:
     GyroStraightDeg.move(-40, -110, minSpeed = 20)
     base.hold()
+    backClaw.run_target(-100, -100)
+    base.reset()
+    GyroStraightDeg.move(40, 105)
+    base.hold()
+    backClaw.run_target(50, 100)
+    base.reset()
+    GyroStraightDeg.move(-30, -10)
+    base.hold()
   else:
     GyroStraightDeg.move(-20, -155, minSpeed = 10)
     base.hold()
+    backClaw.run_target(-100, -100)
+    base.reset()
+    GyroStraightDeg.move(40, 150)
+    base.hold()
+    
 
-  backClaw.run_target(-100, -100)
-  base.reset()
-  GyroStraightDeg.move(40, 90)
-  base.hold()
-  backClaw.run_target(50, 100)
-  base.reset()
-  GyroStraightDeg.move(-30, -10)
-  base.hold()
+  
+  
 
 def depositBattery(time, extraCol):
   global numSurplus, numYellow, numBlue
@@ -816,7 +822,7 @@ def checkHouse3():
   GyroTurn.turn(89)
 
   base.reset()
-  LineTrack.move(colRight, 60, lambda: rightMotor.angle() < 805)
+  LineTrack.move(colRight, 60, lambda: rightMotor.angle() < 808)
   base.hold()  
 
   GyroTurn.turn(-89)
@@ -983,20 +989,11 @@ def main():
   # deposit last energy and return to base
   returnBase()
 
-# frontClaw.dc(dir = -1)
-# wait(2000)
-# frontClaw.reset()
+frontClaw.dc(dir = -1)
+wait(2000)
+frontClaw.reset()
 
-
-# start = clock.time()
-# main()
-# end = clock.time() - start
-# print(end/1000)
-
-
-# wait(1000)
-
-LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK, target = 450, minSpeed = 20)
-base.hold()
-depositBatteryBack(1)
-wait(1000)
+start = clock.time()
+main()
+end = clock.time() - start
+print(end/1000)

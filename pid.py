@@ -69,9 +69,11 @@ class PID_LineTrack(PID):
            target = None, 
            minSpeed = 35,
            accel = False, 
-           deccel = True):
+           deccel = True, 
+           reset_I = True):
     # update control constants if given
-
+    if reset_I:
+      self.reset_integral()
     if threshold is None:
       threshold = self.threshold
     speed = maxSpeed
@@ -136,7 +138,7 @@ class PID_GyroStraight(PID):
            maxSpeed = 100,
            minSpeed = 0, 
            precision = False):
-    
+    self.reset_integral()
     while condition():
       
       error = self.gyro.angle() - target
@@ -183,7 +185,7 @@ class PID_GyroStraightDegrees(PID):
     else:
       speed = maxSpeed
     
-      
+    self.reset_integral()
     while (target < 0 and angle > target) or (target >= 0 and angle < target) and condition():
 
       error = self.gyro.angle() 
