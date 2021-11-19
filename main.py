@@ -643,11 +643,16 @@ def depositBatteryFront(numCube):
     
   base.hold()
 
-def depositBatteryBack():
-  GyroTurn.turn(180)
+def depositBatteryBack(time):
+  
+  PID_SingleMotorTurn(base, gyro, 179, 0.6, 1)
   base.reset()
-  GyroStraightDeg.move(-40, -150, minSpeed = 20)
-  base.hold()
+  if time == 2:
+    GyroStraightDeg.move(-40, -110, minSpeed = 20)
+    base.hold()
+  else:
+    GyroStraightDeg.move(-20, -155, minSpeed = 10)
+    base.hold()
 
   backClaw.run_target(-100, -100)
   base.reset()
@@ -691,7 +696,7 @@ def depositBattery(time, extraCol):
       if numSurplus != 0:
         depositBatteryFront(numSurplus)
       if extraCol == Color.GREEN or (surplus == Color.GREEN and numSurplus == 0):
-        depositBatteryBack()
+        depositBatteryBack(time)
         GyroTurn.turn(-89)
       else:
         # single motor turn to avoid hitting wall of battery area
@@ -708,7 +713,7 @@ def depositBattery(time, extraCol):
       
       if extraCol == Color.BLUE or (surplus == Color.BLUE and numSurplus == 0):
         numBlue -= 2
-        depositBatteryBack()
+        depositBatteryBack(time)
         
 def getExtra():
   cols = {Color.YELLOW: 0, Color.GREEN: 0, Color.BLUE: 0}
@@ -978,15 +983,20 @@ def main():
   # deposit last energy and return to base
   returnBase()
 
-frontClaw.dc(dir = -1)
-wait(2000)
-frontClaw.reset()
+# frontClaw.dc(dir = -1)
+# wait(2000)
+# frontClaw.reset()
 
 
-start = clock.time()
-main()
-end = clock.time() - start
-print(end/1000)
+# start = clock.time()
+# main()
+# end = clock.time() - start
+# print(end/1000)
 
 
+# wait(1000)
+
+LineTrack.move(colLeft, 50, lambda: colRight.color() != Color.BLACK, target = 450, minSpeed = 20)
+base.hold()
+depositBatteryBack(1)
 wait(1000)
