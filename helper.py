@@ -70,15 +70,21 @@ class FrontClaw(Claw):
   def run_target(self, speed, angle, wait = True):
     self.motor.run_target(CorrectSpeed(speed), angle, wait = wait)
   
-  def goUp(self, speed = 50, wait = True):
-    self.run_target(30, 0, wait = wait)
+  def goUp(self, speed = 50, wait = True, load = False):
+    if load:
+      self.run_target(speed, 0, wait = wait)
+    else:
+      self.run_target(speed, 120, wait = wait)
   
   def goDown(self, speed = 30, wait = True):
-    self.run_target(50, 405, wait = wait)
+    self.run_target(speed, 395, wait = wait)
   
   def openUp(self, wait = True):
-    self.run_target(100, 865, wait = wait)
+    self.run_target(100, 860, wait = wait)
   
+  def openSmall(self, wait = True):
+    self.run_target(80, 450, wait = wait)
+    
   def defaultPos(self):
     self.dc()
     wait(1500)
