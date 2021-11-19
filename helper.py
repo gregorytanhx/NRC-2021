@@ -77,13 +77,16 @@ class FrontClaw(Claw):
       self.run_target(speed, 120, wait = wait)
   
   def goDown(self, speed = 30, wait = True):
-    self.run_target(speed, 395, wait = wait)
+    self.run_target(speed, 405, wait = wait)
   
   def openUp(self, wait = True):
     self.run_target(100, 860, wait = wait)
   
   def openSmall(self, wait = True):
-    self.run_target(80, 450, wait = wait)
+    self.run_target(80, 550, wait = wait)
+    
+  def solar(self, wait = True):
+    self.run_target(80, 460, wait = wait)
     
   def defaultPos(self):
     self.dc()
