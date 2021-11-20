@@ -72,8 +72,9 @@ class PID_LineTrack(PID):
            deccel = True, 
            reset_I = True):
     # update control constants if given
+    print(self.integral)
     if reset_I:
-      self.reset_integral()
+      self.resetIntegral()
     if threshold is None:
       threshold = self.threshold
     speed = maxSpeed
@@ -85,10 +86,10 @@ class PID_LineTrack(PID):
       speed = maxSpeed /abs(maxSpeed) * minSpeed
     slowingDown = False
     while condition():
-      kp = self.kp - (85 - speed) * 0.001
+      kp = self.kp - (85 - speed) * 0.002
       #ki = self.ki - (85 - speed) * 0.00001
       kd = self.kd - (85 - speed) * 0.05
-  
+      #print(kp, ki, kd)
       error = threshold - sensor.reflection()
       
       self.update(error, kp, ki, kd)
@@ -113,7 +114,7 @@ class PID_LineTrack(PID):
           if speed > maxSpeed:
             speed = maxSpeed
       #print(speed + side * self.correction, speed - side * self.correction)
-      self.base.run(max(min(speed + side * self.correction, 100), 0), max(min(speed - side * self.correction, 100),0) )   
+      self.base.run(speed + side * self.correction, speed - side * self.correction)   
       
           
 
@@ -138,7 +139,7 @@ class PID_GyroStraight(PID):
            maxSpeed = 100,
            minSpeed = 0, 
            precision = False):
-    self.reset_integral()
+    self.resetIntegral()
     while condition():
       
       error = self.gyro.angle() - target
@@ -185,7 +186,7 @@ class PID_GyroStraightDegrees(PID):
     else:
       speed = maxSpeed
     
-    self.reset_integral()
+    self.resetIntegral()
     while (target < 0 and angle > target) or (target >= 0 and angle < target) and condition():
 
       error = self.gyro.angle() 
@@ -220,11 +221,11 @@ class PID_GyroTurn(PID_GyroStraight):
       
   def turn(self, angle, kp = None, ki = None, kd = None, precision = False):
   
-    self.resetIntegral()
+
     if precision:
       self.move(0, lambda: self.gyro.angle() != angle or self.base.leftMotor.speed() != 0 or self.base.rightMotor.speed() != 0, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
     else:
-      self.move(0, lambda: self.gyro.angle() != angle, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed)
+      self.move(0, lambda: self.gyro.angle() != angle, kp = kp, ki = ki, kd = kd, target = angle, maxSpeed = self.maxSpeed, minSpeed = 3)
     self.base.hold()
     
     self.gyro.reset_angle(0)
