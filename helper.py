@@ -88,7 +88,7 @@ class FrontClaw(Claw):
     self.run_target(80, 550, wait = wait)
     
   def solar(self, wait = True):
-    self.run_target(80, 455, wait = wait)
+    self.run_target(80, 475, wait = wait)
     
   def defaultPos(self):
     self.dc()

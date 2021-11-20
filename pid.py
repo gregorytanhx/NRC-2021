@@ -72,7 +72,7 @@ class PID_LineTrack(PID):
            deccel = True, 
            reset_I = True):
     # update control constants if given
-    print(self.integral)
+
     if reset_I:
       self.resetIntegral()
     if threshold is None:
@@ -232,13 +232,16 @@ class PID_GyroTurn(PID_GyroStraight):
     wait(10)
     
       
-def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 1.3, ki = 0.005, kd = 3, minSpeed = 5, reset = True):
+def PID_SingleMotorTurn(base, gyro, angle, leftM, rightM, kp = 1.3, ki = 0.005, kd = 3, minSpeed = 5, maxSpeed = 100, reset = True):
   pid = PID(kp, ki, kd)
   while gyro.angle() != angle:
     error = (gyro.angle() - angle)
     pid.update(error, kp, ki, kd)
+    polarity = pid.correction / abs(pid.correction)
     if abs(pid.correction) < minSpeed:
-      base.run(-minSpeed * (pid.correction / abs(pid.correction)) * leftM, minSpeed * (pid.correction / abs(pid.correction)) * rightM)
+      base.run(-minSpeed * polarity * leftM, minSpeed * polarity * rightM)
+    elif abs(pid.correction) > maxSpeed:
+      base.run(-maxSpeed * polarity * leftM, maxSpeed * polarity * rightM)
     else:
       base.run(-pid.correction * leftM, pid.correction * rightM)
   base.hold()
